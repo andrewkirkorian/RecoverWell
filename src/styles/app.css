@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@layer base {
+  /* One calm, light palette for everyone: patients read this on phones, at home,
+     in whatever lighting, and a half-styled dark mode would only add confusion. */
+  html,
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+}
