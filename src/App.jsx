@@ -170,6 +170,14 @@ const surgeryChecklists = {
 };
 
 function App() {
+  const [hasSignedUp, setHasSignedUp] = useState(false);
+  const [authMode, setAuthMode] = useState('signup');
+  const [signUpDetails, setSignUpDetails] = useState({
+    name: '',
+    dateOfBirth: '',
+    phone: '',
+    email: '',
+  });
   const [activePage, setActivePage] = useState('home');
   const [tasks, setTasks] = useState(initialTasks);
   const [selectedService, setSelectedService] = useState('Neuro');
@@ -271,6 +279,193 @@ function App() {
     );
   };
 
+  const handleSignUp = (event) => {
+    event.preventDefault();
+    setHasSignedUp(true);
+  };
+
+  const handleSignIn = (event) => {
+    event.preventDefault();
+    setHasSignedUp(true);
+  };
+
+  if (!hasSignedUp) {
+    const isSigningIn = authMode === 'signin';
+
+    return (
+      <main className="signup-page">
+        <section className="signup-shell" aria-labelledby="signup-heading">
+          <div className="signup-welcome">
+            <div className="signup-brand">
+              <span className="signup-brand-mark" aria-hidden="true">+</span>
+              <span>Recover Well</span>
+            </div>
+
+            <div className="signup-welcome-copy">
+              <p className="signup-eyebrow">A LITTLE MORE SUPPORT, EVERY DAY</p>
+              <h1>Your recovery journey starts here.</h1>
+              <p>
+                Keep your recovery tools and helpful information together, all in one calm,
+                easy-to-use place.
+              </p>
+            </div>
+
+            <div className="signup-promise">
+              <span className="signup-promise-icon" aria-hidden="true">✓</span>
+              <p>
+                <strong>Made for your next step</strong>
+                <span>Simple tools to help you feel more prepared.</span>
+              </p>
+            </div>
+            <span className="signup-decoration signup-decoration-one" aria-hidden="true" />
+            <span className="signup-decoration signup-decoration-two" aria-hidden="true" />
+          </div>
+
+          <div className="signup-form-panel">
+            <div className="signup-form-heading">
+              <p className="signup-eyebrow">WELCOME TO RECOVER WELL</p>
+              <h2 id="signup-heading">{isSigningIn ? 'Welcome back' : 'Create your account'}</h2>
+              <p>
+                {isSigningIn
+                  ? 'Sign in to continue to your recovery tools.'
+                  : 'Enter your details to get started.'}
+              </p>
+            </div>
+
+            {isSigningIn ? (
+              <form key="signin" className="signup-form signup-form-single" onSubmit={handleSignIn}>
+                <label htmlFor="signin-email">
+                  Email address
+                  <input
+                    id="signin-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </label>
+
+                <label htmlFor="signin-password">
+                  Password
+                  <input
+                    id="signin-password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </label>
+
+                <button className="signup-submit" type="submit">
+                  Sign in to Recover Well <span aria-hidden="true">→</span>
+                </button>
+              </form>
+            ) : (
+              <form key="signup" className="signup-form" onSubmit={handleSignUp}>
+                <label htmlFor="signup-name">
+                  Full name
+                  <input
+                    id="signup-name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    placeholder="Your name"
+                    value={signUpDetails.name}
+                    onChange={(event) =>
+                      setSignUpDetails((details) => ({ ...details, name: event.target.value }))
+                    }
+                    required
+                  />
+                </label>
+
+                <label htmlFor="signup-dob">
+                  Date of birth
+                  <input
+                    id="signup-dob"
+                    name="dateOfBirth"
+                    type="date"
+                    autoComplete="bday"
+                    value={signUpDetails.dateOfBirth}
+                    onChange={(event) =>
+                      setSignUpDetails((details) => ({ ...details, dateOfBirth: event.target.value }))
+                    }
+                    required
+                  />
+                </label>
+
+                <label htmlFor="signup-phone">
+                  Phone number
+                  <input
+                    id="signup-phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    placeholder="Your phone number"
+                    value={signUpDetails.phone}
+                    onChange={(event) =>
+                      setSignUpDetails((details) => ({ ...details, phone: event.target.value }))
+                    }
+                    required
+                  />
+                </label>
+
+                <label htmlFor="signup-email">
+                  Email address
+                  <input
+                    id="signup-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    value={signUpDetails.email}
+                    onChange={(event) =>
+                      setSignUpDetails((details) => ({ ...details, email: event.target.value }))
+                    }
+                    required
+                  />
+                </label>
+
+                <label htmlFor="signup-password">
+                  Create password
+                  <input
+                    id="signup-password"
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Create a password"
+                    required
+                  />
+                </label>
+
+                <button className="signup-submit" type="submit">
+                  Continue to Recover Well <span aria-hidden="true">→</span>
+                </button>
+              </form>
+            )}
+
+            <p className="signup-alternate">
+              {isSigningIn ? 'New to Recover Well?' : 'Already have an account?'}{' '}
+              <button
+                type="button"
+                onClick={() => setAuthMode(isSigningIn ? 'signup' : 'signin')}
+              >
+                {isSigningIn ? 'Create an account' : 'Sign in'}
+              </button>
+            </p>
+
+            <p className="signup-privacy">
+              {isSigningIn
+                ? 'This demo does not verify credentials or save your password.'
+                : 'Your details stay in this page only. This demo does not create an account, save, or send your information.'}
+            </p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   const navigateTo = (page, event) => {
     setActivePage(page);
     event.currentTarget.closest('details')?.removeAttribute('open');
@@ -341,7 +536,7 @@ function App() {
           <div className="hero-card">
             <div>
               <p className="eyebrow">WELCOME TO RECOVER WELL</p>
-              <h2>Your recovery, in one place.</h2>
+              <h2>{signUpDetails.name ? `${signUpDetails.name.split(' ')[0]}'s recovery, in one place.` : 'Your recovery, in one place.'}</h2>
               <p>Choose a tool below, or use the menus to find your plan, medicines, and guides.</p>
             </div>
           </div>
@@ -398,6 +593,15 @@ function App() {
                 <strong>Explore recovery information</strong>
                 <span>Explore general recovery information and topics.</span>
               </button>
+              <a
+                className="mychart-shortcut"
+                href="https://www.mychart.org/l/en-us/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <strong>Open MyChart</strong>
+                <span>Visit your patient portal in a new tab. Recover Well does not access your MyChart information.</span>
+              </a>
             </div>
           </section>
         </section>

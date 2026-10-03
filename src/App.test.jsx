@@ -2,8 +2,71 @@ import { expect, test } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import App from './App';
 
+function completeSignUp() {
+  fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Avery James' } });
+  fireEvent.change(screen.getByLabelText('Date of birth'), { target: { value: '1988-04-12' } });
+  fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: '555-010-1234' } });
+  fireEvent.change(screen.getByLabelText('Email address'), { target: { value: 'avery@example.com' } });
+  fireEvent.change(screen.getByLabelText('Create password'), { target: { value: 'demo-password' } });
+  fireEvent.click(screen.getByRole('button', { name: /continue to recover well/i }));
+}
+
+test('starts with a sign-up form and requires all five details before continuing', () => {
+  render(<App />);
+
+  expect(screen.getByRole('heading', { name: 'Create your account' })).toBeDefined();
+  for (const label of ['Full name', 'Date of birth', 'Phone number', 'Email address', 'Create password']) {
+    expect(screen.getByLabelText(label).required).toBe(true);
+  }
+
+  fireEvent.click(screen.getByRole('button', { name: /continue to recover well/i }));
+
+  expect(screen.getByRole('heading', { name: 'Create your account' })).toBeDefined();
+  expect(screen.queryByRole('heading', { name: /your recovery, in one place/i })).toBeNull();
+
+  completeSignUp();
+  expect(screen.getByRole('heading', { name: /avery's recovery, in one place/i })).toBeDefined();
+});
+
+test('lets existing users sign in and return to account creation', () => {
+  render(<App />);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+  expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeDefined();
+  expect(screen.getByLabelText('Email address').required).toBe(true);
+  expect(screen.getByLabelText('Password').required).toBe(true);
+  expect(screen.getByText(/does not verify credentials or save your password/i)).toBeDefined();
+
+  fireEvent.click(screen.getByRole('button', { name: /sign in to recover well/i }));
+  expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeDefined();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Create an account' }));
+  expect(screen.getByRole('heading', { name: 'Create your account' })).toBeDefined();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+  fireEvent.change(screen.getByLabelText('Email address'), {
+    target: { value: 'avery@example.com' },
+  });
+  fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'demo-password' } });
+  fireEvent.click(screen.getByRole('button', { name: /sign in to recover well/i }));
+
+  expect(screen.getByRole('heading', { name: /your recovery, in one place/i })).toBeDefined();
+});
+
+test('shows a secure link to MyChart after signup', () => {
+  render(<App />);
+  completeSignUp();
+
+  const myChartLink = screen.getByRole('link', { name: /open mychart/i });
+  expect(myChartLink.getAttribute('href')).toBe('https://www.mychart.org/l/en-us/');
+  expect(myChartLink.getAttribute('target')).toBe('_blank');
+  expect(myChartLink.getAttribute('rel')).toContain('noopener');
+});
+
 test('shows a simple home page and opens the daily recovery plan from navigation', () => {
   render(<App />);
+  completeSignUp();
 
   expect(screen.getByRole('heading', { name: /recover well/i })).toBeDefined();
   expect(screen.getByRole('heading', { name: /your recovery, in one place/i })).toBeDefined();
@@ -24,6 +87,7 @@ test('shows a simple home page and opens the daily recovery plan from navigation
 
 test('personalizes ICU follow-up based on service line and operative note', () => {
   render(<App />);
+  completeSignUp();
 
   fireEvent.click(screen.getByText('Recovery information'));
   fireEvent.click(screen.getByRole('button', { name: 'Procedure planning' }));
@@ -36,6 +100,7 @@ test('personalizes ICU follow-up based on service line and operative note', () =
 
 test('adjusts ICU care and discharge readiness for patient risk factors', () => {
   render(<App />);
+  completeSignUp();
 
   fireEvent.click(screen.getByText('Recovery information'));
   fireEvent.click(screen.getByRole('button', { name: 'Procedure planning' }));
@@ -50,6 +115,7 @@ test('adjusts ICU care and discharge readiness for patient risk factors', () => 
 
 test('records procedure scheduling details and changes the checklist for each procedure', () => {
   render(<App />);
+  completeSignUp();
 
   fireEvent.click(screen.getByText('Recovery information'));
   fireEvent.click(screen.getByRole('button', { name: 'Procedure planning' }));
@@ -88,6 +154,7 @@ test('records procedure scheduling details and changes the checklist for each pr
 
 test('creates a care-team message draft without sending it', () => {
   render(<App />);
+  completeSignUp();
 
   fireEvent.click(screen.getByText('My recovery'));
   fireEvent.click(screen.getByRole('button', { name: 'Message the care team' }));
