@@ -1,5 +1,10 @@
+=================== preconditions ===================
+run tag        : 261003160723-18284
+test accounts  : alice.261003160723-18284@example.com (+ user B, C, D, mass, nobody, shortpw)
+rig OK       : throwaway database is empty and reachable
+
 =================== STEP 0: make index setup fail, before the app's first request ===================
-tools/verify.sh: line 35: hdr: command not found
+### 0.1 seed two users documents that share one email (the unique index cannot be built)
 seeded 2 users documents sharing one email (duplicate keys on purpose)
   the landing page was served anyway: status 200 (indexes were failing underneath it)
 =================== environment ===================
@@ -10,11 +15,11 @@ server UTC date: 2026-10-03
 
 =================== STEP a: signup user A ===================
 
-### a1. POST /api/auth/signup  (alice@example.com)
+### a1. POST /api/auth/signup  (alice.261003160723-18284@example.com)
   status: 303
-    set-cookie: rw_session=TpluPRtpBUUmCnTj-FoxdVaGUfPHS7qXpAjjxlDKTO0; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=UiV9uDNgYkeIcp-fYpDdZjR3s0kqZpGWHA68HFNfpRI; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
-    cookie jar: rw_session	TpluPRtpBUUmCnTj-FoxdVaGUfPHS7qXpAjjxlDKTO0
+    cookie jar: rw_session	UiV9uDNgYkeIcp-fYpDdZjR3s0kqZpGWHA68HFNfpRI
 
 ### a2. GET /plan with that cookie
   status: 200  |  plan form present: 1  |  'Signed in as '
@@ -119,7 +124,7 @@ server UTC date: 2026-10-03
 
 ### e4. POST /api/auth/login (correct password)
   status: 303
-    set-cookie: rw_session=x2YltpSw65ZS60_7XO3wso1Q3qXqQPtdc5k-tqjBWi0; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=xU-dneJwG8KtzPEb2YsiiBImnfFK6KG-UamnyjoJvMI; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /today
 
 ### e5. GET /today after logging back in
@@ -180,9 +185,9 @@ server UTC date: 2026-10-03
 
 =================== STEP g: isolation between two accounts ===================
 
-### g1. signup user B (bob@example.com)
+### g1. signup user B (bob.261003160723-18284@example.com)
   status: 303
-    set-cookie: rw_session=BaVeF2fhI89Mu6XFHh1r1IVn_BbFoUwgq-A30Qt6rjg; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=upriWm6y3p6mQNN5F6pgoKd_BxBERJLAmg5WmNXIVpE; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
 
 ### g2. user B saves a different plan
@@ -295,7 +300,7 @@ server UTC date: 2026-10-03
 ### j3. GET /today: the same flag, above the checklist
   status: 200
   banner heading (expect 1): 1
-  banner byte offset 2018 vs checklist heading 2857 (banner is above when smaller)
+  banner byte offset 2364 vs checklist heading 3203 (banner is above when smaller)
   checklist untouched: 6 tick forms, progress 'Pain score 7 out of 10'
   phone shown here too: 2
 
@@ -325,7 +330,7 @@ server UTC date: 2026-10-03
   completions: 3 document(s)
   sessions: 2 document(s)
   logs: 1 document(s)
-  logs for user 6ac123d8…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac1283c…: 2026-10-03  (days logged: 1, duplicate days: 0)
   logs indexes: {"_id":1}, {"userId":1,"date":1} unique
 
 =================== STEP l: what user B can and cannot reach ===================
@@ -445,15 +450,15 @@ server UTC date: 2026-10-03
   completions: 3 document(s)
   sessions: 2 document(s)
   logs: 3 document(s)
-  logs for user 6ac123d8…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
-  logs for user 6ac123d9…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac1283c…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
+  logs for user 6ac1283d…: 2026-10-03  (days logged: 1, duplicate days: 0)
   logs indexes: {"_id":1}, {"userId":1,"date":1} unique
 
 =================== STEP p: a mistyped limit is refused, never silently dropped ===================
 
-### p1. signup user C (carol@example.com) for the limit tests
+### p1. signup user C (carol.261003160723-18284@example.com) for the limit tests
   status: 303
-    set-cookie: rw_session=aYXQPkI6QFo-jR3N2A-ZM-27DJbtVWRydkgl6ZANIWo; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=B9fCAEx_0uHQ6dV1dqo6AZiylR1UYkGtqE7WkiVJLUQ; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
   PASS p1 carol has an account (/plan)
 
@@ -501,17 +506,17 @@ server UTC date: 2026-10-03
 
 =================== STEP q: sign-in throttling, and equal-cost answers ===================
 
-### q1. signup user D (dave@example.com), the account the throttle test grinds
+### q1. signup user D (dave.261003160723-18284@example.com), the account the throttle test grinds
   status: 303
-    set-cookie: rw_session=yngV6W-09aqqsGD076v5PeyTcWSh_HSLQqDx5Cmnl-c; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=JsrpZzL4iGICH7t1RE9UA_JSg4JtxodkOytUYCaCBbA; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
   PASS q1 dave has an account (/plan)
 
 ### q2. an unknown email must cost about what a wrong password costs
-  3 unknown-email sign-ins: 101 ms total
-  3 wrong-password sign-ins: 110 ms total
-  PASS q2 the unknown-email path is doing real hash work (101 >= 100)
-  PASS q2 the two paths cost about the same (101ms vs 110ms, within 3x)
+  3 unknown-email sign-ins: 103 ms total
+  3 wrong-password sign-ins: 104 ms total
+  PASS q2 the unknown-email path is doing real hash work (103 >= 100)
+  PASS q2 the two paths cost about the same (103ms vs 104ms, within 3x)
 
 ### q3. six wrong passwords for one account, then the right one
   status: 303
@@ -530,7 +535,7 @@ server UTC date: 2026-10-03
 
 ### q4. the wait is a backoff, not a permanent lockout
   status: 303
-    set-cookie: rw_session=wsFd-c52AbT8uLqgJgnEspghssLNtvCJBzWefF-vbKs; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=krSkrcM0kSK9fWMeZBaQ-aSGA7BRumYwfqef7ifO6Hc; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /today
   PASS q4 after the wait the correct password works again (/today)
   PASS q4 and a session is handed out (1)
@@ -598,9 +603,9 @@ server UTC date: 2026-10-03
   completions: 5 document(s)
   sessions: 5 document(s)
   logs: 4 document(s)
-  logs for user 6ac123d8…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
-  logs for user 6ac123d9…: 2026-10-03  (days logged: 1, duplicate days: 0)
-  logs for user 6ac123db…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac1283c…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
+  logs for user 6ac1283d…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac1283e…: 2026-10-03  (days logged: 1, duplicate days: 0)
   logs indexes: {"_id":1}, {"userId":1,"date":1} unique
   PASS t1 the index failure was reported exactly once for the whole run (1)
   PASS t2 the unique key that keeps one log per user per day was still built (1)
@@ -627,8 +632,90 @@ server UTC date: 2026-10-03
   PASS u3 the nav may wrap too (1)
   PASS u3 the nav still links to the three pages (5 >= 3)
 
+=================== STEP v: the recovery timeline ===================
+
+### v1. user A logs an over-limit day for yesterday (2026-10-02): pain 9 against the saved limit of 4
+  status: 303
+    Location: /log
+  PASS v1 the over-limit day saves (/log)
+
+### v2. GET /timeline as user A
+  status: 200
+  PASS v2 the timeline loads for the signed-in patient (200)
+  PASS v2 A's own logged value is shown (1)
+  PASS v2 A's own note is shown (1)
+  PASS v2 the day a limit was crossed carries a plain marker (1)
+  PASS v2 the marker names the reading and the limit the patient saved (1)
+  PASS v2 the checklist count is shown for a day (2)
+  PASS v2 a day with no entry still has a row (1)
+  PASS v2 and that gap row carries no logged value (0)
+  PASS v2 every day from the surgery date to today has a row ()
+/home/team/shared/site/tools/verify.sh: line 906: 14: command not found
+  PASS v2 the page links to the appointment summary (1)
+  PASS v2 the page keeps no patient values in its address ()
+
+### v3. user B's timeline: B's own days, and nothing of A's
+  status: 200
+  PASS v3 B's own logged note is shown to B (1)
+  PASS v3 A's note never reaches B's timeline (0)
+  PASS v3 A's marked day never reaches B's timeline (0)
+  PASS v3 A's pain score never reaches B's timeline (0)
+  PASS v3 B's own marked day is absent (B saved no limits) (0)
+
+### v4. a signed-out visitor and a forged cookie get nothing
+  status: 307
+    Location: /login
+  PASS v4 /timeline sends a signed-out visitor to the log-in page (/login)
+  PASS v4 with no query string of its own (/login)
+  PASS v4 no patient value is carried in the redirect (0)
+
+=================== STEP w: the follow-up appointment summary ===================
+
+### w1. GET /summary as user A
+  status: 200
+  PASS w1 the summary loads for the signed-in patient (200)
+  PASS w1 the surgery date is shown as entered (2 >= 1)
+  PASS w1 the procedure label is shown as entered (1 >= 1)
+  PASS w1 the medication and dose are shown as entered (1 >= 1)
+  PASS w1 the wound-care step is shown as entered (1 >= 1)
+  PASS w1 the pain limit the patient saved is shown (1 >= 1)
+  PASS w1 the temperature limit and its unit are shown (1 >= 1)
+  PASS w1 the care-team phone number is shown (1 >= 1)
+  PASS w1 the warning signs the patient saved are shown (1 >= 1)
+  PASS w1 the days logged are counted (1)
+  PASS w1 the pain-score range is given (1)
+  PASS w1 the temperature readings are counted (1)
+  PASS w1 the days a saved limit was met or passed are counted (1)
+  PASS w1 and those days are named (1)
+  PASS w1 it says plainly that it is a record, not an assessment (1)
+  PASS w1 the page keeps no patient values in its address ()
+
+### w2. the summary carries no interpretation, prediction or advice wording
+  PASS w2 no diagnosis, prognosis or 'getting better/worse' wording (0)
+  PASS w2 no medication instruction of any kind (0)
+
+### w3. the printable sheet: one page, no app frame, no chart library
+  PASS w3 a print stylesheet ships with the page (1)
+  PASS w3 the app frame is hidden on paper (2 >= 1)
+  PASS w3 the print control is there for a phone as well (2 >= 1)
+  PASS w3 no chart or canvas markup on the printable sheet (0)
+
+### w4. the summary is reachable from the Today view, and only for the signed-in patient
+  PASS w4 the Today view links to the summary (1)
+  PASS w4 the Today view links to the timeline (2 >= 2)
+  status: 307
+    Location: /login
+  PASS w4 /summary sends a signed-out visitor to the log-in page (/login)
+  status: 307
+    Location: /login
+  PASS w4 a forged cookie gets the log-in page too (/login)
+
+### w5. neither page puts a patient value in the server's output
+  PASS w5 no logged value, note, limit or phone number reaches the app log (0)
+  PASS w5 no 5xx answered any request in this run (0)
+
 =================== summary ===================
-  assertions: 81 passed, 0 failed
+  assertions: 129 passed, 0 failed
   every check passed
 
 =================== done ===================

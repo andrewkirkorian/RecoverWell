@@ -204,6 +204,23 @@ function TodayPage() {
         </a>
       </p>
 
+      <div className="mt-3 flex flex-col gap-3">
+        <a
+          href="/timeline"
+          className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50"
+        >
+          <span className="text-base text-slate-700">See your recovery timeline</span>
+          <span className="text-sm text-teal-700">Open &rarr;</span>
+        </a>
+        <a
+          href="/summary"
+          className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50"
+        >
+          <span className="text-base text-slate-700">Print a summary for your next appointment</span>
+          <span className="text-sm text-teal-700">Open &rarr;</span>
+        </a>
+      </div>
+
       <script dangerouslySetInnerHTML={{ __html: LOCAL_DATE_SCRIPT }} />
     </AppShell>
   );

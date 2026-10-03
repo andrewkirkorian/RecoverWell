@@ -1,17 +1,20 @@
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 
 import type { LogEntry } from "~/lib/logs";
+import { buildHistory, buildTotals, type History, type HistoryTotals } from "~/lib/history";
 import { buildDaySections, buildDayItems, type DaySection, type Plan } from "~/lib/plan";
 import { DbNotConfiguredError, isDbConfigured } from "~/mongo.server";
 import { localDateFor } from "~/server/local-day.server";
 import { serverRequest } from "~/server/request.server";
 import { sessionUser, type SessionUser } from "~/server/session.server";
 import {
+  getAllLogs,
   getCompletions,
   getLatestLog,
   getLog,
   getPlan,
   getRecentLogs,
+  getTickedItems,
 } from "~/server/store.server";
 
 /**
@@ -167,5 +170,54 @@ export const loadLogPage = createServerFn().handler(async (): Promise<LogPageSta
     today: todayRead.value,
     recent: recentRead.value,
     latest: latestRead.value,
+  };
+});
+
+/** Everything the recovery timeline and the appointment summary read: the
+ * patient's own plan, their days, and which items they ticked. Read-only, and
+ * every read is scoped to the authenticated user's id. */
+export interface HistoryPageState extends SessionState {
+  date: string;
+  plan: Plan | null;
+  history: History;
+  totals: HistoryTotals;
+}
+
+export const loadHistoryPage = createServerFn().handler(async (): Promise<HistoryPageState> => {
+  const date = todayForRequest(await serverRequest());
+  const empty = buildHistory({ plan: null, logs: [], ticks: [], today: date });
+  const user = await currentUser();
+  if (!user) {
+    return {
+      ...signedOutState(),
+      date,
+      plan: null,
+      history: empty,
+      totals: buildTotals(empty, null),
+    };
+  }
+  const planRead = await readOrDegrade<Plan | null>(() => getPlan(user.id), null);
+  const logsRead = await readOrDegrade<LogEntry[]>(() => getAllLogs(user.id), []);
+  const ticksRead = await readOrDegrade(() => getTickedItems(user.id), []);
+  const plan = planRead.value;
+  const history = buildHistory({
+    plan,
+    logs: logsRead.value,
+    ticks: ticksRead.value,
+    today: date,
+  });
+  const reads = [planRead, logsRead, ticksRead];
+  return {
+    db: reads.some((read) => read.db === "error")
+      ? "error"
+      : reads.every((read) => read.db === "ok")
+        ? "ok"
+        : "missing",
+    signedIn: true,
+    email: user.email,
+    date,
+    plan,
+    history,
+    totals: buildTotals(history, plan),
   };
 });

@@ -20,4 +20,10 @@ fi
 
 echo "still running (expect: nothing; the site on 3000 is not listed here):"
 pgrep -fa 'serve-verify.ts|serve-3100.ts|mongod --dbpath' || echo "  (nothing)"
+# Prove the port is actually free again: a stale instance holding 3100 is what
+# makes the next run silently test the previous build.
+if curl -sf -o /dev/null http://127.0.0.1:3100/; then
+  echo "something is STILL answering on 127.0.0.1:3100 — the rig did not stop cleanly" >&2
+  exit 1
+fi
 exit 0

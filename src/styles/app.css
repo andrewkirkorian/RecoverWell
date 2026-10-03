@@ -8,3 +8,50 @@
     @apply bg-slate-50 text-slate-900 antialiased;
   }
 }
+
+/* Printing.
+   The appointment summary is meant to be handed over on paper, so on paper it
+   drops the app frame, prints in plain black on white, and keeps a day's row or
+   a card from being split across two sheets. Nothing here changes what a page
+   says — only how it lands on the sheet. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* The app frame (header, nav, footer padding) is screen furniture. */
+  header.no-print,
+  .print-hide {
+    display: none !important;
+  }
+
+  .print-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Print at a readable size with no wasted margin, and show the URL-free sheet
+     as one column rather than a phone-width strip. */
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+}
+
+@page {
+  margin: 12mm;
+}

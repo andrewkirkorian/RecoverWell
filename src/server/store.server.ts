@@ -229,6 +229,40 @@ export async function getLatestLog(userId: string): Promise<LogEntry | null> {
   return doc ? toLogEntry(doc) : null;
 }
 
+/**
+ * Every day this user has logged, newest first — what the timeline and the
+ * appointment summary are built from. Read-only, scoped to the authenticated
+ * user's id, and capped: a decade of daily entries is far more than either page
+ * lays out.
+ */
+export async function getAllLogs(userId: string, limit = 1000): Promise<LogEntry[]> {
+  const db = await getDb();
+  const rows = await db
+    .collection("logs")
+    .find({ userId: new ObjectId(userId) })
+    .sort({ date: -1 })
+    .limit(Math.min(Math.max(Math.trunc(limit), 1), 2000))
+    .toArray();
+  return rows.map(toLogEntry);
+}
+
+/** Every item this user has ticked, newest day first. Read-only and user-scoped. */
+export async function getTickedItems(
+  userId: string,
+  limit = 5000,
+): Promise<{ date: string; itemId: string }[]> {
+  const db = await getDb();
+  const rows = await db
+    .collection("completions")
+    .find({ userId: new ObjectId(userId) }, { projection: { date: 1, itemId: 1 } })
+    .sort({ date: -1 })
+    .limit(Math.min(Math.max(Math.trunc(limit), 1), 10_000))
+    .toArray();
+  return rows
+    .map((row) => ({ date: asString(row.date, 10), itemId: asId(row.itemId) }))
+    .filter((row) => row.date.length > 0 && row.itemId.length > 0);
+}
+
 /** The user's most recent days, newest first. */
 export async function getRecentLogs(userId: string, limit = 7): Promise<LogEntry[]> {
   const db = await getDb();

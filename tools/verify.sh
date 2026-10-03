@@ -14,30 +14,80 @@
 # Steps a-g cover increment 1 (accounts, plan, ticks, isolation); steps h-o cover
 # increment 2 (call-your-care-team limits, the daily log, the red-flag banner);
 # steps p-u cover the safety-review fixes (mistyped limits, sign-in throttling and
-# equal-cost answers, the body cap, tick dates, index setup, page hardening).
+# equal-cost answers, the body cap, tick dates, index setup, page hardening); step
+# v covers increment 3 (the recovery timeline and the appointment summary).
 #
 # The script counts PASS/FAIL assertions and exits non-zero if any fail: a check
-# that only printed a number could drift without anyone noticing. Run
-# tools/reset-verify.sh immediately before it — step 0 seeds the throwaway
-# database *before* the app's first request, which only works on a fresh rig.
+# that only printed a number could drift without anyone noticing.
+#
+# Repeatability: every account it creates is suffixed with RUN_TAG, so a run never
+# collides with the accounts an earlier run left behind, and step 0 fails fast when
+# the throwaway database is not pristine instead of quietly testing a stale one.
+# Run tools/run-verify.sh to wipe the rig, run this, and capture the output; run it
+# twice in a row to prove a run can be repeated with no manual cleanup.
 # See tools/README.md.
 BASE=http://127.0.0.1:3100
 VERIFY_URI=mongodb://127.0.0.1:27018/recoverwell_verify
 D=/tmp/rw-verify
 SITE_ROOT=$(cd "$(dirname "$0")/.." && pwd)
+TOOLS=$(cd "$(dirname "$0")" && pwd)
 mkdir -p "$D"
 rm -f $D/cookies-*.txt
 
-echo "=================== STEP 0: make index setup fail, before the app's first request ==================="
+# A fresh suffix for every run, so no email can already exist from an earlier one.
+# RUN_TAG can be pinned to re-run one particular tag on purpose.
+RUN_TAG=${RUN_TAG:-$(date -u +%y%m%d%H%M%S)-$RANDOM}
+A_EMAIL="alice.$RUN_TAG@example.com"
+B_EMAIL="bob.$RUN_TAG@example.com"
+C_EMAIL="carol.$RUN_TAG@example.com"
+D_EMAIL="dave.$RUN_TAG@example.com"
+MASS_EMAIL="mass1.$RUN_TAG@example.com"
+NOBODY_EMAIL="nobody.$RUN_TAG@example.com"
+SHORTPW_EMAIL="shortpw.$RUN_TAG@example.com"
+# The same address in capitals, for the case-insensitive sign-up check.
+UP_EMAIL=$(echo "$A_EMAIL" | tr 'a-z' 'A-Z')
+
+echo "=================== preconditions ==================="
+echo "run tag        : $RUN_TAG"
+echo "test accounts  : alice.$RUN_TAG@example.com (+ user B, C, D, mass, nobody, shortpw)"
+# Fail fast and name the missing piece: a precondition that is only discovered
+# half-way through turns into a confusing pile of failures (or worse, a run that
+# looks like it passed because everything answered 000).
+if [ ! -d "${MONGOD_BIN:-/tmp/mongo-bin}" ]; then
+  echo "missing precondition: no mongod at ${MONGOD_BIN:-/tmp/mongo-bin} — set MONGOD_BIN to a directory holding the mongod binary" >&2
+  exit 1
+fi
+if ! find "${MONGOD_BIN:-/tmp/mongo-bin}" -type f -name mongod -print -quit | grep -q .; then
+  echo "missing precondition: no mongod file under ${MONGOD_BIN:-/tmp/mongo-bin} — the extract of the mongodb tarball is gone" >&2
+  exit 1
+fi
+if [ ! -f "$SITE_ROOT/dist/server/server.js" ]; then
+  echo "missing precondition: no $SITE_ROOT/dist/server/server.js — run 'bun run build' in the site root first" >&2
+  exit 1
+fi
+if ! (cd "$SITE_ROOT" && MONGODB_URI="$VERIFY_URI" bun tools/rig-check.ts); then
+  echo "missing precondition: the throwaway rig is not usable (see the line above) — run 'bash tools/reset-verify.sh'" >&2
+  exit 1
+fi
+
+if ! curl -s -o /dev/null http://127.0.0.1:3100/; then
+  echo "missing precondition: nothing is answering on http://127.0.0.1:3100 — run 'bash tools/reset-verify.sh'" >&2
+  exit 1
+fi
+
+echo; echo "=================== STEP 0: make index setup fail, before the app's first request ==================="
 # The app builds its indexes on its first database call, so the two duplicate
 # `users` documents have to be in place before anything touches the app. This is
 # what lets step t prove index setup is neither fatal nor retried.
-hdr "0.1 seed two users documents that share one email (the unique index cannot be built)"
+echo "### 0.1 seed two users documents that share one email (the unique index cannot be built)"
 SEEDED=0
 if (cd "$SITE_ROOT" && MONGODB_URI="$VERIFY_URI" bun tools/seed-duplicate-emails.ts); then
   SEEDED=1
 else
-  echo "  could not seed the throwaway database — the index checks in step t will be skipped"
+  # Not a skipped check: without the duplicate documents the index precondition
+  # cannot be set up, so the run would no longer prove what step t claims.
+  echo "missing precondition: could not seed the throwaway database (see above) — run 'bash tools/reset-verify.sh' and start the run again" >&2
+  exit 1
 fi
 
 # Fail fast: an app that isn't listening makes every step below return 000 and
@@ -79,6 +129,17 @@ firstafter() { txt "$1" | grep -A2 -m1 -- "$2" | tr '\n' ' '; }
 # a plain grep for it finds nothing. Drop the empty comments first.
 plainn() { sed 's/<!--[^>]*-->//g' "$1" | grep -o -- "$2" | wc -l | tr -d ' '; }
 loc() { grep -i '^location:' "$1.hdr" | head -1 | tr -d '\r' | sed 's/^[Ll]ocation: *//'; }
+# The page as a visitor sees it: the framework's hydration payload duplicates the
+# page's own data inside a <script> block, so drop script blocks before counting
+# anything a patient would actually read.
+# The rendered page arrives as one long line, so these work on the whole
+# document rather than line by line.
+vis() { python3 "$TOOLS/vis.py" "$1"; }
+visn() { vis "$1" | grep -o -- "$2" | wc -l | tr -d ' '; }
+visre() { vis "$1" | grep -oE -- "$2" | wc -l | tr -d ' '; }
+# One day's row of the timeline, as plain text: from its data-day marker to the
+# row's closing tag, so a check can talk about a single day rather than the page.
+dayrow() { python3 "$TOOLS/vis.py" "$1" "$2"; }
 
 # --- assertions ----------------------------------------------------------
 # Every numbered fix has at least one of these, and any FAIL makes this script
@@ -120,10 +181,13 @@ SHORT_YDAY=$(date -u -d 'yesterday' +'%b %-d, %Y')
 YDAY=$(date -u -d 'yesterday' +%F)
 FUTURE3=$(date -u -d '+3 days' +%F)
 PAST5=$(date -u -d '-5 days' +%F)
+# User A's surgery date is 2026-09-20 throughout, so the timeline owes one row per
+# day from then to today (step v counts them).
+DAY_ROWS=$(( ( $(date -u -d "$DATE" +%s) - $(date -u -d '2026-09-20' +%s) ) / 86400 + 1 ))
 
 echo; echo "=================== STEP a: signup user A ==================="
-hdr "a1. POST /api/auth/signup  (alice@example.com)"
-S=$(post $D/cookies-a.txt $D/a1 --data-urlencode 'email=alice@example.com' --data-urlencode 'password=correct horse battery' $BASE/api/auth/signup)
+hdr "a1. POST /api/auth/signup  ($A_EMAIL)"
+S=$(post $D/cookies-a.txt $D/a1 --data-urlencode "email=$A_EMAIL" --data-urlencode 'password=correct horse battery' $BASE/api/auth/signup)
 show $D/a1 "$S"
 echo "    cookie jar: $(grep -o 'rw_session.*' $D/cookies-a.txt | head -1)"
 hdr "a2. GET /plan with that cookie"
@@ -248,7 +312,7 @@ S=$(get $D/cookies-a.txt $D/e3 $BASE/today)
 show $D/e3 "$S"
 echo "  'Paracetamol' in body: $(n 'Paracetamol' $D/e3.body)"
 hdr "e4. POST /api/auth/login (correct password)"
-S=$(post $D/cookies-a.txt $D/e4 --data-urlencode 'email=alice@example.com' --data-urlencode 'password=correct horse battery' $BASE/api/auth/login)
+S=$(post $D/cookies-a.txt $D/e4 --data-urlencode "email=$A_EMAIL" --data-urlencode 'password=correct horse battery' $BASE/api/auth/login)
 show $D/e4 "$S"
 hdr "e5. GET /today after logging back in"
 S=$(get $D/cookies-a.txt $D/e5 $BASE/today)
@@ -257,18 +321,18 @@ echo "  plan survived: Paracetamol=$(n 'Paracetamol' $D/e5.body)  'Climb the sta
 
 echo; echo "=================== STEP f: failure cases ==================="
 hdr "f1. signup with an email that is already registered"
-S=$(post $D/cookies-f1.txt $D/f1 --data-urlencode 'email=alice@example.com' --data-urlencode 'password=another password here' $BASE/api/auth/signup)
+S=$(post $D/cookies-f1.txt $D/f1 --data-urlencode "email=$A_EMAIL" --data-urlencode 'password=another password here' $BASE/api/auth/signup)
 show $D/f1 "$S"
 echo "  session cookie set for the rejected attempt: $(grep -c 'rw_session' $D/cookies-f1.txt)"
 hdr "f2. signup with the same email in different case (ALICE@Example.COM)"
-S=$(post $D/cookies-f2.txt $D/f2 --data-urlencode 'email=ALICE@Example.COM' --data-urlencode 'password=another password here' $BASE/api/auth/signup)
+S=$(post $D/cookies-f2.txt $D/f2 --data-urlencode "email=$UP_EMAIL" --data-urlencode 'password=another password here' $BASE/api/auth/signup)
 show $D/f2 "$S"
 hdr "f3. login with the wrong password"
-S=$(post $D/cookies-anon.txt $D/f3 --data-urlencode 'email=alice@example.com' --data-urlencode 'password=wrong password here' $BASE/api/auth/login)
+S=$(post $D/cookies-anon.txt $D/f3 --data-urlencode "email=$A_EMAIL" --data-urlencode 'password=wrong password here' $BASE/api/auth/login)
 show $D/f3 "$S"
 echo "  session cookie set: $(grep -c 'rw_session' $D/cookies-anon.txt)"
 hdr "f4. login for an email that has no account"
-S=$(post $D/cookies-anon.txt $D/f4 --data-urlencode 'email=nobody@example.com' --data-urlencode 'password=whatever password' $BASE/api/auth/login)
+S=$(post $D/cookies-anon.txt $D/f4 --data-urlencode "email=$NOBODY_EMAIL" --data-urlencode 'password=whatever password' $BASE/api/auth/login)
 show $D/f4 "$S"
 hdr "f5. GET /today and /plan with no cookie at all"
 rm -f $D/cookies-fresh.txt
@@ -286,7 +350,7 @@ S=$(forgedget $D/f8 $BASE/today deadbeefdeadbeefdeadbeefdeadbeef)
 show $D/f8 "$S"
 echo "  'Paracetamol' in body: $(n 'Paracetamol' $D/f8.body)"
 hdr "f9. POST /api/auth/signup with a too-short password"
-S=$(post $D/cookies-f9.txt $D/f9 --data-urlencode 'email=shortpw@example.com' --data-urlencode 'password=abc' $BASE/api/auth/signup)
+S=$(post $D/cookies-f9.txt $D/f9 --data-urlencode "email=$SHORTPW_EMAIL" --data-urlencode 'password=abc' $BASE/api/auth/signup)
 show $D/f9 "$S"
 hdr "f10. POST /api/auth/signup with a non-email"
 S=$(post $D/cookies-f10.txt $D/f10 --data-urlencode 'email=not an email' --data-urlencode 'password=long enough password' $BASE/api/auth/signup)
@@ -296,8 +360,8 @@ S=$(post $D/cookies-a.txt $D/f11 --data-urlencode 'surgery_date=2026-09-20' --da
 show $D/f11 "$S"
 
 echo; echo "=================== STEP g: isolation between two accounts ==================="
-hdr "g1. signup user B (bob@example.com)"
-S=$(post $D/cookies-b.txt $D/g1 --data-urlencode 'email=bob@example.com' --data-urlencode 'password=a totally different pw' $BASE/api/auth/signup)
+hdr "g1. signup user B ($B_EMAIL)"
+S=$(post $D/cookies-b.txt $D/g1 --data-urlencode "email=$B_EMAIL" --data-urlencode 'password=a totally different pw' $BASE/api/auth/signup)
 show $D/g1 "$S"
 hdr "g2. user B saves a different plan"
 S=$(post $D/cookies-b.txt $D/g2 \
@@ -617,8 +681,8 @@ carol_plan() { # out extra-field...  — carol's own plan with one extra form fi
     "${@:2}" \
     $BASE/api/plan
 }
-hdr "p1. signup user C (carol@example.com) for the limit tests"
-S=$(post $D/cookies-c.txt $D/p1 --data-urlencode 'email=carol@example.com' --data-urlencode 'password=carol password here' $BASE/api/auth/signup)
+hdr "p1. signup user C ($C_EMAIL) for the limit tests"
+S=$(post $D/cookies-c.txt $D/p1 --data-urlencode "email=$C_EMAIL" --data-urlencode 'password=carol password here' $BASE/api/auth/signup)
 show $D/p1 "$S"
 check "p1 carol has an account" "$(loc $D/p1)" "/plan"
 
@@ -672,8 +736,8 @@ check "p7 '36,9' was stored as 36.9" "$(plainn $D/p7b.body '36.9 °C')" 1
 check "p7 and it is below the 37.5 limit, so no banner" "$(n 'Contact your care team' $D/p7b.body)" 0
 
 echo; echo "=================== STEP q: sign-in throttling, and equal-cost answers ==================="
-hdr "q1. signup user D (dave@example.com), the account the throttle test grinds"
-S=$(post $D/cookies-throttle.txt $D/q1 --data-urlencode 'email=dave@example.com' --data-urlencode 'password=dave password here' $BASE/api/auth/signup)
+hdr "q1. signup user D ($D_EMAIL), the account the throttle test grinds"
+S=$(post $D/cookies-throttle.txt $D/q1 --data-urlencode "email=$D_EMAIL" --data-urlencode 'password=dave password here' $BASE/api/auth/signup)
 show $D/q1 "$S"
 check "q1 dave has an account" "$(loc $D/q1)" "/plan"
 rm -f $D/cookies-throttle.txt
@@ -689,12 +753,12 @@ timed_login() { # email password -> seconds
 hdr "q2. an unknown email must cost about what a wrong password costs"
 UNK_TOTAL=0
 for i in 1 2 3; do
-  T=$(timed_login "ghost$i@example.com" "any old password")
+  T=$(timed_login "ghost$i.$RUN_TAG@example.com" "any old password")
   UNK_TOTAL=$(awk -v a="$UNK_TOTAL" -v b="$T" 'BEGIN { print a + b }')
 done
 WRONG_TOTAL=0
 for i in 1 2 3; do
-  T=$(timed_login 'bob@example.com' 'definitely the wrong password')
+  T=$(timed_login "$B_EMAIL" 'definitely the wrong password')
   WRONG_TOTAL=$(awk -v a="$WRONG_TOTAL" -v b="$T" 'BEGIN { print a + b }')
 done
 echo "  3 unknown-email sign-ins: $(ms "$UNK_TOTAL") ms total"
@@ -704,13 +768,13 @@ ratio_ok "q2 the two paths cost about the same" "$(ms "$UNK_TOTAL")" "$(ms "$WRO
 
 hdr "q3. six wrong passwords for one account, then the right one"
 for i in 1 2 3 4 5 6; do
-  S=$(post $D/cookies-throttle.txt $D/q3_$i --data-urlencode 'email=dave@example.com' --data-urlencode 'password=not dave password' $BASE/api/auth/login)
+  S=$(post $D/cookies-throttle.txt $D/q3_$i --data-urlencode "email=$D_EMAIL" --data-urlencode 'password=not dave password' $BASE/api/auth/login)
 done
 show $D/q3_1 "$S"
 show $D/q3_6 "$S"
 check "q3a a wrong password is refused with the plain code" "$(loc $D/q3_1)" "/login?e=bad"
 check "q3b the sixth wrong password is refused the same way" "$(loc $D/q3_6)" "/login?e=bad"
-S=$(post $D/cookies-throttle.txt $D/q3_end --data-urlencode 'email=dave@example.com' --data-urlencode 'password=dave password here' $BASE/api/auth/login)
+S=$(post $D/cookies-throttle.txt $D/q3_end --data-urlencode "email=$D_EMAIL" --data-urlencode 'password=dave password here' $BASE/api/auth/login)
 show $D/q3_end "$S"
 check "q3c even the CORRECT password is refused while throttled" "$(loc $D/q3_end)" "/login?e=bad"
 check "q3d the throttled answer is the same code as a wrong password" "$(loc $D/q3_end)" "$(loc $D/q3_1)"
@@ -721,18 +785,18 @@ check "q3g and never says which it was" "$(na '(too many|slow down|try again lat
 
 hdr "q4. the wait is a backoff, not a permanent lockout"
 sleep 2
-S=$(post $D/cookies-throttle.txt $D/q4 --data-urlencode 'email=dave@example.com' --data-urlencode 'password=dave password here' $BASE/api/auth/login)
+S=$(post $D/cookies-throttle.txt $D/q4 --data-urlencode "email=$D_EMAIL" --data-urlencode 'password=dave password here' $BASE/api/auth/login)
 show $D/q4 "$S"
 check "q4 after the wait the correct password works again" "$(loc $D/q4)" "/today"
 check "q4 and a session is handed out" "$(grep -c 'rw_session' $D/cookies-throttle.txt)" 1
 
 hdr "q5. sign-up is limited too (lighter: it guards bulk account creation)"
 for i in 1 2 3 4 5 6; do
-  S=$(post $D/cookies-mass.txt $D/q5_$i --data-urlencode 'email=mass1@example.com' --data-urlencode 'password=short' $BASE/api/auth/signup)
+  S=$(post $D/cookies-mass.txt $D/q5_$i --data-urlencode "email=$MASS_EMAIL" --data-urlencode 'password=short' $BASE/api/auth/signup)
 done
 show $D/q5_1 "$S"
 check "q5a a short password is refused with its own plain code" "$(loc $D/q5_1)" "/signup?e=password"
-S=$(post $D/cookies-mass.txt $D/q5_end --data-urlencode 'email=mass1@example.com' --data-urlencode 'password=a perfectly fine password' $BASE/api/auth/signup)
+S=$(post $D/cookies-mass.txt $D/q5_end --data-urlencode "email=$MASS_EMAIL" --data-urlencode 'password=a perfectly fine password' $BASE/api/auth/signup)
 show $D/q5_end "$S"
 check "q5b the next attempt is slowed, even with a good password" "$(loc $D/q5_end)" "/signup?e=slow"
 check "q5c and no account was created" "$(grep -c 'rw_session' $D/cookies-mass.txt)" 0
@@ -815,6 +879,87 @@ hdr "u3. the header wraps rather than overflowing at 320 px"
 check "u3 the header row may wrap" "$(na 'flex max-w-2xl flex-wrap items-center justify-between' $D/u2.body)" 1
 check "u3 the nav may wrap too" "$(na 'flex flex-wrap items-center justify-end gap-1' $D/u2.body)" 1
 ge "u3 the nav still links to the three pages" "$(na 'href="/(today|log|plan)"' $D/u2.body)" 3
+
+echo; echo "=================== STEP v: the recovery timeline ==================="
+# User A's plan at this point (step o2): one medication (Paracetamol, 1 tablet,
+# 08:00), one wound-care step (Change the dressing, once daily), one goal — so
+# three checklist items per day — a pain limit of 4 out of 10, a temperature limit
+# of 100.4 °F and the care-team phone 01234 567890. A's ticks are on the med's
+# 08:00 item for today and yesterday (step d6).
+GAP=$(date -u -d '-2 days' +%F)
+hdr "v1. user A logs an over-limit day for yesterday ($YDAY): pain 9 against the saved limit of 4"
+S=$(post $D/cookies-a.txt $D/v1a --data-urlencode "date=$YDAY" --data-urlencode 'pain=9' --data-urlencode 'temperature=37.1' \
+  --data-urlencode 'wound_note=V wound note' --data-urlencode 'note=V general note' $BASE/api/log)
+show $D/v1a "$S"
+check "v1 the over-limit day saves" "$(loc $D/v1a)" "/log"
+hdr "v2. GET /timeline as user A"
+S=$(get $D/cookies-a.txt $D/v2 $BASE/timeline); show $D/v2 "$S"
+check "v2 the timeline loads for the signed-in patient" "$S" 200
+check "v2 A's own logged value is shown" "$(visn $D/v2.body 'Pain 9 out of 10')" 1
+check "v2 A's own note is shown" "$(visn $D/v2.body 'V wound note')" 1
+check "v2 the day a limit was crossed carries a plain marker" "$(visn $D/v2.body 'You logged a value at or above a limit you saved')" 1
+check "v2 the marker names the reading and the limit the patient saved" "$(visn $D/v2.body 'Pain score 9 out of 10 — you saved 4 out of 10 as your limit.')" 1
+check "v2 the checklist count is shown for a day" "$(visn $D/v2.body 'Checklist: 1 of 3 done')" 2
+check "v2 a day with no entry still has a row" "$(dayrow $D/v2.body "$GAP" | grep -c 'Nothing logged')" 1
+check "v2 and that gap row carries no logged value" "$(dayrow $D/v2.body "$GAP" | grep -c 'out of 10')" 0
+check "v2 every day from the surgery date to today has a row"
+  "$(grep -o 'data-day="' $D/v2.body | wc -l | tr -d ' ')" "$DAY_ROWS"
+check "v2 the page links to the appointment summary" "$(n 'href="/summary"' $D/v2.body)" 1
+check "v2 the page keeps no patient values in its address" "$(loc $D/v2)" ""
+hdr "v3. user B's timeline: B's own days, and nothing of A's"
+S=$(get $D/cookies-b.txt $D/v3 $BASE/timeline); show $D/v3 "$S"
+check "v3 B's own logged note is shown to B" "$(visn $D/v3.body 'B wound note')" 1
+check "v3 A's note never reaches B's timeline" "$(visn $D/v3.body 'V wound note')" 0
+check "v3 A's marked day never reaches B's timeline" "$(visn $D/v3.body 'Pain score 9 out of 10')" 0
+check "v3 A's pain score never reaches B's timeline" "$(visn $D/v3.body 'Pain 9 out of 10')" 0
+check "v3 B's own marked day is absent (B saved no limits)" "$(visn $D/v3.body 'You logged a value at or above a limit you saved')" 0
+hdr "v4. a signed-out visitor and a forged cookie get nothing"
+rm -f $D/cookies-v.txt
+S=$(get $D/cookies-v.txt $D/v4 $BASE/timeline); show $D/v4 "$S"
+check "v4 /timeline sends a signed-out visitor to the log-in page" "$(loc $D/v4)" "/login"
+check "v4 with no query string of its own" "$(loc $D/v4)" "/login"
+check "v4 no patient value is carried in the redirect" "$(na 'V wound note|Pain 9' $D/v4.hdr)" 0
+
+echo; echo "=================== STEP w: the follow-up appointment summary ==================="
+hdr "w1. GET /summary as user A"
+S=$(get $D/cookies-a.txt $D/w1 $BASE/summary); show $D/w1 "$S"
+check "w1 the summary loads for the signed-in patient" "$S" 200
+ge "w1 the surgery date is shown as entered" "$(visn $D/w1.body 'Sep 20, 2026')" 1
+ge "w1 the procedure label is shown as entered" "$(visn $D/w1.body 'Knee replacement')" 1
+ge "w1 the medication and dose are shown as entered" "$(visn $D/w1.body 'Paracetamol — 1 tablet')" 1
+ge "w1 the wound-care step is shown as entered" "$(visn $D/w1.body 'Change the dressing')" 1
+ge "w1 the pain limit the patient saved is shown" "$(visn $D/w1.body 'Pain score to call about:')" 1
+ge "w1 the temperature limit and its unit are shown" "$(visn $D/w1.body '100.4 °F')" 1
+ge "w1 the care-team phone number is shown" "$(visn $D/w1.body '01234 567890')" 1
+ge "w1 the warning signs the patient saved are shown" "$(visn $D/w1.body 'If the wound starts to smell')" 1
+check "w1 the days logged are counted" "$(visn $D/w1.body 'Days you logged: 2')" 1
+check "w1 the pain-score range is given" "$(visre $D/w1.body 'Pain scores: 2 logged, from [0-9]+ to [0-9]+ out of 10\.')" 1
+check "w1 the temperature readings are counted" "$(visn $D/w1.body 'Temperature readings: 2 logged')" 1
+check "w1 the days a saved limit was met or passed are counted" "$(visn $D/w1.body 'Days a limit you saved was met or passed: 1')" 1
+check "w1 and those days are named" "$(visn $D/w1.body "you were told to contact your care team.")" 1
+check "w1 it says plainly that it is a record, not an assessment" "$(visn $D/w1.body 'It is not a clinical assessment, and it is not medical advice.')" 1
+check "w1 the page keeps no patient values in its address" "$(loc $D/w1)" ""
+hdr "w2. the summary carries no interpretation, prediction or advice wording"
+check "w2 no diagnosis, prognosis or 'getting better/worse' wording" "$(na '(healing|on track|improv|getting better|getting worse|diagnos|prognos|suggests|may indicate|likely|possibly|you may|we recommend|you should|take more|take less|stop taking|increase your dose)' $D/w1.body)" 0
+check "w2 no medication instruction of any kind" "$(na '(dosage advice|change your dose|double your)' $D/w1.body)" 0
+hdr "w3. the printable sheet: one page, no app frame, no chart library"
+CSS_PATH=$(grep -o 'href="/assets/[^"]*\.css"' $D/w1.body | head -1 | sed 's/href="//;s/"$//')
+curl -s "$BASE$CSS_PATH" -o $D/app.css
+check "w3 a print stylesheet ships with the page" "$(grep -c '@media print' $D/app.css)" 1
+ge "w3 the app frame is hidden on paper" "$(visn $D/w1.body 'no-print')" 1
+ge "w3 the print control is there for a phone as well" "$(visn $D/w1.body 'Print this page')" 1
+check "w3 no chart or canvas markup on the printable sheet" "$(vis $D/w1.body | grep -c -E '<svg|<canvas')" 0
+hdr "w4. the summary is reachable from the Today view, and only for the signed-in patient"
+S=$(get $D/cookies-a.txt $D/w4 $BASE/today)
+check "w4 the Today view links to the summary" "$(n 'href="/summary"' $D/w4.body)" 1
+ge "w4 the Today view links to the timeline" "$(n 'href="/timeline"' $D/w4.body)" 2
+S=$(get $D/cookies-fresh.txt $D/w4b $BASE/summary); show $D/w4b "$S"
+check "w4 /summary sends a signed-out visitor to the log-in page" "$(loc $D/w4b)" "/login"
+S=$(forgedget $D/w4c $BASE/summary deadbeefdeadbeefdeadbeefdeadbeef); show $D/w4c "$S"
+check "w4 a forged cookie gets the log-in page too" "$(loc $D/w4c)" "/login"
+hdr "w5. neither page puts a patient value in the server's output"
+check "w5 no logged value, note, limit or phone number reaches the app log" "$(grep -c -a -E 'V wound note|V general note|B wound note|01234 567890|Pain score' $D/app.log)" 0
+check "w5 no 5xx answered any request in this run" "$(grep -lE '^HTTP/[0-9.]+ 5' $D/*.hdr 2>/dev/null | wc -l | tr -d ' ')" 0
 
 echo; echo "=================== summary ==================="
 echo "  assertions: $PASSED passed, $FAILED failed"

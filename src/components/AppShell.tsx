@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 
 /** Shared page frame for the signed-in parts of the app: a calm header with
- * the things a patient needs — today, how they feel, their plan, and a way out. */
+ * the things a patient needs — today, how they feel, their plan, the days behind
+ * them, and a way out. */
 export function AppShell({
   active,
   children,
 }: {
-  active: "today" | "plan" | "log";
+  active: "today" | "plan" | "log" | "timeline";
   children: ReactNode;
 }) {
   const link = (isActive: boolean) =>
@@ -17,9 +18,9 @@ export function AppShell({
 
   return (
     <div className="min-h-dvh bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        {/* Wraps rather than crowds: on a 320 px phone the four links drop to
-            their own line instead of squeezing or overflowing the header. */}
+      <header className="no-print border-b border-slate-200 bg-white">
+        {/* Wraps rather than crowds: on a 320 px phone the links drop to their
+            own line instead of squeezing or overflowing the header. */}
         <div className="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-x-2 gap-y-1 px-4 py-2">
           <a href="/today" className="text-base font-semibold text-teal-800">
             RecoverWell
@@ -34,6 +35,13 @@ export function AppShell({
             <a href="/plan" className={link(active === "plan")} aria-current={active === "plan" ? "page" : undefined}>
               My plan
             </a>
+            <a
+              href="/timeline"
+              className={link(active === "timeline")}
+              aria-current={active === "timeline" ? "page" : undefined}
+            >
+              Timeline
+            </a>
             <form method="post" action="/api/auth/logout">
               <button
                 type="submit"
@@ -45,7 +53,9 @@ export function AppShell({
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-4 pt-5 pb-20">{children}</main>
+      <main className="mx-auto max-w-2xl px-4 pt-5 pb-20 print:max-w-none print:px-0 print:pb-0">
+        {children}
+      </main>
     </div>
   );
 }
