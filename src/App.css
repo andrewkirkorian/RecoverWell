@@ -72,6 +72,153 @@ h3 {
   padding-top: 22px;
 }
 
+.recovery-app [hidden] {
+  display: none !important;
+}
+
+.primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 0;
+}
+
+.home-nav-button,
+.nav-dropdown summary {
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid #dfe8e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #315b4d;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  list-style: none;
+}
+
+.home-nav-button[aria-current="page"] {
+  border-color: #b8d1bf;
+  background: #edf6ef;
+}
+
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.nav-dropdown summary::after {
+  content: "⌄";
+  margin-left: 8px;
+}
+
+.nav-dropdown[open] summary {
+  border-color: #b8d1bf;
+  background: #f5faf6;
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 6px);
+  left: 0;
+  display: grid;
+  min-width: 220px;
+  gap: 4px;
+  padding: 7px;
+  border: 1px solid #dfe8e1;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(36, 52, 46, 0.14);
+}
+
+.nav-dropdown-menu button {
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #314a40;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-dropdown-menu button:hover,
+.nav-dropdown-menu button:focus-visible {
+  background: #edf6ef;
+}
+
+.home-nav-button:focus-visible,
+.nav-dropdown summary:focus-visible,
+.shortcut-grid button:focus-visible {
+  outline: 3px solid #6a9c7b;
+  outline-offset: 2px;
+}
+
+.emergency-banner {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border: 1px solid #efd4bd;
+  border-radius: 12px;
+  background: #fff8f1;
+  color: #68472c;
+  line-height: 1.5;
+}
+
+.emergency-banner strong {
+  flex: 0 0 auto;
+}
+
+.home-page > .summary-grid {
+  margin-top: 18px;
+}
+
+.home-shortcuts {
+  margin-top: 26px;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.shortcut-grid button {
+  display: grid;
+  gap: 7px;
+  min-height: 112px;
+  padding: 18px;
+  border: 1px solid #e3ebe5;
+  border-radius: 14px;
+  background: #fff;
+  color: #1f2c28;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.shortcut-grid button:hover {
+  border-color: #b8d1bf;
+  background: #f7fbf8;
+}
+
+.shortcut-grid strong {
+  color: #315b4d;
+  font-size: 1.02rem;
+}
+
+.shortcut-grid span {
+  color: #5f726b;
+  line-height: 1.5;
+}
+
 .hero-card,
 .summary-card,
 .plan-card,
@@ -320,6 +467,135 @@ h3 {
   background: #ffffff;
   color: #1f2c28;
   font: inherit;
+}
+
+.procedure-planner-section,
+.care-message-section {
+  margin-top: 28px;
+}
+
+.planner-disclaimer,
+.planner-local-note,
+.surgery-checklist-card > p,
+.message-notice {
+  margin-top: 8px;
+  color: #596f69;
+  line-height: 1.55;
+}
+
+.procedure-planner-card,
+.surgery-checklist-card,
+.care-message-card {
+  padding: 20px;
+  border: 1px solid #e7ece8;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(36, 52, 46, 0.04);
+}
+
+.planner-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.planner-fields label,
+.care-message-field {
+  display: grid;
+  gap: 8px;
+  color: #44675d;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.planner-fields input,
+.planner-fields select,
+.care-message-field input,
+.care-message-field select,
+.care-message-field textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #dfe8e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2c28;
+  font: inherit;
+  font-weight: 400;
+}
+
+.planner-local-note {
+  font-size: 0.82rem;
+}
+
+.surgery-checklist-card {
+  margin-top: 16px;
+}
+
+.surgery-checklist-card h4 {
+  font-size: 1.1rem;
+}
+
+.surgery-checklist {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.surgery-checklist li {
+  border: 1px solid #edf1ee;
+  border-radius: 10px;
+  background: #fbfcfb;
+}
+
+.surgery-checklist label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  color: #42584f;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.surgery-checklist input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #4d7b67;
+}
+
+.care-message-section .section-heading {
+  max-width: 760px;
+}
+
+.message-notice {
+  padding: 12px 14px;
+  border: 1px solid #efd4bd;
+  border-radius: 10px;
+  background: #fff8f1;
+  color: #68472c;
+}
+
+.care-message-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.message-body-field,
+.care-message-card > button,
+.care-message-card > .care-support-summary,
+.care-message-card > .care-support-privacy {
+  grid-column: 1 / -1;
+}
+
+.care-message-field textarea {
+  min-height: 140px;
+  resize: vertical;
 }
 
 .patient-summary {
@@ -665,23 +941,26 @@ h3 {
   border-top: 1px solid #e9eeeb;
 }
 
-.catalog-class-filter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #44675d;
-  font-size: 0.86rem;
-  font-weight: 600;
+.rxnorm-catalog-disclosure,
+.rxnorm-attribution,
+.catalog-search-status {
+  color: #687972;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
-.catalog-class-filter select {
-  min-width: 200px;
-  padding: 9px 12px;
-  border: 1px solid #dfe8e1;
+.rxnorm-attribution {
+  font-size: 0.75rem;
+}
+
+.catalog-search-error {
+  padding: 12px 14px;
+  border: 1px solid #f0d7c4;
   border-radius: 10px;
-  background: #fff;
-  color: #1f2c28;
-  font: inherit;
+  background: #fff8f2;
+  color: #8b451e;
+  font-size: 0.86rem;
+  line-height: 1.5;
 }
 
 .catalog-add-button {
@@ -748,6 +1027,16 @@ h3 {
   color: #625d55;
   font-size: 0.85rem;
   line-height: 1.5;
+}
+
+.interaction-source {
+  display: inline-block;
+  margin-top: 8px;
+  color: #416b58;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .alert-level {
@@ -988,9 +1277,36 @@ h3 {
   .care-support-fields,
   .patient-profile-grid,
   .patient-controls,
+  .planner-fields,
+  .care-message-card,
   .timeline-grid,
   .procedure-grid {
     grid-template-columns: 1fr;
+  }
+
+  .primary-nav {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .message-body-field,
+  .care-message-card > button,
+  .care-message-card > .care-support-summary,
+  .care-message-card > .care-support-privacy {
+    grid-column: auto;
+  }
+
+  .nav-dropdown-menu {
+    min-width: min(250px, calc(100vw - 28px));
+  }
+
+  .shortcut-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-banner {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .task-item label {
@@ -1012,15 +1328,6 @@ h3 {
 
   .medication-search,
   .medication-search input {
-    width: 100%;
-  }
-
-  .catalog-class-filter {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .catalog-class-filter select {
     width: 100%;
   }
 
