@@ -1,5 +1,5 @@
 .recovery-app {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 32px 20px 48px;
   color: #1f2c28;
@@ -11,7 +11,7 @@
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e7ece8;
+  border-bottom: 1px solid #e6ece7;
 }
 
 .brand-wrap {
@@ -26,138 +26,168 @@
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: #e2efe7;
-  color: #2a5d4d;
+  background: #e5f0ea;
+  color: #2b5d4f;
   font-weight: 700;
 }
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #73857d;
+  color: #70857d;
   font-size: 11px;
-  font-weight: 700;
   letter-spacing: 0.12em;
+  font-weight: 700;
 }
 
-h1, h2, h3, p { margin: 0; }
+h1, h2, h3, h4, p {
+  margin: 0;
+}
 
 h1 {
-  font-size: clamp(2rem, 3vw, 2.6rem);
-  font-weight: 700;
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: clamp(1.7rem, 2vw, 2.3rem);
+  line-height: 1.2;
+}
+
+h3 {
+  font-size: 1.3rem;
 }
 
 .header-pill {
   display: inline-flex;
   align-items: center;
   padding: 10px 14px;
-  border: 1px solid #dfe8e3;
+  border: 1px solid #dfe8e1;
   border-radius: 999px;
   background: #f8fbf8;
-  color: #466a5a;
+  color: #436a5c;
   font-size: 0.85rem;
 }
 
-.main-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 0.9fr;
-  gap: 20px;
-  padding-top: 24px;
+.page-content {
+  padding-top: 22px;
 }
 
 .hero-card,
-.progress-card,
+.summary-card,
 .plan-card,
-.tip-card,
-.care-card {
-  padding: 22px;
+.care-panel,
+.timeline-card,
+.procedure-card {
   border: 1px solid #e7ece8;
   border-radius: 18px;
-  background: #ffffff;
+  background: #fff;
   box-shadow: 0 10px 24px rgba(36, 52, 46, 0.04);
 }
 
 .hero-card {
-  background: linear-gradient(135deg, #edf8f0 0%, #ffffff 100%);
-}
-
-.hero-card h2 {
-  margin-bottom: 8px;
-  font-size: clamp(1.6rem, 2vw, 2.2rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 26px;
+  background: linear-gradient(135deg, #edf8f0, #fff);
 }
 
 .hero-card p:last-child {
-  max-width: 520px;
-  color: #5d7069;
+  margin-top: 10px;
+  max-width: 620px;
+  color: #596f69;
   line-height: 1.6;
 }
 
-.progress-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  background: #f8faf8;
-}
-
-.progress-header {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.progress-header strong {
-  font-size: 1.2rem;
-  color: #295a49;
-}
-
-.progress-ring {
+.hero-badge {
   display: grid;
-  place-items: center;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: conic-gradient(#5f8b73 0% var(--percent), #e8eee9 var(--percent) 100%);
-  position: relative;
+  gap: 6px;
+  min-width: 118px;
+  padding: 16px 18px;
+  border: 1px solid #dfe9e1;
+  border-radius: 14px;
+  background: #f5faf6;
+  text-align: center;
 }
 
-.progress-ring::before {
-  content: '';
-  position: absolute;
-  inset: 12px;
-  border-radius: 50%;
-  background: white;
+.hero-badge span {
+  color: #6c847d;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.progress-ring span {
-  position: relative;
-  z-index: 1;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #284d3f;
+.hero-badge strong {
+  font-size: 1.4rem;
+  color: #244d40;
 }
 
-.plan-card {
-  grid-column: 1 / 2;
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.summary-card {
+  padding: 20px;
+}
+
+.summary-card h3 {
+  margin-bottom: 10px;
+}
+
+.summary-card p:last-child {
+  color: #5f726b;
+  line-height: 1.6;
+}
+
+.summary-card .eyebrow {
+  margin-bottom: 8px;
+}
+
+.mini-progress {
+  height: 10px;
+  border-radius: 999px;
+  background: #edf1ee;
+  overflow: hidden;
+}
+
+.mini-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6a9c7b, #4d7b67);
+}
+
+.warning-card {
+  background: #fffaf7;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(250px, 0.9fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.plan-card,
+.care-panel {
+  padding: 22px;
 }
 
 .plan-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 18px;
 }
 
-.plan-header h3 {
-  font-size: 1.4rem;
-}
-
 .plan-header span {
-  color: #5d7069;
-  font-size: 0.9rem;
+  color: #586f68;
+  font-weight: 600;
 }
 
 .task-list {
@@ -165,18 +195,18 @@ h1 {
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .task-item {
-  border: 1px solid #edf2ee;
+  border: 1px solid #edf1ee;
   border-radius: 12px;
-  background: #fafcfb;
+  background: #fbfcfb;
 }
 
 .task-item label {
   display: grid;
-  grid-template-columns: 20px 70px 1fr;
+  grid-template-columns: 18px 85px 1fr;
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
@@ -186,39 +216,758 @@ h1 {
 .task-item input {
   width: 18px;
   height: 18px;
-  accent-color: #4b7a65;
+  accent-color: #4d7b67;
 }
 
 .task-time {
   color: #6a7b76;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
 
 .task-name {
-  font-weight: 600;
   color: #21352f;
+  font-weight: 600;
 }
 
 .task-item.done .task-name {
-  color: #70857d;
+  color: #75867f;
   text-decoration: line-through;
 }
 
-.side-panel {
-  display: grid;
-  gap: 20px;
+.care-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #f7faf7;
 }
 
-.tip-card h3,
-.care-card h3 {
-  margin-bottom: 8px;
-  font-size: 1.2rem;
+.care-panel h3 {
+  margin-bottom: 10px;
 }
 
-.tip-card p:last-child,
-.care-card p:last-child {
-  color: #5d7069;
+.care-panel p:last-child {
+  color: #5d726a;
   line-height: 1.6;
+}
+
+.icu-model-section,
+.service-bundle-section,
+.timeline-section,
+.procedures-section,
+.pharmacy-section,
+.care-support-section {
+  margin-top: 28px;
+}
+
+.section-heading {
+  margin-bottom: 16px;
+}
+
+.section-heading h3 {
+  margin-top: 2px;
+}
+
+.icu-model-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.icu-model-card {
+  padding: 18px 18px 20px;
+  border: 1px solid #e7ece8;
+  border-radius: 18px;
+  background: #f7faf8;
+}
+
+.icu-model-card h4 {
+  margin-bottom: 10px;
+  font-size: 1.08rem;
+}
+
+.icu-model-card p {
+  color: #596f69;
+  line-height: 1.6;
+}
+
+.patient-profile-card {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid #e7ece8;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f7faf8 0%, #ffffff 100%);
+}
+
+.patient-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.patient-controls label {
+  color: #44675d;
+  font-weight: 600;
+}
+
+.patient-controls select,
+.patient-form-card input,
+.patient-form-card select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dfe8e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2c28;
+  font: inherit;
+}
+
+.patient-summary {
+  padding: 16px 18px;
+  border: 1px solid #e5ece7;
+  border-radius: 12px;
+  background: #f8fbf8;
+}
+
+.patient-summary h4 {
+  margin: 8px 0 10px;
+  font-size: 1.12rem;
+}
+
+.patient-summary p:last-child {
+  color: #5a6f68;
+  line-height: 1.6;
+}
+
+.patient-profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.patient-form-card,
+.patient-risk-card {
+  padding: 18px;
+  border: 1px solid #e8eeea;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.field-row {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.field-row:last-child {
+  margin-bottom: 0;
+}
+
+.field-row label {
+  color: #44675d;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.patient-risk-card h4 {
+  margin: 8px 0 10px;
+  font-size: 1.08rem;
+}
+
+.patient-risk-card p {
+  color: #596f69;
+  line-height: 1.6;
+}
+
+.readiness-box {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #edf7f1;
+}
+
+.readiness-box strong {
+  display: block;
+  margin-top: 8px;
+  color: #264d40;
+  font-size: 1.05rem;
+}
+
+.readiness-box p:last-child {
+  margin-top: 8px;
+}
+
+.service-body {
+  display: grid;
+  gap: 16px;
+}
+
+.service-body ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: #596f69;
+  line-height: 1.7;
+}
+
+.mini-label {
+  margin: 0;
+  color: #6b7a75;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.service-body p:last-child {
+  margin-top: 8px;
+  color: #596f69;
+  line-height: 1.6;
+}
+
+.timeline-grid,
+.procedure-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.timeline-card,
+.procedure-card {
+  padding: 18px 18px 20px;
+}
+
+.stage-badge {
+  display: inline-block;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: #edf7f1;
+  color: #345e4a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.timeline-card h4,
+.procedure-card h4 {
+  margin-bottom: 10px;
+  font-size: 1.08rem;
+}
+
+.timeline-card ul,
+.procedure-card p {
+  margin: 0;
+  color: #596f69;
+  line-height: 1.6;
+}
+
+.timeline-card ul {
+  padding-left: 18px;
+}
+
+.timeline-card li + li {
+  margin-top: 6px;
+}
+
+.procedure-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pharmacy-intro {
+  margin-top: 7px;
+  color: #596f69;
+  line-height: 1.5;
+}
+
+.pharmacy-card {
+  padding: 22px;
+  border: 1px solid #e7ece8;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(36, 52, 46, 0.04);
+}
+
+.pharmacy-notice {
+  display: grid;
+  gap: 5px;
+  padding: 13px 16px;
+  border: 1px solid #dfe8e1;
+  border-radius: 12px;
+  background: #f5faf6;
+  color: #50675e;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.pharmacy-notice strong {
+  color: #315c4b;
+}
+
+.pharmacy-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.pharmacy-summary > div {
+  display: grid;
+  gap: 3px;
+  padding: 14px 16px;
+  border: 1px solid #edf1ee;
+  border-radius: 12px;
+  background: #fbfcfb;
+}
+
+.pharmacy-summary strong {
+  color: #244d40;
+  font-size: 1.35rem;
+}
+
+.pharmacy-summary span,
+.medication-list-header p {
+  color: #6a7b76;
+  font-size: 0.83rem;
+}
+
+.medication-list-header,
+.safety-review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.medication-list-header h4,
+.safety-review-heading h4 {
+  color: #243c33;
+  font-size: 1.1rem;
+}
+
+.medication-list-header p {
+  margin-top: 5px;
+}
+
+.medication-search input {
+  width: min(240px, 38vw);
+  padding: 10px 12px;
+  border: 1px solid #dfe8e1;
+  border-radius: 10px;
+  color: #1f2c28;
+  background: #fff;
+}
+
+.medication-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 10px;
+}
+
+.medication-filter {
+  padding: 8px 12px;
+  border: 1px solid #dfe8e1;
+  border-radius: 999px;
+  background: #fff;
+  color: #53675f;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.medication-filter.selected {
+  border-color: #c9dfd1;
+  background: #edf7f1;
+  color: #315c4b;
+  font-weight: 700;
+}
+
+.medication-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.medication-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid #edf1ee;
+  border-radius: 12px;
+  background: #fbfcfb;
+}
+
+.medication-mark {
+  display: grid;
+  flex: 0 0 38px;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #edf7f1;
+  color: #315c4b;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.medication-info {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+  color: #66766f;
+  font-size: 0.85rem;
+}
+
+.medication-name-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #243c33;
+  font-size: 0.97rem;
+}
+
+.medication-status {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #edf7f1;
+  color: #3f7259;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.medication-info small {
+  color: #788780;
+  font-size: 0.76rem;
+}
+
+.medication-category {
+  color: #5f726b;
+  font-size: 0.78rem;
+}
+
+.medication-empty,
+.no-safety-flags {
+  padding: 16px;
+  color: #687972;
+  text-align: center;
+}
+
+.medication-catalog {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid #e9eeeb;
+}
+
+.catalog-class-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #44675d;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.catalog-class-filter select {
+  min-width: 200px;
+  padding: 9px 12px;
+  border: 1px solid #dfe8e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2c28;
+  font: inherit;
+}
+
+.catalog-add-button {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border: 1px solid #c9dfd1;
+  border-radius: 9px;
+  background: #f5faf6;
+  color: #315c4b;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.catalog-add-button:disabled {
+  border-color: #e4ebe6;
+  background: #f4f6f4;
+  color: #75867f;
+  cursor: default;
+}
+
+.safety-review {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e9eeeb;
+}
+
+.safety-review-heading {
+  margin-bottom: 3px;
+}
+
+.safety-review-heading h4 {
+  margin-top: 5px;
+}
+
+.review-count {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #fff3e8;
+  color: #91541f;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.safety-alert {
+  display: grid;
+  grid-template-columns: 145px minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid;
+  border-radius: 12px;
+}
+
+.safety-alert h5 {
+  margin: 0 0 5px;
+  color: #3a342c;
+  font-size: 0.92rem;
+}
+
+.safety-alert p {
+  color: #625d55;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.alert-level {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.high-alert,
+.contraindication-alert {
+  border-color: #f0d7c4;
+  background: #fff8f2;
+}
+
+.high-alert .alert-level,
+.contraindication-alert .alert-level {
+  color: #995522;
+}
+
+.moderate-alert {
+  border-color: #eee2bb;
+  background: #fffdf5;
+}
+
+.moderate-alert .alert-level {
+  color: #816920;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.care-support-intro {
+  margin-top: 7px;
+  color: #596f69;
+  line-height: 1.5;
+}
+
+.care-support-card {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid #e7ece8;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(36, 52, 46, 0.04);
+}
+
+.care-support-emergency-note,
+.care-support-urgent-alert {
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px;
+  border: 1px solid #f0d7c4;
+  border-radius: 12px;
+  background: #fff8f2;
+  color: #714b30;
+  line-height: 1.55;
+}
+
+.care-support-emergency-note strong {
+  color: #8b451e;
+}
+
+.care-support-form {
+  display: grid;
+  gap: 18px;
+}
+
+.care-support-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.care-support-field {
+  display: grid;
+  gap: 8px;
+  color: #44675d;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.care-support-field input,
+.care-support-field select,
+.care-support-field textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #dfe8e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2c28;
+  font: inherit;
+  font-weight: 400;
+}
+
+.care-support-field textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.care-warning-signs {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid #e9eeeb;
+  border-radius: 12px;
+}
+
+.care-warning-signs legend {
+  padding: 0 6px;
+  color: #243c33;
+  font-weight: 700;
+}
+
+.care-warning-signs > p {
+  color: #687972;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.care-warning-sign-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+.care-warning-sign-list label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: #42584f;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.care-warning-sign-list input {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  accent-color: #a34d28;
+}
+
+.care-support-urgent-alert {
+  border-width: 2px;
+  color: #693b20;
+  font-weight: 700;
+}
+
+.care-support-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.care-support-submit,
+.care-support-clear {
+  padding: 10px 14px;
+  border: 1px solid #c9dfd1;
+  border-radius: 10px;
+  background: #edf7f1;
+  color: #315c4b;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.care-support-clear {
+  border-color: #dfe8e1;
+  background: #fff;
+  color: #53675f;
+}
+
+.care-support-summary {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #dfe8e1;
+  border-radius: 12px;
+  background: #f8fbf8;
+}
+
+.care-support-summary h4 {
+  color: #243c33;
+  font-size: 1rem;
+}
+
+.care-support-summary pre {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  color: #42584f;
+  font: inherit;
+  line-height: 1.6;
+}
+
+.care-support-summary p,
+.care-support-privacy {
+  color: #687972;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .timeline-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .procedure-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -227,21 +976,69 @@ h1 {
   }
 
   .topbar,
-  .plan-header,
-  .progress-header {
+  .hero-card,
+  .plan-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summary-grid,
+  .main-grid,
+  .icu-model-grid,
+  .care-support-fields,
+  .patient-profile-grid,
+  .patient-controls,
+  .timeline-grid,
+  .procedure-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .task-item label {
+    grid-template-columns: 18px 75px 1fr;
+  }
+
+  .pharmacy-card {
+    padding: 16px;
+  }
+
+  .care-warning-sign-list {
+    grid-template-columns: 1fr;
+  }
+
+  .medication-list-header {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .main-grid {
+  .medication-search,
+  .medication-search input {
+    width: 100%;
+  }
+
+  .catalog-class-filter {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .catalog-class-filter select {
+    width: 100%;
+  }
+
+  .medication-row {
+    align-items: flex-start;
+  }
+
+  .catalog-add-button {
+    max-width: 118px;
+    white-space: normal;
+  }
+
+  .medication-category {
+    display: none;
+  }
+
+  .safety-alert {
     grid-template-columns: 1fr;
-  }
-
-  .plan-card {
-    grid-column: auto;
-  }
-
-  .task-item label {
-    grid-template-columns: 20px 70px 1fr;
+    gap: 6px;
   }
 }
