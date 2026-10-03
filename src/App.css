@@ -1,31 +1,247 @@
-.App {
-  text-align: center;
+.recovery-app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  color: #1f2c28;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e7ece8;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-badge {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #e2efe7;
+  color: #2a5d4d;
+  font-weight: 700;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #73857d;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+h1, h2, h3, p { margin: 0; }
+
+h1 {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 700;
+}
+
+.header-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid #dfe8e3;
+  border-radius: 999px;
+  background: #f8fbf8;
+  color: #466a5a;
+  font-size: 0.85rem;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr;
+  gap: 20px;
+  padding-top: 24px;
+}
+
+.hero-card,
+.progress-card,
+.plan-card,
+.tip-card,
+.care-card {
+  padding: 22px;
+  border: 1px solid #e7ece8;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(36, 52, 46, 0.04);
+}
+
+.hero-card {
+  background: linear-gradient(135deg, #edf8f0 0%, #ffffff 100%);
+}
+
+.hero-card h2 {
+  margin-bottom: 8px;
+  font-size: clamp(1.6rem, 2vw, 2.2rem);
+}
+
+.hero-card p:last-child {
+  max-width: 520px;
+  color: #5d7069;
+  line-height: 1.6;
+}
+
+.progress-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 18px;
+  background: #f8faf8;
 }
 
-.App-link {
-  color: #61dafb;
+.progress-header {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
-.heart {
-  color: #ff0000;
+.progress-header strong {
+  font-size: 1.2rem;
+  color: #295a49;
 }
 
-.small {
-  font-size: 0.75rem;
+.progress-ring {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(#5f8b73 0% var(--percent), #e8eee9 var(--percent) 100%);
+  position: relative;
+}
+
+.progress-ring::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  background: white;
+}
+
+.progress-ring span {
+  position: relative;
+  z-index: 1;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #284d3f;
+}
+
+.plan-card {
+  grid-column: 1 / 2;
+}
+
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.plan-header h3 {
+  font-size: 1.4rem;
+}
+
+.plan-header span {
+  color: #5d7069;
+  font-size: 0.9rem;
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.task-item {
+  border: 1px solid #edf2ee;
+  border-radius: 12px;
+  background: #fafcfb;
+}
+
+.task-item label {
+  display: grid;
+  grid-template-columns: 20px 70px 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.task-item input {
+  width: 18px;
+  height: 18px;
+  accent-color: #4b7a65;
+}
+
+.task-time {
+  color: #6a7b76;
+  font-size: 0.82rem;
+}
+
+.task-name {
+  font-weight: 600;
+  color: #21352f;
+}
+
+.task-item.done .task-name {
+  color: #70857d;
+  text-decoration: line-through;
+}
+
+.side-panel {
+  display: grid;
+  gap: 20px;
+}
+
+.tip-card h3,
+.care-card h3 {
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+}
+
+.tip-card p:last-child,
+.care-card p:last-child {
+  color: #5d7069;
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .recovery-app {
+    padding: 24px 14px 40px;
+  }
+
+  .topbar,
+  .plan-header,
+  .progress-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-card {
+    grid-column: auto;
+  }
+
+  .task-item label {
+    grid-template-columns: 20px 70px 1fr;
+  }
 }
