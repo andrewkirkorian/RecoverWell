@@ -11,6 +11,19 @@ export const isDateValue = (value: string): boolean => {
 
 /** Today on the server clock (UTC). */
 export const utcToday = (): string => new Date().toISOString().slice(0, 10);
+/**
+ * True when two `YYYY-MM-DD` values are the same day or neighbouring days.
+ *
+ * One day of slack either way covers the difference between the patient's own
+ * time zone and the server's, without letting a request name an arbitrary day.
+ */
+export const withinOneDayOf = (date: string, reference: string): boolean => {
+  if (!isDateValue(date) || !isDateValue(reference)) return false;
+  const drift = Math.abs(
+    new Date(`${date}T00:00:00Z`).getTime() - new Date(`${reference}T00:00:00Z`).getTime(),
+  );
+  return drift <= 24 * 60 * 60 * 1000;
+};
 
 /** "2026-10-03" -> "Saturday, October 3, 2026". */
 export const formatDateLong = (value: string): string => {

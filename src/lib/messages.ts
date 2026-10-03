@@ -4,6 +4,7 @@ export const SIGNUP_ERRORS: Record<string, string> = {
   email: "Please enter a valid email address.",
   password: "Please choose a password with at least 8 characters.",
   email_taken: "That email is already registered. Try logging in instead.",
+  slow: "Too many sign-up attempts just now. Please wait a moment and try again.",
   nodb: "The app isn't connected to its database yet, so accounts can't be created right now.",
   problem: "Something went wrong saving your account. Please try again.",
 };

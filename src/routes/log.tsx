@@ -43,7 +43,8 @@ const prefillTemperature = (entry: LogEntry | null, unit: TempUnit): string => {
 
 function PainScale({ selected }: { selected: number | null }) {
   return (
-    <div className="mt-2 grid grid-cols-6 gap-2">
+    // Five per row, so every score is at least 44 px wide on a 320 px phone.
+    <div className="mt-2 grid grid-cols-5 gap-2">
       {PAIN_STEPS.map((step) => (
         <label key={step} className="cursor-pointer">
           <input
@@ -54,7 +55,7 @@ function PainScale({ selected }: { selected: number | null }) {
             required
             className="peer sr-only"
           />
-          <span className="flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white text-lg font-medium text-slate-800 peer-checked:border-teal-700 peer-checked:bg-teal-700 peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-teal-700">
+          <span className="flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-300 bg-white text-lg font-medium text-slate-800 peer-checked:border-teal-700 peer-checked:bg-teal-700 peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-teal-700">
             {step}
           </span>
         </label>

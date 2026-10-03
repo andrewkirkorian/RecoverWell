@@ -25,7 +25,8 @@ export class DbNotConfiguredError extends Error {
 export const isDbConfigured = (): boolean => Boolean(process.env.MONGODB_URI);
 
 let clientPromise: Promise<MongoClient> | null = null;
-let indexesPromise: Promise<void> | null = null;
+let indexSetup: Promise<void> | null = null;
+let indexState: "pending" | "done" | "failed" = "pending";
 
 /** Database name: the path of the connection string, else "recoverwell". */
 const dbNameFrom = (uri: string): string => {
@@ -58,30 +59,61 @@ const getClient = async (uri: string): Promise<MongoClient> => {
 
 /**
  * Best-effort index creation: uniqueness for emails (so two accounts can never
- * share one) and a TTL that clears expired sessions. Never fatal — if index
- * creation is not permitted the app keeps working and still checks for existing
- * emails before inserting.
+ * share one) and keys that keep one day's log and one plan per user.
+ *
+ * Index setup runs at most once per process, and a failure is never retried:
+ * building an index is housekeeping, so a patient-facing request must neither
+ * wait on it repeatedly nor fail because of it. If setup cannot run (permissions,
+ * a cluster that refuses it), the app keeps working and still checks for existing
+ * emails before inserting. Each index is attempted on its own so one failure does
+ * not skip the rest — the unique keys matter most. The failure is reported once,
+ * naming only the collections, because the driver's error text can carry
+ * connection details.
  */
 const ensureIndexes = async (db: Db): Promise<void> => {
-  if (!indexesPromise) {
-    indexesPromise = (async () => {
-      await db.collection("users").createIndex({ email: 1 }, { unique: true });
-      await db.collection("sessions").createIndex({ tokenHash: 1 }, { unique: true });
-      await db
-        .collection("sessions")
-        .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-      await db
-        .collection("completions")
-        .createIndex({ userId: 1, date: 1, itemId: 1 }, { unique: true });
-      await db.collection("plans").createIndex({ userId: 1 }, { unique: true });
+  if (indexState !== "pending") return;
+  if (!indexSetup) {
+    indexSetup = (async () => {
+      const failed: string[] = [];
+      const attempt = async (collection: string, build: () => Promise<unknown>) => {
+        try {
+          await build();
+        } catch {
+          failed.push(collection);
+        }
+      };
+      await attempt("users", () => db.collection("users").createIndex({ email: 1 }, { unique: true }));
+      await attempt("sessions", () =>
+        db.collection("sessions").createIndex({ tokenHash: 1 }, { unique: true }),
+      );
+      await attempt("sessions", () =>
+        db.collection("sessions").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+      );
+      await attempt("completions", () =>
+        db.collection("completions").createIndex({ userId: 1, date: 1, itemId: 1 }, { unique: true }),
+      );
+      await attempt("plans", () => db.collection("plans").createIndex({ userId: 1 }, { unique: true }));
       // One day's log per user: this unique key is what makes re-saving the same
       // date an update rather than a second entry.
-      await db.collection("logs").createIndex({ userId: 1, date: 1 }, { unique: true });
-    })().catch(() => {
-      indexesPromise = null;
+      await attempt("logs", () =>
+        db.collection("logs").createIndex({ userId: 1, date: 1 }, { unique: true }),
+      );
+      if (failed.length > 0) {
+        indexState = "failed";
+        console.error(
+          `recoverwell: could not build indexes for: ${failed.join(", ")} — continuing without them`,
+        );
+        return;
+      }
+      indexState = "done";
+    })();
+    // Whatever happens above, this promise must resolve: index setup never fails
+    // a request.
+    indexSetup = indexSetup.catch(() => {
+      indexState = "failed";
     });
   }
-  await indexesPromise;
+  await indexSetup;
 };
 
 /** The database handle. Throws `DbNotConfiguredError` when `MONGODB_URI` is missing. */

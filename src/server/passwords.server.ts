@@ -36,3 +36,24 @@ export async function verifyPassword(password: string, stored: string): Promise<
 
 /** 32 random bytes, URL-safe: only ever sent to the browser, never logged. */
 export const newToken = (): string => randomBytes(32).toString("base64url");
+
+/**
+ * A stored-form hash of a throwaway password, built once per process.
+ *
+ * Used only when a sign-in attempt names an email with no account: verifying
+ * against this costs exactly what verifying a real password costs, so the answer
+ * cannot be told apart by how long it took.
+ */
+let dummyHash: Promise<string> | null = null;
+
+const dummyStoredHash = (): Promise<string> => {
+  dummyHash ??= hashPassword(newToken());
+  return dummyHash;
+};
+
+/** Always false. Spends one hash-cost verification so an unknown email and a
+ * wrong password take the same time. */
+export const verifyPasswordWhenUnknown = async (password: string): Promise<false> => {
+  await verifyPassword(password, await dummyStoredHash());
+  return false;
+};

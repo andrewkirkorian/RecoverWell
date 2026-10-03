@@ -39,7 +39,8 @@ export function parseLogForm(form: FormData, temperatureUnit: TempUnit): LogPars
   const tempRaw = text(form, "temperature", 12).trim();
   let temperature: number | null = null;
   if (tempRaw.length > 0) {
-    const value = Number(tempRaw);
+    // A comma decimal separator is taken as a decimal point ("37,5" -> 37.5).
+    const value = Number(tempRaw.replace(",", "."));
     if (!Number.isFinite(value) || value <= 0 || value > 200) {
       return { ok: false, error: "temperature" };
     }

@@ -12,7 +12,14 @@
 #   bash tools/stop-verify.sh  # stop the rig, delete the scratch dir
 #
 # Steps a-g cover increment 1 (accounts, plan, ticks, isolation); steps h-o cover
-# increment 2 (call-your-care-team limits, the daily log, the red-flag banner).
+# increment 2 (call-your-care-team limits, the daily log, the red-flag banner);
+# steps p-u cover the safety-review fixes (mistyped limits, sign-in throttling and
+# equal-cost answers, the body cap, tick dates, index setup, page hardening).
+#
+# The script counts PASS/FAIL assertions and exits non-zero if any fail: a check
+# that only printed a number could drift without anyone noticing. Run
+# tools/reset-verify.sh immediately before it — step 0 seeds the throwaway
+# database *before* the app's first request, which only works on a fresh rig.
 # See tools/README.md.
 BASE=http://127.0.0.1:3100
 VERIFY_URI=mongodb://127.0.0.1:27018/recoverwell_verify
@@ -21,12 +28,25 @@ SITE_ROOT=$(cd "$(dirname "$0")/.." && pwd)
 mkdir -p "$D"
 rm -f $D/cookies-*.txt
 
+echo "=================== STEP 0: make index setup fail, before the app's first request ==================="
+# The app builds its indexes on its first database call, so the two duplicate
+# `users` documents have to be in place before anything touches the app. This is
+# what lets step t prove index setup is neither fatal nor retried.
+hdr "0.1 seed two users documents that share one email (the unique index cannot be built)"
+SEEDED=0
+if (cd "$SITE_ROOT" && MONGODB_URI="$VERIFY_URI" bun tools/seed-duplicate-emails.ts); then
+  SEEDED=1
+else
+  echo "  could not seed the throwaway database — the index checks in step t will be skipped"
+fi
+
 # Fail fast: an app that isn't listening makes every step below return 000 and
 # look like a pass. Better to stop here and say so.
 if [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/")" != "200" ]; then
   echo "nothing is answering on $BASE — run 'bun run build', then 'bash tools/reset-verify.sh'" >&2
   exit 1
 fi
+echo "  the landing page was served anyway: status 200 (indexes were failing underneath it)"
 
 # --- helpers -------------------------------------------------------------
 # The pages carry UTF-8 (the degree sign on the log page). In this box's C
@@ -54,12 +74,52 @@ n() { grep -o -- "$1" "$2" | wc -l | tr -d ' '; }
 txt() { sed -e 's/<[^>]*>/|/g' "$1" | tr '|' '\n' | grep -v '^[[:space:]]*$'; }
 line() { txt "$1" | grep -m1 -- "$2" || echo "(not found: $2)"; }
 firstafter() { txt "$1" | grep -A2 -m1 -- "$2" | tr '\n' ' '; }
+# React's server renderer separates adjacent text nodes with `<!---->`, so a
+# string the page shows as one run ("Pain 3 out of 10") is split in the HTML and
+# a plain grep for it finds nothing. Drop the empty comments first.
+plainn() { sed 's/<!--[^>]*-->//g' "$1" | grep -o -- "$2" | wc -l | tr -d ' '; }
+loc() { grep -i '^location:' "$1.hdr" | head -1 | tr -d '\r' | sed 's/^[Ll]ocation: *//'; }
+
+# --- assertions ----------------------------------------------------------
+# Every numbered fix has at least one of these, and any FAIL makes this script
+# exit non-zero, so a check cannot regress quietly.
+PASSED=0
+FAILED=0
+check() { # label actual expected
+  if [ "$2" = "$3" ]; then
+    PASSED=$((PASSED + 1)); echo "  PASS $1 ($2)"
+  else
+    FAILED=$((FAILED + 1)); echo "  FAIL $1 — got '$2', expected '$3'"
+  fi
+}
+ge() { # label actual floor
+  if [ "$2" -ge "$3" ] 2>/dev/null; then
+    PASSED=$((PASSED + 1)); echo "  PASS $1 ($2 >= $3)"
+  else
+    FAILED=$((FAILED + 1)); echo "  FAIL $1 — got '$2', expected >= $3"
+  fi
+}
+ratio_ok() { # label actual_ms reference_ms max_factor
+  local ok
+  ok=$(awk -v a="$2" -v b="$3" -v f="$4" 'BEGIN { print (a <= b * f && a >= b / f) ? "yes" : "no" }')
+  if [ "$ok" = "yes" ]; then
+    PASSED=$((PASSED + 1)); echo "  PASS $1 (${2}ms vs ${3}ms, within ${4}x)"
+  else
+    FAILED=$((FAILED + 1)); echo "  FAIL $1 — ${2}ms vs ${3}ms is more than ${4}x apart"
+  fi
+}
+ms() { awk -v s="$1" 'BEGIN { printf "%d", s * 1000 }'; }
 
 echo "=================== environment ==================="
 echo "app under test : http://127.0.0.1:3100 (throwaway second instance of dist/server)"
 echo "database       : mongodb://127.0.0.1:27018/recoverwell_verify (throwaway local mongod 7.0.14)"
 echo "live site      : http://127.0.0.1:3000 untouched -> $(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/)"
 DATE=$(date -u +%F); echo "server UTC date: $DATE"
+SHORT=$(date -u +'%b %-d, %Y')                       # the date line the log page prints
+SHORT_YDAY=$(date -u -d 'yesterday' +'%b %-d, %Y')
+YDAY=$(date -u -d 'yesterday' +%F)
+FUTURE3=$(date -u -d '+3 days' +%F)
+PAST5=$(date -u -d '-5 days' +%F)
 
 echo; echo "=================== STEP a: signup user A ==================="
 hdr "a1. POST /api/auth/signup  (alice@example.com)"
@@ -164,7 +224,10 @@ echo "  status: $S   progress: $(line $D/d5b.body 'done')   rows marked done: $(
 hdr "d6. re-tick item1, then check a tick on a DIFFERENT date is separate"
 S=$(post $D/cookies-a.txt $D/d6 --data-urlencode "item=$ITEM1" --data-urlencode "date=$DATE" --data-urlencode 'done=1' $BASE/api/tick)
 echo "  status: $S"
-S=$(post $D/cookies-a.txt $D/d6b --data-urlencode "item=$ITEM1" --data-urlencode 'date=2026-10-02' --data-urlencode 'done=1' $BASE/api/tick)
+# Yesterday, not a hard-coded date: a tick may only name the patient's own day or
+# a neighbouring one (see step s), and this step is only about the two dates
+# being kept apart.
+S=$(post $D/cookies-a.txt $D/d6b --data-urlencode "item=$ITEM1" --data-urlencode "date=$YDAY" --data-urlencode 'done=1' $BASE/api/tick)
 show $D/d6b "$S"
 hdr "d7. POST /api/tick with an item id that is not in the user's plan"
 S=$(post $D/cookies-a.txt $D/d7 --data-urlencode 'item=med:fake000000:08:00' --data-urlencode "date=$DATE" --data-urlencode 'done=1' $BASE/api/tick)
@@ -285,8 +348,6 @@ forgedpost() { # out url "a=b&c=d" — a POST carrying someone else's session to
   curl -s -H 'Accept-Encoding: identity' -o "$1.body" -D "$1.hdr" \
     -H 'Cookie: rw_session=deadbeefdeadbeefdeadbeefdeadbeef' -X POST -d "$3" "$2" -w '%{http_code}\n'
 }
-SHORT=$(date -u +'%b %-d, %Y')                       # the date line the log page prints
-YDAY=$(date -u -d 'yesterday' +%F)
 
 echo; echo "=================== STEP h: the patient's own 'when to call' limits ==================="
 hdr "h1. POST /api/plan with the 'When to call your care team' section filled in"
@@ -348,7 +409,8 @@ S=$(get $D/cookies-a.txt $D/i3 $BASE/log)
 echo "  status: $S"
 echo "  'Contact your care team' present (expect 0): $(n 'Contact your care team' $D/i3.body)"
 echo "  'contact your care team' present (expect 0): $(n 'contact your care team' $D/i3.body)"
-echo "  pain read back      : $(line $D/i3.body 'Pain 2 out of 10')"
+echo "  pain read back      : $(plainn $D/i3.body 'Pain 2 out of 10') occurrence(s) of 'Pain 2 out of 10'"
+check "i3 the day's pain score reads back" "$(plainn $D/i3.body 'Pain 2 out of 10')" 1
 echo "  temperature read back: $(line $D/i3.body '37.1')"
 echo "  wound note read back : $(n 'Wound looks clean and dry' $D/i3.body)"
 echo "  general note read back: $(n 'Slept better last night' $D/i3.body)"
@@ -399,8 +461,12 @@ hdr "k2. GET /log: one entry for the day, holding the new values"
 S=$(get $D/cookies-a.txt $D/k2 $BASE/log)
 echo "  status: $S"
 echo "  entries dated '$SHORT' in 'your last few days' (expect 1): $(n "$SHORT" $D/k2.body)"
-echo "  new values shown  : $(line $D/k2.body 'Pain 3 out of 10')  /  $(line $D/k2.body '37.4')"
+echo "  new values shown  : $(plainn $D/k2.body 'Pain 3 out of 10') occurrence(s) of 'Pain 3 out of 10'  /  $(line $D/k2.body '37.4')"
+check "k2 the re-saved day shows the new pain score" "$(plainn $D/k2.body 'Pain 3 out of 10')" 1
+check "k2 the old pain score is gone" "$(plainn $D/k2.body 'Pain 7 out of 10')" 0
 echo "  old values gone   : 'Pain 7 out of 10'=$(n 'Pain 7 out of 10' $D/k2.body)  old wound text=$(n 'Redness along the top of the scar' $D/k2.body) (expect 0 / 0)"
+check "k2 the old wound note is gone" "$(n 'Redness along the top of the scar' $D/k2.body)" 0
+check "k2 one entry for the day, in 'your last few days'" "$(n "$SHORT" $D/k2.body)" 1
 echo "  banner cleared by the lower log (expect 0): $(n 'Contact your care team' $D/k2.body)"
 hdr "k3. GET /today: banner cleared there too"
 S=$(get $D/cookies-a.txt $D/k3 $BASE/today)
@@ -422,13 +488,16 @@ S=$(post $D/cookies-b.txt $D/l2 --data-urlencode "date=$DATE" --data-urlencode '
   --data-urlencode 'wound_note=B wound note' --data-urlencode 'note=B general note' $BASE/api/log)
 show $D/l2 "$S"
 S=$(get $D/cookies-b.txt $D/l2b $BASE/log)
-echo "  B's own values read back: $(line $D/l2b.body 'Pain 10 out of 10')  /  $(line $D/l2b.body '39.5')"
+echo "  B's own values read back: $(plainn $D/l2b.body 'Pain 10 out of 10') occurrence(s) of 'Pain 10 out of 10'  /  $(line $D/l2b.body '39.5')"
+check "l2 B's own extreme values read back to B" "$(plainn $D/l2b.body 'Pain 10 out of 10')" 1
 echo "  banner on B's log page (expect 0): $(n 'Contact your care team' $D/l2b.body)"
 S=$(get $D/cookies-b.txt $D/l2c $BASE/today)
 echo "  banner on B's today    (expect 0): $(n 'Contact your care team' $D/l2c.body)"
 hdr "l3. user B's log did not disturb user A's day"
 S=$(get $D/cookies-a.txt $D/l3 $BASE/log)
-echo "  A's entry still A's: $(line $D/l3.body 'Pain 3 out of 10')   B's note in A's page (expect 0): $(n 'B wound note' $D/l3.body)"
+echo "  A's entry still A's: $(plainn $D/l3.body 'Pain 3 out of 10') occurrence(s) of 'Pain 3 out of 10'   B's note in A's page (expect 0): $(n 'B wound note' $D/l3.body)"
+check "l3 A's own entry is still A's" "$(plainn $D/l3.body 'Pain 3 out of 10')" 1
+check "l3 B's note never reaches A's page" "$(n 'B wound note' $D/l3.body)" 0
 hdr "l4. POST /api/log with no cookie / with a forged cookie"
 rm -f $D/cookies-fresh.txt
 S=$(post $D/cookies-fresh.txt $D/l4 --data-urlencode "date=$DATE" --data-urlencode 'pain=5' $BASE/api/log); show $D/l4 "$S"
@@ -437,29 +506,45 @@ hdr "l5. POST /api/log with values that are not numbers"
 S=$(post $D/cookies-a.txt $D/l5 --data-urlencode "date=$DATE" --data-urlencode 'pain=eleven' $BASE/api/log); show $D/l5 "$S"
 S=$(post $D/cookies-a.txt $D/l5b --data-urlencode "date=$DATE" --data-urlencode 'pain=3' --data-urlencode 'temperature=abc' $BASE/api/log); show $D/l5b "$S"
 S=$(get $D/cookies-a.txt $D/l5c $BASE/log)
-echo "  A's saved values after the refused posts (expect the pain 3 entry): $(line $D/l5c.body 'Pain 3 out of 10')"
+echo "  A's saved values after the refused posts (expect the pain 3 entry): $(plainn $D/l5c.body 'Pain 3 out of 10') occurrence(s)"
+check "l5 A's saved entry survives two refused log posts" "$(plainn $D/l5c.body 'Pain 3 out of 10')" 1
 
 echo; echo "=================== STEP m: the flag stays until the next log ==================="
-hdr "m1. user A logs a high value on a different date ($YDAY)"
-S=$(post $D/cookies-a.txt $D/m1 --data-urlencode "date=$YDAY" --data-urlencode 'pain=8' --data-urlencode 'temperature=38.2' $BASE/api/log)
+# The flag is judged on the patient's NEWEST log by date, so the newest entry has
+# to be the over-limit one for this step to mean anything: an older, quieter day
+# must not mask it, and only the next (newer) log clears it.
+hdr "m1. user A logs a quiet day for yesterday ($YDAY), then a high value for today"
+S=$(post $D/cookies-a.txt $D/m1 --data-urlencode "date=$YDAY" --data-urlencode 'pain=1' --data-urlencode 'temperature=36.8' $BASE/api/log)
 show $D/m1 "$S"
-hdr "m2. GET /today: today's checklist carries the flag from that log"
+check "m1a yesterday's quiet entry saves" "$(loc $D/m1)" "/log"
+S=$(post $D/cookies-a.txt $D/m1b --data-urlencode "date=$DATE" --data-urlencode 'pain=8' --data-urlencode 'temperature=38.2' $BASE/api/log)
+show $D/m1b "$S"
+check "m1b today's over-limit entry saves" "$(loc $D/m1b)" "/log"
+hdr "m2. GET /today: today's checklist carries the flag from the newest log"
 S=$(get $D/cookies-a.txt $D/m2 $BASE/today)
 echo "  status: $S   banner (expect 1): $(n 'Contact your care team' $D/m2.body)   pain named: $(n 'Pain score 8 out of 10' $D/m2.body)"
+check "m2 the flag is on the Today view" "$(n 'Contact your care team' $D/m2.body)" 1
+check "m2 it names the reading the patient logged" "$(n 'Pain score 8 out of 10' $D/m2.body)" 1
 hdr "m3. GET /log: the flag is in front of the patient there too, and today's entry is prefilled"
 S=$(get $D/cookies-a.txt $D/m3 $BASE/log)
 echo "  status: $S   banner (expect 1): $(n 'Contact your care team' $D/m3.body)"
-echo "  today's pain still selected: $(grep -o 'name="pain" value="3" checked' $D/m3.body | head -1)"
+echo "  today's pain still selected: $(grep -oE '<input[^>]*name="pain"[^>]*checked[^>]*>' $D/m3.body | grep -oE 'value="[0-9]+"' | head -1)"
 echo "  today's temperature still prefilled: $(grep -o 'name="temperature"[^>]*value="[^"]*"' $D/m3.body | head -1)"
-echo "  the older entry is still listed (both dates, expect 2 days): $(n "$SHORT" $D/m3.body)"
+check "m3 the flag is on the log page" "$(n 'Contact your care team' $D/m3.body)" 1
+check "m3 today's pain score is still selected" "$(grep -oE '<input[^>]*name="pain"[^>]*checked[^>]*>' $D/m3.body | grep -oE 'value="[0-9]+"' | head -1)" 'value="8"'
+check "m3 today's temperature is still prefilled" "$(grep -o 'name="temperature"[^>]*value="38.2"' $D/m3.body | head -1)" 'name="temperature" value="38.2"'
+echo "  both dates listed: today $(n "$SHORT" $D/m3.body) + yesterday $(n "$SHORT_YDAY" $D/m3.body)"
+check "m3 the older day is still listed beside today" "$(n "$SHORT_YDAY" $D/m3.body)" 1
 hdr "m4. user A logs today again below both limits: the flag clears"
 S=$(post $D/cookies-a.txt $D/m4 --data-urlencode "date=$DATE" --data-urlencode 'pain=3' --data-urlencode 'temperature=37.6' \
   --data-urlencode 'wound_note=Redness has settled a little' --data-urlencode 'note=Quieter evening' $BASE/api/log)
 show $D/m4 "$S"
 S=$(get $D/cookies-a.txt $D/m4b $BASE/today)
 echo "  banner on /today (expect 0): $(n 'Contact your care team' $D/m4b.body)"
+check "m4 the flag clears on /today after the next log" "$(n 'Contact your care team' $D/m4b.body)" 0
 S=$(get $D/cookies-a.txt $D/m4c $BASE/log)
 echo "  banner on /log   (expect 0): $(n 'Contact your care team' $D/m4c.body)"
+check "m4 the flag clears on /log too" "$(n 'Contact your care team' $D/m4c.body)" 0
 
 echo; echo "=================== STEP n: 'at or over' is the boundary ==================="
 hdr "n1. POST /api/log exactly at both limits (pain 4, temperature 38)"
@@ -515,5 +600,228 @@ S=$(get $D/cookies-a.txt $D/o6 $BASE/today)
 echo "  status: $S   banner (expect 0): $(n 'Contact your care team' $D/o6.body)   tick forms: $(n 'action="/api/tick"' $D/o6.body)"
 hdr "o7. database after the whole run"
 (cd "$SITE_ROOT" && MONGODB_URI="$VERIFY_URI" bun tools/db-count.ts)
+
+echo; echo "=================== STEP p: a mistyped limit is refused, never silently dropped ==================="
+# Item 1 of the safety review: `Number("abc")` used to pass the old range checks
+# (NaN compares false both ways), so a mistyped limit was stored as NaN, read back
+# as "no limit", and the alert the patient believed they had set never fired.
+ITEMC='med:c1medpara0001:08:00'
+carol_plan() { # out extra-field...  — carol's own plan with one extra form field
+  post $D/cookies-c.txt "$1" \
+    --data-urlencode 'surgery_date=2026-09-20' \
+    --data-urlencode 'procedure_label=Knee replacement' \
+    --data-urlencode 'med_count=1' \
+    --data-urlencode 'med_0_id=c1medpara0001' --data-urlencode 'med_0_name=Paracetamol' --data-urlencode 'med_0_dose=1 tablet' --data-urlencode 'med_0_times=1' --data-urlencode 'med_0_time_0=08:00' \
+    --data-urlencode 'wound_count=0' \
+    --data-urlencode 'goal_count=1' --data-urlencode 'goal_0_id=c1goal00001' --data-urlencode 'goal_0_label=Walk to the kitchen' \
+    "${@:2}" \
+    $BASE/api/plan
+}
+hdr "p1. signup user C (carol@example.com) for the limit tests"
+S=$(post $D/cookies-c.txt $D/p1 --data-urlencode 'email=carol@example.com' --data-urlencode 'password=carol password here' $BASE/api/auth/signup)
+show $D/p1 "$S"
+check "p1 carol has an account" "$(loc $D/p1)" "/plan"
+
+hdr "p2. save a plan whose temperature limit is typed with a comma decimal (37,5)"
+S=$(carol_plan $D/p2 --data-urlencode 'pain_threshold=3' --data-urlencode 'temp_threshold=37,5' --data-urlencode 'temp_unit=C')
+show $D/p2 "$S"
+check "p2 the plan saves" "$(loc $D/p2)" "/today"
+S=$(get $D/cookies-c.txt $D/p2b $BASE/plan)
+echo "  temp limit field: $(grep -o 'name="temp_threshold"[^>]*' $D/p2b.body | head -1)"
+check "p2 '37,5' was stored as 37.5" "$(grep -o 'name="temp_threshold" value="37.5"' $D/p2b.body | head -1)" 'name="temp_threshold" value="37.5"'
+
+hdr "p3. log 38 with that 37.5 limit: the alert the patient set actually fires"
+S=$(post $D/cookies-c.txt $D/p3 --data-urlencode "date=$DATE" --data-urlencode 'pain=1' --data-urlencode 'temperature=38' $BASE/api/log)
+show $D/p3 "$S"
+check "p3 the log saves" "$(loc $D/p3)" "/log"
+S=$(get $D/cookies-c.txt $D/p3b $BASE/log)
+check "p3 the banner appears" "$(n 'Contact your care team' $D/p3b.body)" 1
+check "p3 the reading is named" "$(plainn $D/p3b.body 'Temperature 38 °C')" 1
+check "p3 the saved limit is named" "$(plainn $D/p3b.body 'you saved 37.5 °C as your limit.')" 1
+check "p3 no diagnosis or medication wording" "$(na '(you may|possibly|likely|diagnos|suggests|take more|take less|stop taking)' $D/p3b.body)" 0
+
+hdr "p4. a temperature limit that is not a number is refused, with the plain message"
+S=$(carol_plan $D/p4 --data-urlencode 'pain_threshold=3' --data-urlencode 'temp_threshold=abc')
+show $D/p4 "$S"
+check "p4 refused with the temperature error code" "$(loc $D/p4)" "/plan?e=temp_threshold"
+S=$(get $D/cookies-c.txt $D/p4b "$BASE/plan?e=temp_threshold")
+check "p4 the plain message is shown" "$(n 'The temperature to call about has to be a number' $D/p4b.body)" 1
+S=$(get $D/cookies-c.txt $D/p4c $BASE/plan)
+check "p4 the temperature limit the patient already saved is untouched" "$(grep -o 'name="temp_threshold" value="37.5"' $D/p4c.body | head -1)" 'name="temp_threshold" value="37.5"'
+check "p4 and so is the pain limit beside it" "$(grep -o 'name="pain_threshold" value="3"' $D/p4c.body | head -1)" 'name="pain_threshold" value="3"'
+
+hdr "p5. an infinite value (1e999) is refused the same way — NaN never reaches storage"
+S=$(carol_plan $D/p5 --data-urlencode 'pain_threshold=3' --data-urlencode 'temp_threshold=1e999')
+show $D/p5 "$S"
+check "p5 refused with the temperature error code" "$(loc $D/p5)" "/plan?e=temp_threshold"
+
+hdr "p6. the pain limit takes the identical path"
+S=$(carol_plan $D/p6 --data-urlencode 'pain_threshold=abc' --data-urlencode 'temp_threshold=37.5')
+show $D/p6 "$S"
+check "p6 refused with the pain error code" "$(loc $D/p6)" "/plan?e=pain_threshold"
+S=$(get $D/cookies-c.txt $D/p6b "$BASE/plan?e=pain_threshold")
+check "p6 the plain message is shown" "$(n 'The pain score to call about has to be a whole number from 0 to 10' $D/p6b.body)" 1
+S=$(get $D/cookies-c.txt $D/p6c $BASE/plan)
+check "p6 carol's saved limits are still both intact" "$(grep -o 'name="pain_threshold" value="3"' $D/p6c.body | head -1)$(grep -o 'name="temp_threshold" value="37.5"' $D/p6c.body | head -1)" 'name="pain_threshold" value="3"name="temp_threshold" value="37.5"'
+
+hdr "p7. the log's own temperature field takes a comma decimal too"
+S=$(post $D/cookies-c.txt $D/p7 --data-urlencode "date=$DATE" --data-urlencode 'pain=1' --data-urlencode 'temperature=36,9' $BASE/api/log)
+show $D/p7 "$S"
+S=$(get $D/cookies-c.txt $D/p7b $BASE/log)
+check "p7 '36,9' was stored as 36.9" "$(plainn $D/p7b.body '36.9 °C')" 1
+check "p7 and it is below the 37.5 limit, so no banner" "$(n 'Contact your care team' $D/p7b.body)" 0
+
+echo; echo "=================== STEP q: sign-in throttling, and equal-cost answers ==================="
+hdr "q1. signup user D (dave@example.com), the account the throttle test grinds"
+S=$(post $D/cookies-throttle.txt $D/q1 --data-urlencode 'email=dave@example.com' --data-urlencode 'password=dave password here' $BASE/api/auth/signup)
+show $D/q1 "$S"
+check "q1 dave has an account" "$(loc $D/q1)" "/plan"
+rm -f $D/cookies-throttle.txt
+
+# Item 3 of the review: an unknown email used to skip password hashing entirely,
+# so the response time told an attacker whether an email had an account. Both
+# paths must now cost one hash. Three attempts each, summed, so one slow request
+# cannot decide the result.
+timed_login() { # email password -> seconds
+  curl -s -o /dev/null -w '%{time_total}' -X POST "$BASE/api/auth/login" \
+    --data-urlencode "email=$1" --data-urlencode "password=$2"
+}
+hdr "q2. an unknown email must cost about what a wrong password costs"
+UNK_TOTAL=0
+for i in 1 2 3; do
+  T=$(timed_login "ghost$i@example.com" "any old password")
+  UNK_TOTAL=$(awk -v a="$UNK_TOTAL" -v b="$T" 'BEGIN { print a + b }')
+done
+WRONG_TOTAL=0
+for i in 1 2 3; do
+  T=$(timed_login 'bob@example.com' 'definitely the wrong password')
+  WRONG_TOTAL=$(awk -v a="$WRONG_TOTAL" -v b="$T" 'BEGIN { print a + b }')
+done
+echo "  3 unknown-email sign-ins: $(ms "$UNK_TOTAL") ms total"
+echo "  3 wrong-password sign-ins: $(ms "$WRONG_TOTAL") ms total"
+ge "q2 the unknown-email path is doing real hash work" "$(ms "$UNK_TOTAL")" 100
+ratio_ok "q2 the two paths cost about the same" "$(ms "$UNK_TOTAL")" "$(ms "$WRONG_TOTAL")" 3
+
+hdr "q3. six wrong passwords for one account, then the right one"
+for i in 1 2 3 4 5 6; do
+  S=$(post $D/cookies-throttle.txt $D/q3_$i --data-urlencode 'email=dave@example.com' --data-urlencode 'password=not dave password' $BASE/api/auth/login)
+done
+show $D/q3_1 "$S"
+show $D/q3_6 "$S"
+check "q3a a wrong password is refused with the plain code" "$(loc $D/q3_1)" "/login?e=bad"
+check "q3b the sixth wrong password is refused the same way" "$(loc $D/q3_6)" "/login?e=bad"
+S=$(post $D/cookies-throttle.txt $D/q3_end --data-urlencode 'email=dave@example.com' --data-urlencode 'password=dave password here' $BASE/api/auth/login)
+show $D/q3_end "$S"
+check "q3c even the CORRECT password is refused while throttled" "$(loc $D/q3_end)" "/login?e=bad"
+check "q3d the throttled answer is the same code as a wrong password" "$(loc $D/q3_end)" "$(loc $D/q3_1)"
+check "q3e no session cookie is handed out while throttled" "$(grep -c 'rw_session' $D/cookies-throttle.txt)" 0
+S=$(get $D/cookies-throttle.txt $D/q3_page "$BASE/login?e=bad")
+check "q3f the page shows the one plain message" "$(n 'Email or password is incorrect.' $D/q3_page.body)" 1
+check "q3g and never says which it was" "$(na '(too many|slow down|try again later|throttl|locked out|rate limit)' $D/q3_page.body)" 0
+
+hdr "q4. the wait is a backoff, not a permanent lockout"
+sleep 2
+S=$(post $D/cookies-throttle.txt $D/q4 --data-urlencode 'email=dave@example.com' --data-urlencode 'password=dave password here' $BASE/api/auth/login)
+show $D/q4 "$S"
+check "q4 after the wait the correct password works again" "$(loc $D/q4)" "/today"
+check "q4 and a session is handed out" "$(grep -c 'rw_session' $D/cookies-throttle.txt)" 1
+
+hdr "q5. sign-up is limited too (lighter: it guards bulk account creation)"
+for i in 1 2 3 4 5 6; do
+  S=$(post $D/cookies-mass.txt $D/q5_$i --data-urlencode 'email=mass1@example.com' --data-urlencode 'password=short' $BASE/api/auth/signup)
+done
+show $D/q5_1 "$S"
+check "q5a a short password is refused with its own plain code" "$(loc $D/q5_1)" "/signup?e=password"
+S=$(post $D/cookies-mass.txt $D/q5_end --data-urlencode 'email=mass1@example.com' --data-urlencode 'password=a perfectly fine password' $BASE/api/auth/signup)
+show $D/q5_end "$S"
+check "q5b the next attempt is slowed, even with a good password" "$(loc $D/q5_end)" "/signup?e=slow"
+check "q5c and no account was created" "$(grep -c 'rw_session' $D/cookies-mass.txt)" 0
+S=$(get $D/cookies-mass.txt $D/q5_page "$BASE/signup?e=slow")
+check "q5d the sign-up message is plain and says nothing about accounts" "$(n 'Too many sign-up attempts just now.' $D/q5_page.body)" 1
+
+echo; echo "=================== STEP r: the request-body cap (content-length is only a hint) ==================="
+{
+  printf 'date=%s&pain=2&note=' "$DATE"
+  head -c 150000 /dev/zero | tr '\0' 'a'
+} > $D/big.txt
+echo "  oversized body: $(wc -c < $D/big.txt) bytes (cap is 100000)"
+hdr "r1. POST /api/log with a 150 kB body and a content-length header"
+S=$(post $D/cookies-a.txt $D/r1 --data-binary @$D/big.txt $BASE/api/log)
+show $D/r1 "$S"
+check "r1 refused cleanly, not a crash" "$(loc $D/r1)" "/log?e=problem"
+check "r1 the response is a 303, not a 5xx" "$S" 303
+hdr "r2. the same body sent chunked (no content-length at all)"
+S=$(post $D/cookies-a.txt $D/r2 -H 'Transfer-Encoding: chunked' --data-binary @$D/big.txt $BASE/api/log)
+show $D/r2 "$S"
+check "r2 refused cleanly" "$(loc $D/r2)" "/log?e=problem"
+check "r2 the response is a 303, not a 5xx" "$S" 303
+hdr "r3. a small chunked post is still accepted (the cap is a size limit, not a ban)"
+S=$(post $D/cookies-a.txt $D/r3 -H 'Transfer-Encoding: chunked' --data-urlencode "date=$DATE" --data-urlencode 'pain=3' --data-urlencode 'temperature=37.2' $BASE/api/log)
+show $D/r3 "$S"
+check "r3 a small chunked post is accepted" "$(loc $D/r3)" "/log"
+hdr "r4. the oversized posts changed nothing that was already saved"
+S=$(get $D/cookies-a.txt $D/r4 $BASE/log)
+check "r4 today's entry still holds the small post's value" "$(plainn $D/r4.body 'Pain 3 out of 10')" 1
+check "r4 the oversized body's value was never stored" "$(plainn $D/r4.body 'Pain 2 out of 10')" 0
+
+echo; echo "=================== STEP s: a tick may only name the patient's own day ==================="
+# Item 6 of the review: /api/tick used to accept any well-formed date, so a crafted
+# request could write ticks on arbitrary past or future days of the user's account.
+hdr "s1. user C ticks item $ITEMC for $FUTURE3 (three days ahead)"
+S=$(post $D/cookies-c.txt $D/s1 --data-urlencode "item=$ITEMC" --data-urlencode "date=$FUTURE3" --data-urlencode 'done=1' $BASE/api/tick)
+show $D/s1 "$S"
+check "s1 a tick three days ahead is refused" "$(loc $D/s1)" "/today?e=problem"
+hdr "s2. user C ticks it for $PAST5 (five days back)"
+S=$(post $D/cookies-c.txt $D/s2 --data-urlencode "item=$ITEMC" --data-urlencode "date=$PAST5" --data-urlencode 'done=1' $BASE/api/tick)
+show $D/s2 "$S"
+check "s2 a tick five days back is refused" "$(loc $D/s2)" "/today?e=problem"
+hdr "s3. the neighbouring day ($YDAY) is still allowed — that is the time-zone window"
+S=$(post $D/cookies-c.txt $D/s3 --data-urlencode "item=$ITEMC" --data-urlencode "date=$YDAY" --data-urlencode 'done=1' $BASE/api/tick)
+show $D/s3 "$S"
+check "s3 yesterday is accepted" "$(loc $D/s3)" "/today"
+hdr "s4. today still works, and shows up on the checklist"
+S=$(post $D/cookies-c.txt $D/s4 --data-urlencode "item=$ITEMC" --data-urlencode "date=$DATE" --data-urlencode 'done=1' $BASE/api/tick)
+show $D/s4 "$S"
+check "s4 today is accepted" "$(loc $D/s4)" "/today"
+S=$(get $D/cookies-c.txt $D/s4b $BASE/today)
+check "s4 the ticked item is marked done on today's checklist" "$(n 'aria-pressed="true"' $D/s4b.body)" 1
+
+echo; echo "=================== STEP t: index setup is logged once, not retried, never fatal ==================="
+(cd "$SITE_ROOT" && MONGODB_URI="$VERIFY_URI" bun tools/db-count.ts) | tee $D/dbcount.txt
+if [ "$SEEDED" = "1" ]; then
+  check "t1 the index failure was reported exactly once for the whole run" "$(grep -c 'could not build indexes' $D/app.log)" 1
+else
+  echo "  (index failure check skipped: step 0 could not seed the throwaway database)"
+fi
+check "t2 the unique key that keeps one log per user per day was still built" "$(na '\{"userId":1,"date":1\} unique' $D/dbcount.txt)" 1
+check "t3 no request in this run answered 5xx" "$(grep -lE '^HTTP/[0-9.]+ 5' $D/*.hdr 2>/dev/null | wc -l | tr -d ' ')" 0
+
+echo; echo "=================== STEP u: page hardening and tap targets ==================="
+hdr "u1. every page carries a strict Content-Security-Policy"
+S=$(get $D/cookies-a.txt $D/u1 $BASE/today)
+check "u1 the Today view carries the policy" "$(na '<meta http-equiv="Content-Security-Policy"' $D/u1.body)" 1
+check "u1 it pins resources to this origin" "$(na 'default-src &#x27;self&#x27;' $D/u1.body)" 1
+check "u1 it forbids plugins" "$(na 'object-src &#x27;none&#x27;' $D/u1.body)" 1
+check "u1 it forbids a posted form going elsewhere" "$(na 'form-action &#x27;self&#x27;' $D/u1.body)" 1
+check "u1 it does not allow unsafe-eval" "$(na 'unsafe-eval' $D/u1.body)" 0
+check "u1 the stylesheet link is still there" "$(na 'rel="stylesheet"' $D/u1.body)" 1
+ge "u1 the tick checklist is still rendered under it" "$(na 'action="/api/tick"' $D/u1.body)" 1
+hdr "u2. the pain scale is five per row, so every cell clears 44 px on a 320 px phone"
+S=$(get $D/cookies-a.txt $D/u2 $BASE/log)
+check "u2 the pain scale is a five-column grid" "$(na 'grid grid-cols-5 gap-2' $D/u2.body)" 1
+check "u2 no six-column grid is left" "$(na 'grid-cols-6' $D/u2.body)" 0
+check "u2 all eleven scores are still offered" "$(na 'name="pain"' $D/u2.body)" 11
+hdr "u3. the header wraps rather than overflowing at 320 px"
+check "u3 the header row may wrap" "$(na 'flex max-w-2xl flex-wrap items-center justify-between' $D/u2.body)" 1
+check "u3 the nav may wrap too" "$(na 'flex flex-wrap items-center justify-end gap-1' $D/u2.body)" 1
+ge "u3 the nav still links to the three pages" "$(na 'href="/(today|log|plan)"' $D/u2.body)" 3
+
+echo; echo "=================== summary ==================="
+echo "  assertions: $PASSED passed, $FAILED failed"
+if [ "$FAILED" != "0" ]; then
+  echo "  FAILURES above — this run does NOT prove the fixes"
+  exit 1
+fi
+echo "  every check passed"
 
 echo; echo "=================== done ==================="

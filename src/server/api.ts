@@ -1,11 +1,11 @@
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 
-import { isDateValue, utcToday } from "~/lib/dates";
 import type { LogEntry } from "~/lib/logs";
 import { buildDaySections, buildDayItems, type DaySection, type Plan } from "~/lib/plan";
 import { DbNotConfiguredError, isDbConfigured } from "~/mongo.server";
+import { localDateFor } from "~/server/local-day.server";
 import { serverRequest } from "~/server/request.server";
-import { readCookie, sessionUser, type SessionUser } from "~/server/session.server";
+import { sessionUser, type SessionUser } from "~/server/session.server";
 import {
   getCompletions,
   getLatestLog,
@@ -87,16 +87,7 @@ const currentUser = createServerOnlyFn(async (): Promise<SessionUser | null> => 
 
 /** "Today" in the patient's own time zone when the browser has told us (cookie),
  * else the server's UTC date. The cookie holds a date, never health data. */
-const todayForRequest = createServerOnlyFn((request: Request): string => {
-  const fromCookie = readCookie(request, "rw_local_date");
-  const server = utcToday();
-  if (!fromCookie || !isDateValue(fromCookie)) return server;
-  const drift = Math.abs(
-    new Date(`${fromCookie}T00:00:00Z`).getTime() - new Date(`${server}T00:00:00Z`).getTime(),
-  );
-  // Same day or neighbouring day only: ignore a stale or nonsense cookie.
-  return drift <= 24 * 60 * 60 * 1000 ? fromCookie : server;
-});
+const todayForRequest = createServerOnlyFn((request: Request): string => localDateFor(request));
 
 const signedOutState = createServerOnlyFn(
   (): SessionState => ({

@@ -45,15 +45,26 @@ const timesFor = (form: FormData, name: string, howMany: number): string[] => {
   return [...new Set(values)].slice(0, MAX_TIMES);
 };
 
-/** A blank field is `null` (the patient didn't give a number); text that isn't a
- * number is `NaN`, which the caller turns into a plain error message. */
-const optionalNumber = (form: FormData, name: string): number | null => {
+/** A blank field means "the patient gave no number for this"; anything else that
+ * is not a number is refused, never dropped. */
+type NumberField = { ok: true; value: number | null } | { ok: false };
+
+/**
+ * Read one number the patient typed.
+ *
+ * A comma decimal separator is taken as a decimal point ("37,5" -> 37.5) because
+ * that is what a phone keypad in much of the world gives you. Anything still not
+ * a finite number is refused — a mistyped limit must never be stored as "no
+ * limit", which would silently look like an alert that was never set.
+ */
+const optionalNumber = (form: FormData, name: string): NumberField => {
   const raw = form.get(name);
-  if (typeof raw !== "string") return null;
-  const text = raw.trim();
-  if (text.length === 0) return null;
+  if (typeof raw !== "string") return { ok: true, value: null };
+  const text = raw.trim().replace(",", ".");
+  if (text.length === 0) return { ok: true, value: null };
   const value = Number(text);
-  return Number.isFinite(value) ? value : NaN;
+  if (!Number.isFinite(value)) return { ok: false };
+  return { ok: true, value };
 };
 
 /**
@@ -62,12 +73,16 @@ const optionalNumber = (form: FormData, name: string): number | null => {
  * the app never raises an alert for that value.
  */
 const parseCareTeam = (form: FormData): CareTeam | "pain_threshold" | "temp_threshold" => {
-  const pain = optionalNumber(form, "pain_threshold");
+  const painField = optionalNumber(form, "pain_threshold");
+  if (!painField.ok) return "pain_threshold";
+  const pain = painField.value;
   if (pain !== null && (!Number.isInteger(pain) || pain < 0 || pain > 10)) {
     return "pain_threshold";
   }
 
-  const temp = optionalNumber(form, "temp_threshold");
+  const tempField = optionalNumber(form, "temp_threshold");
+  if (!tempField.ok) return "temp_threshold";
+  const temp = tempField.value;
   if (temp !== null && (temp <= 0 || temp > 200)) return "temp_threshold";
 
   const unit: TempUnit = form.get("temp_unit") === "F" ? "F" : "C";

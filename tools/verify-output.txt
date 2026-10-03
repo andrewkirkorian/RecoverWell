@@ -1,3 +1,7 @@
+=================== STEP 0: make index setup fail, before the app's first request ===================
+tools/verify.sh: line 35: hdr: command not found
+seeded 2 users documents sharing one email (duplicate keys on purpose)
+  the landing page was served anyway: status 200 (indexes were failing underneath it)
 =================== environment ===================
 app under test : http://127.0.0.1:3100 (throwaway second instance of dist/server)
 database       : mongodb://127.0.0.1:27018/recoverwell_verify (throwaway local mongod 7.0.14)
@@ -8,9 +12,9 @@ server UTC date: 2026-10-03
 
 ### a1. POST /api/auth/signup  (alice@example.com)
   status: 303
-    set-cookie: rw_session=MN7CfOfvHiQfJpAnTshIBM5SnTRoOwwSHBwmL7JKHsA; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=TpluPRtpBUUmCnTj-FoxdVaGUfPHS7qXpAjjxlDKTO0; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
-    cookie jar: rw_session	MN7CfOfvHiQfJpAnTshIBM5SnTRoOwwSHBwmL7JKHsA
+    cookie jar: rw_session	TpluPRtpBUUmCnTj-FoxdVaGUfPHS7qXpAjjxlDKTO0
 
 ### a2. GET /plan with that cookie
   status: 200  |  plan form present: 1  |  'Signed in as '
@@ -115,7 +119,7 @@ server UTC date: 2026-10-03
 
 ### e4. POST /api/auth/login (correct password)
   status: 303
-    set-cookie: rw_session=JIAnUy0EazbSKnSR4hS3SP50l-DkHzqFhg-sBAPuCcI; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=x2YltpSw65ZS60_7XO3wso1Q3qXqQPtdc5k-tqjBWi0; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /today
 
 ### e5. GET /today after logging back in
@@ -178,7 +182,7 @@ server UTC date: 2026-10-03
 
 ### g1. signup user B (bob@example.com)
   status: 303
-    set-cookie: rw_session=0SSb-ZTI5yhO49pYglvVSxLwJw3tY50FZZPiuz5Rt14; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=BaVeF2fhI89Mu6XFHh1r1IVn_BbFoUwgq-A30Qt6rjg; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
 
 ### g2. user B saves a different plan
@@ -254,7 +258,8 @@ server UTC date: 2026-10-03
   status: 200
   'Contact your care team' present (expect 0): 0
   'contact your care team' present (expect 0): 1
-  pain read back      : (not found: Pain 2 out of 10)
+  pain read back      : 1 occurrence(s) of 'Pain 2 out of 10'
+  PASS i3 the day's pain score reads back (1)
   temperature read back:  · 37.1 °C
   wound note read back : 5
   general note read back: 5
@@ -290,7 +295,7 @@ server UTC date: 2026-10-03
 ### j3. GET /today: the same flag, above the checklist
   status: 200
   banner heading (expect 1): 1
-  banner byte offset 1601 vs checklist heading 2440 (banner is above when smaller)
+  banner byte offset 2018 vs checklist heading 2857 (banner is above when smaller)
   checklist untouched: 6 tick forms, progress 'Pain score 7 out of 10'
   phone shown here too: 2
 
@@ -303,20 +308,24 @@ server UTC date: 2026-10-03
 ### k2. GET /log: one entry for the day, holding the new values
   status: 200
   entries dated 'Oct 3, 2026' in 'your last few days' (expect 1): 1
-  new values shown  : (not found: Pain 3 out of 10)  /   · 37.4 °C
+  new values shown  : 1 occurrence(s) of 'Pain 3 out of 10'  /   · 37.4 °C
+  PASS k2 the re-saved day shows the new pain score (1)
+  PASS k2 the old pain score is gone (0)
   old values gone   : 'Pain 7 out of 10'=0  old wound text=0 (expect 0 / 0)
+  PASS k2 the old wound note is gone (0)
+  PASS k2 one entry for the day, in 'your last few days' (1)
   banner cleared by the lower log (expect 0): 0
 
 ### k3. GET /today: banner cleared there too
   status: 200   banner (expect 0): 0   tick forms: 6
 
 ### k4. database: one log document per user per day, under a unique key
-  users: 2 document(s)
+  users: 4 document(s)
   plans: 2 document(s)
   completions: 3 document(s)
   sessions: 2 document(s)
   logs: 1 document(s)
-  logs for user 6ac11e82…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac123d8…: 2026-10-03  (days logged: 1, duplicate days: 0)
   logs indexes: {"_id":1}, {"userId":1,"date":1} unique
 
 =================== STEP l: what user B can and cannot reach ===================
@@ -332,12 +341,15 @@ server UTC date: 2026-10-03
 ### l2. user B saved NO limits: logging a high value raises no banner, ever
   status: 303
     Location: /log
-  B's own values read back: (not found: Pain 10 out of 10)  /   · 39.5 °C
+  B's own values read back: 1 occurrence(s) of 'Pain 10 out of 10'  /   · 39.5 °C
+  PASS l2 B's own extreme values read back to B (1)
   banner on B's log page (expect 0): 0
   banner on B's today    (expect 0): 0
 
 ### l3. user B's log did not disturb user A's day
-  A's entry still A's: (not found: Pain 3 out of 10)   B's note in A's page (expect 0): 0
+  A's entry still A's: 1 occurrence(s) of 'Pain 3 out of 10'   B's note in A's page (expect 0): 0
+  PASS l3 A's own entry is still A's (1)
+  PASS l3 B's note never reaches A's page (0)
 
 ### l4. POST /api/log with no cookie / with a forged cookie
   status: 303
@@ -350,28 +362,41 @@ server UTC date: 2026-10-03
     Location: /log?e=pain
   status: 303
     Location: /log?e=temperature
-  A's saved values after the refused posts (expect the pain 3 entry): (not found: Pain 3 out of 10)
+  A's saved values after the refused posts (expect the pain 3 entry): 1 occurrence(s)
+  PASS l5 A's saved entry survives two refused log posts (1)
 
 =================== STEP m: the flag stays until the next log ===================
 
-### m1. user A logs a high value on a different date (2026-10-02)
+### m1. user A logs a quiet day for yesterday (2026-10-02), then a high value for today
   status: 303
     Location: /log
+  PASS m1a yesterday's quiet entry saves (/log)
+  status: 303
+    Location: /log
+  PASS m1b today's over-limit entry saves (/log)
 
-### m2. GET /today: today's checklist carries the flag from that log
-  status: 200   banner (expect 1): 0   pain named: 0
+### m2. GET /today: today's checklist carries the flag from the newest log
+  status: 200   banner (expect 1): 1   pain named: 1
+  PASS m2 the flag is on the Today view (1)
+  PASS m2 it names the reading the patient logged (1)
 
 ### m3. GET /log: the flag is in front of the patient there too, and today's entry is prefilled
-  status: 200   banner (expect 1): 0
-  today's pain still selected: 
-  today's temperature still prefilled: name="temperature" value="37.4"
-  the older entry is still listed (both dates, expect 2 days): 1
+  status: 200   banner (expect 1): 1
+  today's pain still selected: value="8"
+  today's temperature still prefilled: name="temperature" value="38.2"
+  PASS m3 the flag is on the log page (1)
+  PASS m3 today's pain score is still selected (value="8")
+  PASS m3 today's temperature is still prefilled (name="temperature" value="38.2")
+  both dates listed: today 2 + yesterday 1
+  PASS m3 the older day is still listed beside today (1)
 
 ### m4. user A logs today again below both limits: the flag clears
   status: 303
     Location: /log
   banner on /today (expect 0): 0
+  PASS m4 the flag clears on /today after the next log (0)
   banner on /log   (expect 0): 0
+  PASS m4 the flag clears on /log too (0)
 
 =================== STEP n: 'at or over' is the boundary ===================
 
@@ -415,13 +440,195 @@ server UTC date: 2026-10-03
   status: 200   banner (expect 0): 0   tick forms: 3
 
 ### o7. database after the whole run
-  users: 2 document(s)
+  users: 4 document(s)
   plans: 2 document(s)
   completions: 3 document(s)
   sessions: 2 document(s)
   logs: 3 document(s)
-  logs for user 6ac11e82…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
-  logs for user 6ac11e83…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac123d8…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
+  logs for user 6ac123d9…: 2026-10-03  (days logged: 1, duplicate days: 0)
   logs indexes: {"_id":1}, {"userId":1,"date":1} unique
+
+=================== STEP p: a mistyped limit is refused, never silently dropped ===================
+
+### p1. signup user C (carol@example.com) for the limit tests
+  status: 303
+    set-cookie: rw_session=aYXQPkI6QFo-jR3N2A-ZM-27DJbtVWRydkgl6ZANIWo; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    Location: /plan
+  PASS p1 carol has an account (/plan)
+
+### p2. save a plan whose temperature limit is typed with a comma decimal (37,5)
+  status: 303
+    Location: /today
+  PASS p2 the plan saves (/today)
+  temp limit field: name="temp_threshold" value="37.5"/
+  PASS p2 '37,5' was stored as 37.5 (name="temp_threshold" value="37.5")
+
+### p3. log 38 with that 37.5 limit: the alert the patient set actually fires
+  status: 303
+    Location: /log
+  PASS p3 the log saves (/log)
+  PASS p3 the banner appears (1)
+  PASS p3 the reading is named (1)
+  PASS p3 the saved limit is named (1)
+  PASS p3 no diagnosis or medication wording (0)
+
+### p4. a temperature limit that is not a number is refused, with the plain message
+  status: 303
+    Location: /plan?e=temp_threshold
+  PASS p4 refused with the temperature error code (/plan?e=temp_threshold)
+  PASS p4 the plain message is shown (1)
+  PASS p4 the temperature limit the patient already saved is untouched (name="temp_threshold" value="37.5")
+  PASS p4 and so is the pain limit beside it (name="pain_threshold" value="3")
+
+### p5. an infinite value (1e999) is refused the same way — NaN never reaches storage
+  status: 303
+    Location: /plan?e=temp_threshold
+  PASS p5 refused with the temperature error code (/plan?e=temp_threshold)
+
+### p6. the pain limit takes the identical path
+  status: 303
+    Location: /plan?e=pain_threshold
+  PASS p6 refused with the pain error code (/plan?e=pain_threshold)
+  PASS p6 the plain message is shown (1)
+  PASS p6 carol's saved limits are still both intact (name="pain_threshold" value="3"name="temp_threshold" value="37.5")
+
+### p7. the log's own temperature field takes a comma decimal too
+  status: 303
+    Location: /log
+  PASS p7 '36,9' was stored as 36.9 (1)
+  PASS p7 and it is below the 37.5 limit, so no banner (0)
+
+=================== STEP q: sign-in throttling, and equal-cost answers ===================
+
+### q1. signup user D (dave@example.com), the account the throttle test grinds
+  status: 303
+    set-cookie: rw_session=yngV6W-09aqqsGD076v5PeyTcWSh_HSLQqDx5Cmnl-c; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    Location: /plan
+  PASS q1 dave has an account (/plan)
+
+### q2. an unknown email must cost about what a wrong password costs
+  3 unknown-email sign-ins: 101 ms total
+  3 wrong-password sign-ins: 110 ms total
+  PASS q2 the unknown-email path is doing real hash work (101 >= 100)
+  PASS q2 the two paths cost about the same (101ms vs 110ms, within 3x)
+
+### q3. six wrong passwords for one account, then the right one
+  status: 303
+    Location: /login?e=bad
+  status: 303
+    Location: /login?e=bad
+  PASS q3a a wrong password is refused with the plain code (/login?e=bad)
+  PASS q3b the sixth wrong password is refused the same way (/login?e=bad)
+  status: 303
+    Location: /login?e=bad
+  PASS q3c even the CORRECT password is refused while throttled (/login?e=bad)
+  PASS q3d the throttled answer is the same code as a wrong password (/login?e=bad)
+  PASS q3e no session cookie is handed out while throttled (0)
+  PASS q3f the page shows the one plain message (1)
+  PASS q3g and never says which it was (0)
+
+### q4. the wait is a backoff, not a permanent lockout
+  status: 303
+    set-cookie: rw_session=wsFd-c52AbT8uLqgJgnEspghssLNtvCJBzWefF-vbKs; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    Location: /today
+  PASS q4 after the wait the correct password works again (/today)
+  PASS q4 and a session is handed out (1)
+
+### q5. sign-up is limited too (lighter: it guards bulk account creation)
+  status: 303
+    Location: /signup?e=password
+  PASS q5a a short password is refused with its own plain code (/signup?e=password)
+  status: 303
+    Location: /signup?e=slow
+  PASS q5b the next attempt is slowed, even with a good password (/signup?e=slow)
+  PASS q5c and no account was created (0)
+  PASS q5d the sign-up message is plain and says nothing about accounts (1)
+
+=================== STEP r: the request-body cap (content-length is only a hint) ===================
+  oversized body: 150028 bytes (cap is 100000)
+
+### r1. POST /api/log with a 150 kB body and a content-length header
+  status: 303
+    Location: /log?e=problem
+  PASS r1 refused cleanly, not a crash (/log?e=problem)
+  PASS r1 the response is a 303, not a 5xx (303)
+
+### r2. the same body sent chunked (no content-length at all)
+  status: 303
+    Location: /log?e=problem
+  PASS r2 refused cleanly (/log?e=problem)
+  PASS r2 the response is a 303, not a 5xx (303)
+
+### r3. a small chunked post is still accepted (the cap is a size limit, not a ban)
+  status: 303
+    Location: /log
+  PASS r3 a small chunked post is accepted (/log)
+
+### r4. the oversized posts changed nothing that was already saved
+  PASS r4 today's entry still holds the small post's value (1)
+  PASS r4 the oversized body's value was never stored (0)
+
+=================== STEP s: a tick may only name the patient's own day ===================
+
+### s1. user C ticks item med:c1medpara0001:08:00 for 2026-10-06 (three days ahead)
+  status: 303
+    Location: /today?e=problem
+  PASS s1 a tick three days ahead is refused (/today?e=problem)
+
+### s2. user C ticks it for 2026-09-28 (five days back)
+  status: 303
+    Location: /today?e=problem
+  PASS s2 a tick five days back is refused (/today?e=problem)
+
+### s3. the neighbouring day (2026-10-02) is still allowed — that is the time-zone window
+  status: 303
+    Location: /today
+  PASS s3 yesterday is accepted (/today)
+
+### s4. today still works, and shows up on the checklist
+  status: 303
+    Location: /today
+  PASS s4 today is accepted (/today)
+  PASS s4 the ticked item is marked done on today's checklist (1)
+
+=================== STEP t: index setup is logged once, not retried, never fatal ===================
+  users: 6 document(s)
+  plans: 3 document(s)
+  completions: 5 document(s)
+  sessions: 5 document(s)
+  logs: 4 document(s)
+  logs for user 6ac123d8…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
+  logs for user 6ac123d9…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac123db…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs indexes: {"_id":1}, {"userId":1,"date":1} unique
+  PASS t1 the index failure was reported exactly once for the whole run (1)
+  PASS t2 the unique key that keeps one log per user per day was still built (1)
+  PASS t3 no request in this run answered 5xx (0)
+
+=================== STEP u: page hardening and tap targets ===================
+
+### u1. every page carries a strict Content-Security-Policy
+  PASS u1 the Today view carries the policy (1)
+  PASS u1 it pins resources to this origin (1)
+  PASS u1 it forbids plugins (1)
+  PASS u1 it forbids a posted form going elsewhere (1)
+  PASS u1 it does not allow unsafe-eval (0)
+  PASS u1 the stylesheet link is still there (1)
+  PASS u1 the tick checklist is still rendered under it (3 >= 1)
+
+### u2. the pain scale is five per row, so every cell clears 44 px on a 320 px phone
+  PASS u2 the pain scale is a five-column grid (1)
+  PASS u2 no six-column grid is left (0)
+  PASS u2 all eleven scores are still offered (11)
+
+### u3. the header wraps rather than overflowing at 320 px
+  PASS u3 the header row may wrap (1)
+  PASS u3 the nav may wrap too (1)
+  PASS u3 the nav still links to the three pages (5 >= 3)
+
+=================== summary ===================
+  assertions: 81 passed, 0 failed
+  every check passed
 
 =================== done ===================
