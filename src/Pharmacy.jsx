@@ -1,281 +1,226 @@
 import { useEffect, useState } from 'react';
-
-const rxNormSearchUrl = 'https://rxnav.nlm.nih.gov/REST/approximateTerm.json';
+import DualAvailabilityGuide from './DualAvailabilityGuide';
+import { dualAvailabilityById } from './dualAvailabilityMedications';
+import { availabilityOrder, formulary, searchFormulary } from './medicationFormulary';
+import { strengthOptions } from './medicationStrengths';
+import { screenMedications } from './medicationInteractions';
+import { searchRxNorm } from './rxnormSearch';
 
 const initialMedications = [
   {
     id: 'apixaban',
     name: 'Apixaban',
-    detail: '5 mg · oral · twice daily',
+    detail: 'Oral',
+    dose: '5 mg',
+    frequency: 'Twice daily',
     category: 'Prescription',
     purpose: 'Anticoagulant',
   },
   {
     id: 'ibuprofen',
+    ingredientId: 'ibuprofen',
     name: 'Ibuprofen',
-    detail: '400 mg · oral · every 6 hours as needed',
+    detail: 'Oral',
+    dose: '400 mg',
+    frequency: 'Every 6 hours as needed',
     category: 'Over the counter',
     purpose: 'Pain and inflammation',
   },
   {
     id: 'lisinopril',
     name: 'Lisinopril',
-    detail: '10 mg · oral · once daily',
+    detail: 'Oral',
+    dose: '10 mg',
+    frequency: 'Once daily',
     category: 'Prescription',
     purpose: 'Blood pressure',
   },
   {
     id: 'acetaminophen',
     name: 'Acetaminophen',
-    detail: '650 mg · oral · every 6 hours as needed',
+    detail: 'Oral',
+    dose: '650 mg',
+    frequency: 'Every 6 hours as needed',
     category: 'Over the counter',
     purpose: 'Pain relief',
   },
 ];
 
-function getRxNormSuggestions(payload) {
-  const approximateGroup = payload?.approximateGroup;
-  if (!approximateGroup || typeof approximateGroup !== 'object') {
-    throw new Error('RxNorm returned an unexpected response. Please try again.');
-  }
+const otherDose = '__other__';
 
-  const candidates = approximateGroup.candidate;
-  if (candidates == null) return [];
-  if (!Array.isArray(candidates)) {
-    throw new Error('RxNorm returned an unexpected response. Please try again.');
-  }
+function DoseField({ medication, onChange }) {
+  const options = strengthOptions(medication);
+  const dose = medication.dose ?? '';
+  const [otherMode, setOtherMode] = useState(false);
+  const isOther = options.length === 0 || otherMode || (dose !== '' && !options.includes(dose));
 
-  const seenRxcuis = new Set();
-  return candidates
-    .filter((candidate) => candidate.source === 'RXNORM' && candidate.name && candidate.rxcui)
-    .filter((candidate) => {
-      if (seenRxcuis.has(candidate.rxcui)) return false;
-      seenRxcuis.add(candidate.rxcui);
-      return true;
-    })
-    .slice(0, 15)
-    .map((candidate) => ({
-      id: `rxnorm-${candidate.rxcui}`,
-      rxcui: candidate.rxcui,
-      name: candidate.name,
-      category: 'RxNorm result',
-      purpose: 'Confirm the exact medicine and formulation with a pharmacist.',
-    }));
+  return (
+    <>
+      {options.length > 0 && (
+        <label>
+          <span>Dose</span>
+          <select
+            value={isOther ? otherDose : dose}
+            aria-label={`Dose for ${medication.name}`}
+            onChange={(event) => {
+              if (event.target.value === otherDose) {
+                setOtherMode(true);
+                onChange('');
+              } else {
+                setOtherMode(false);
+                onChange(event.target.value);
+              }
+            }}
+          >
+            <option value="">Select a dose</option>
+            {options.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+            <option value={otherDose}>Other (type it in)</option>
+          </select>
+        </label>
+      )}
+      {isOther && (
+        <label>
+          <span>{options.length > 0 ? 'Other dose' : 'Dose'}</span>
+          <input
+            type="text"
+            maxLength={60}
+            placeholder="e.g. 5 mg"
+            value={dose}
+            onChange={(event) => onChange(event.target.value)}
+            aria-label={options.length > 0 ? `Other dose for ${medication.name}` : `Dose for ${medication.name}`}
+          />
+        </label>
+      )}
+    </>
+  );
 }
 
-const interactionRules = [
-  {
-    medications: ['apixaban', 'ibuprofen'],
-    sourceDrug: 'apixaban',
-    level: 'High',
-    title: 'Bleeding risk',
-    description:
-      'Ibuprofen may increase bleeding risk when taken with apixaban. Confirm this combination with the prescribing clinician or pharmacist.',
-  },
-  {
-    medications: ['apixaban', 'aspirin'],
-    sourceDrug: 'apixaban',
-    level: 'High',
-    title: 'Bleeding risk',
-    description:
-      'Aspirin may add to apixaban’s blood-thinning effect and increase bleeding risk. Confirm the combination with the care team.',
-  },
-  {
-    medications: ['warfarin', 'ibuprofen'],
-    sourceDrug: 'warfarin',
-    level: 'High',
-    title: 'Bleeding risk',
-    description:
-      'Ibuprofen can increase bleeding risk with warfarin. Ask the prescriber or pharmacist before using them together.',
-  },
-  {
-    medications: ['warfarin', 'trimethoprim-sulfamethoxazole'],
-    sourceDrug: 'warfarin',
-    level: 'High',
-    title: 'Warfarin effect may increase',
-    description:
-      'This antibiotic can raise warfarin effect and bleeding risk. Prompt prescriber review and INR monitoring may be needed.',
-  },
-  {
-    medications: ['warfarin', 'fluconazole'],
-    sourceDrug: 'warfarin',
-    level: 'High',
-    title: 'Warfarin effect may increase',
-    description:
-      'Fluconazole may raise warfarin effect and bleeding risk. Confirm with the care team; INR monitoring may be needed.',
-  },
-  {
-    medications: ['lisinopril', 'ibuprofen'],
-    sourceDrug: 'lisinopril',
-    level: 'Moderate',
-    title: 'Kidney function and blood pressure',
-    description:
-      'Ibuprofen can affect kidney function and blood pressure when combined with lisinopril. The risk may be higher with dehydration or kidney disease.',
-  },
-  {
-    medications: ['lisinopril', 'potassium-chloride'],
-    sourceDrug: 'lisinopril',
-    level: 'Moderate',
-    title: 'High potassium',
-    description:
-      'Lisinopril and potassium supplements together may raise blood potassium. Confirm the combination and any monitoring plan with the care team.',
-  },
-  {
-    medications: ['lisinopril', 'spironolactone'],
-    sourceDrug: 'lisinopril',
-    level: 'High',
-    title: 'High potassium',
-    description:
-      'Both medicines can raise blood potassium. The combination may be prescribed, but requires clinician review and appropriate monitoring.',
-  },
-  {
-    medications: ['sertraline', 'tramadol'],
-    sourceDrug: 'sertraline',
-    level: 'High',
-    title: 'Serotonin and seizure risks',
-    description:
-      'Taking tramadol with sertraline may increase the risk of serotonin syndrome and seizures. Contact the prescriber or pharmacist for review.',
-  },
-  {
-    medications: ['sertraline', 'ibuprofen'],
-    sourceDrug: 'sertraline',
-    level: 'Moderate',
-    title: 'Bleeding risk',
-    description:
-      'Combining an SSRI such as sertraline with an NSAID such as ibuprofen may increase bleeding risk.',
-  },
-  {
-    medications: ['oxycodone', 'lorazepam'],
-    sourceDrug: 'oxycodone',
-    level: 'High',
-    title: 'Excess sedation and breathing risk',
-    description:
-      'Combining an opioid with lorazepam can cause dangerous sedation and slowed breathing. Use together only under explicit prescriber direction.',
-  },
-  {
-    medications: ['atorvastatin', 'clarithromycin'],
-    sourceDrug: 'atorvastatin',
-    level: 'High',
-    title: 'Muscle injury risk',
-    description:
-      'Clarithromycin can raise atorvastatin levels and the risk of muscle injury. The prescriber may need to adjust treatment.',
-  },
-  {
-    medications: ['levothyroxine', 'calcium-carbonate'],
-    sourceDrug: 'levothyroxine',
-    level: 'Moderate',
-    title: 'Reduced thyroid medicine absorption',
-    description:
-      'Calcium can reduce levothyroxine absorption. Ask a pharmacist about dose timing and separation.',
-  },
-  {
-    medications: ['nitroglycerin', 'sildenafil'],
-    sourceDrug: 'nitroglycerin',
-    level: 'High',
-    title: 'Dangerously low blood pressure',
-    description:
-      'Nitrates such as nitroglycerin must not be combined with sildenafil because blood pressure can drop dangerously. Seek urgent clinical guidance.',
-  },
-];
-
-function Pharmacy({ comorbidities }) {
-  const [activeMedications, setActiveMedications] = useState(initialMedications);
+function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
+  const [localMedications, setLocalMedications] = useState(initialMedications);
+  const isControlled = Boolean(medications && onMedicationsChange);
+  const activeMedications = isControlled ? medications : localMedications;
+  const updateMedications = isControlled ? onMedicationsChange : setLocalMedications;
   const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [catalogSearch, setCatalogSearch] = useState('');
-  const [catalogResults, setCatalogResults] = useState([]);
-  const [catalogStatus, setCatalogStatus] = useState('idle');
-  const [catalogError, setCatalogError] = useState('');
+
+  const catalogTerm = catalogSearch.trim();
+  const catalogTooShort = catalogTerm.length < 2;
+  const localMatches = searchFormulary(catalogTerm);
+  const [rxNorm, setRxNorm] = useState({ term: '', items: [], error: '' });
+  const rxNormLoading = !catalogTooShort && rxNorm.term !== catalogTerm;
+  const rxNormCurrent = rxNorm.term === catalogTerm ? rxNorm : { items: [], error: '' };
 
   useEffect(() => {
-    const term = catalogSearch.trim();
-    if (term.length < 2) {
-      setCatalogResults([]);
-      setCatalogStatus(term ? 'minimum' : 'idle');
-      setCatalogError('');
-      return undefined;
-    }
-
-    setCatalogResults([]);
-    setCatalogStatus('loading');
-    setCatalogError('');
-
+    if (catalogTooShort) return undefined;
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(async () => {
-      setCatalogStatus('loading');
-      setCatalogError('');
-
-      try {
-        const url = new URL(rxNormSearchUrl);
-        url.searchParams.set('term', term);
-        url.searchParams.set('maxEntries', '30');
-        url.searchParams.set('option', '1');
-
-        const response = await fetch(url, {
-          signal: controller.signal,
-          headers: { Accept: 'application/json' },
+    const timer = setTimeout(() => {
+      searchRxNorm(catalogTerm, controller.signal)
+        .then((items) => setRxNorm({ term: catalogTerm, items, error: '' }))
+        .catch((error) => {
+          if (error.name !== 'AbortError') setRxNorm({ term: catalogTerm, items: [], error: error.message });
         });
-        if (!response.ok) {
-          throw new Error(`RxNorm search failed (HTTP ${response.status}). Please try again.`);
-        }
-
-        const results = getRxNormSuggestions(await response.json());
-        if (!controller.signal.aborted) {
-          setCatalogResults(results);
-          setCatalogStatus('success');
-        }
-      } catch (error) {
-        if (controller.signal.aborted) return;
-        setCatalogError(
-          error instanceof Error
-            ? error.message
-            : 'RxNorm search failed unexpectedly. Please try again.',
-        );
-        setCatalogStatus('error');
-      }
-    }, 500);
-
+    }, 250);
     return () => {
-      window.clearTimeout(timeoutId);
+      clearTimeout(timer);
       controller.abort();
     };
-  }, [catalogSearch]);
+  }, [catalogTerm, catalogTooShort]);
 
-  const activeMedicationIds = new Set(activeMedications.map((medication) => medication.id));
-  const interactions = interactionRules.filter((interaction) =>
-    interaction.medications.every((id) => activeMedicationIds.has(id)),
+  const localNames = new Set(localMatches.map((entry) => entry.name.toLowerCase()));
+  const results = [
+    ...localMatches.map((entry) => ({
+      key: entry.id,
+      name: entry.name,
+      purpose: entry.purpose,
+      availability: entry.availability,
+      basis: 'built-in reference list',
+      local: true,
+    })),
+    ...rxNormCurrent.items
+      .filter((item) => !localNames.has(item.name.toLowerCase()))
+      .map((item) => ({
+        key: 'rxnorm-' + item.rxcui,
+        name: item.name,
+        purpose: '',
+        availability: item.availability,
+        basis: item.basis,
+        local: false,
+      })),
+  ];
+
+  const { interactions, contraindications, unscreened } = screenMedications(
+    activeMedications,
+    comorbidities,
   );
-  const hasKidneyDisease = /\b(ckd|chronic kidney disease|kidney disease)\b/i.test(comorbidities);
-  const contraindications = hasKidneyDisease && activeMedicationIds.has('ibuprofen')
-    ? [
-        {
-          title: 'Kidney disease noted in patient profile',
-          medication: 'Ibuprofen',
-          description:
-            'NSAIDs such as ibuprofen may worsen kidney function. Avoid use unless the patient’s clinician specifically approves it.',
-        },
-      ]
-    : [];
-
   const visibleMedications = activeMedications.filter((medication) => {
     const matchesFilter = activeFilter === 'All' || medication.category === activeFilter;
-    const matchesSearch = `${medication.name} ${medication.detail} ${medication.purpose}`
+    const matchesSearch = `${medication.name} ${medication.detail} ${medication.dose ?? ''} ${medication.frequency ?? ''} ${medication.purpose}`
       .toLowerCase()
       .includes(search.trim().toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const addMedication = (medication) => {
-    setActiveMedications((current) =>
-      current.some((item) => item.id === medication.id)
+  const isListed = (ingredientId, availability) =>
+    activeMedications.some(
+      (medication) =>
+        (medication.ingredientId ?? medication.id) === ingredientId &&
+        medication.category === availability,
+    );
+
+  const isCatalogListed = (key, availability) =>
+    activeMedications.some(
+      (medication) =>
+        (medication.catalogKey ?? medication.ingredientId ?? medication.id) === key &&
+        medication.category === availability,
+    );
+
+  const updateRegimen = (id, field, value) =>
+    updateMedications((current) =>
+      current.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
+    );
+
+  const addResult = (result, availability) => {
+    const both = result.availability === 'Both';
+    const suffix = availability === 'Prescription' ? 'rx' : 'otc';
+    const id = both ? result.key + '-' + suffix : result.key;
+    const dual = result.local ? dualAvailabilityById.get(result.key) : null;
+    const strengths = dual ? (availability === 'Prescription' ? dual.rx : dual.otc).strengths : '';
+    updateMedications((current) =>
+      current.some((item) => item.id === id)
         ? current
         : [
             ...current,
-              {
-                ...medication,
-                detail: 'Dose and schedule not provided · verify with patient',
-              },
-            ],
+            {
+              id,
+              ...(result.local ? { ingredientId: result.key } : { catalogKey: result.key }),
+              name: result.name,
+              category: availability,
+              purpose: result.purpose,
+              detail: strengths ? 'Available strengths: ' + strengths : '',
+              dose: '',
+              frequency: '',
+            },
+          ],
+    );
+  };
+
+  const addMedication = (ingredientId, availability) => {
+    const entry = formulary.find((item) => item.id === ingredientId);
+    if (!entry) return;
+    addResult(
+      {
+        key: ingredientId,
+        name: entry.name,
+        purpose: entry.purpose,
+        availability: entry.availability,
+        local: true,
+      },
+      entry.availability === 'Both' ? availability : entry.availability,
     );
   };
 
@@ -295,9 +240,10 @@ function Pharmacy({ comorbidities }) {
         <div className="pharmacy-notice" role="note">
           <strong>Sample medication list · verify medicines with the care team</strong>
           <span>
-            Search terms are sent to the U.S. National Library of Medicine RxNorm API. Do not enter
-            patient names or other identifying information. RxNorm search results identify terms;
-            they do not confirm what a patient takes or provide interaction checking.
+            Medicine searches are sent to the U.S. National Library of Medicine (RxNorm) and the FDA
+            (openFDA) to find and classify drugs. Do not enter patient names or other identifying
+            information. This tool does not confirm what a patient takes or replace
+            a pharmacist’s review.
           </span>
         </div>
 
@@ -313,6 +259,10 @@ function Pharmacy({ comorbidities }) {
           <div>
             <strong>{activeMedications.filter((medication) => medication.category === 'Prescription').length}</strong>
             <span>prescriptions on list</span>
+          </div>
+          <div>
+            <strong>{activeMedications.filter((medication) => medication.category === 'Over the counter').length}</strong>
+            <span>over-the-counter on list</span>
           </div>
         </div>
 
@@ -333,8 +283,8 @@ function Pharmacy({ comorbidities }) {
           </label>
         </div>
 
-        <div className="medication-filters" aria-label="Filter patient medicines">
-          {[...filters, 'RxNorm result'].map((filter) => (
+        <div className="medication-filters" role="group" aria-label="Filter patient medicines">
+          {filters.map((filter) => (
             <button
               key={filter}
               type="button"
@@ -348,103 +298,165 @@ function Pharmacy({ comorbidities }) {
         </div>
 
         <ul className="medication-list" aria-label="Patient medication list">
-          {visibleMedications.map((medication) => (
-            <li className="medication-row" key={medication.id}>
-              <span className="medication-mark" aria-hidden="true">
-                {medication.category === 'Over the counter' ? 'OTC' : 'Rx'}
-              </span>
-              <div className="medication-info">
-                <div className="medication-name-line">
-                  <strong>{medication.name}</strong>
-                  <span className="medication-status">On list</span>
-                </div>
-                <span>{medication.detail}</span>
-                <small>{medication.purpose}</small>
-              </div>
-              <span className="medication-category">{medication.category}</span>
-            </li>
-          ))}
+          {availabilityOrder.map((group) => {
+            const items = visibleMedications.filter((medication) => medication.category === group);
+            if (items.length === 0) return null;
+            return [
+              <li className="medication-group" key={`group-${group}`}>
+                {group} · {items.length}
+              </li>,
+              ...items.map((medication) => (
+                <li className="medication-row" key={medication.id}>
+                  <span className="medication-mark" aria-hidden="true">
+                    {medication.category === 'Over the counter' ? 'OTC' : 'Rx'}
+                  </span>
+                  <div className="medication-info">
+                    <div className="medication-name-line">
+                      <strong>{medication.name}</strong>
+                      <span className="medication-status">On list</span>
+                    </div>
+                    {medication.detail && <span>{medication.detail}</span>}
+                    <small>{medication.purpose}</small>
+                    <div className="regimen-fields">
+                      <DoseField
+                        medication={medication}
+                        onChange={(value) => updateRegimen(medication.id, 'dose', value)}
+                      />
+                      <label>
+                        <span>How often</span>
+                        <input
+                          type="text"
+                          maxLength={80}
+                          placeholder="e.g. twice daily"
+                          value={medication.frequency ?? ''}
+                          onChange={(event) => updateRegimen(medication.id, 'frequency', event.target.value)}
+                          aria-label={`How often for ${medication.name}`}
+                        />
+                      </label>
+                      {!medication.dose?.trim() || !medication.frequency?.trim() ? (
+                        <small className="regimen-missing">Dose or schedule not entered; verify with the patient.</small>
+                      ) : null}
+                    </div>
+                  </div>
+                  <span className="medication-category">{medication.category}</span>
+                </li>
+              )),
+            ];
+          })}
           {visibleMedications.length === 0 && (
-            <li className="medication-empty">No medicines match this search.</li>
+            <li className="medication-empty">
+              {activeMedications.length === 0
+                ? 'No medicines have been added to this profile.'
+                : 'No medicines match this search.'}
+            </li>
           )}
         </ul>
 
         <div className="medication-catalog">
           <div className="medication-list-header">
             <div>
-              <h4>Browse medication catalog</h4>
-              <p>Search active RxNorm concepts by generic, brand, or product name.</p>
+              <h4>Find a medicine to add</h4>
+              <p>Search by generic name, brand name, or purpose.</p>
             </div>
             <label className="medication-search">
-              <span className="visually-hidden">Search medication catalog</span>
+              <span className="visually-hidden">Search medication reference</span>
               <input
                 type="search"
-                list="rxnorm-medication-suggestions"
+                list="medication-reference-suggestions"
                 value={catalogSearch}
                 onChange={(event) => setCatalogSearch(event.target.value)}
-                placeholder="Search catalog"
+                placeholder="Search medicines"
               />
             </label>
           </div>
-          <p className="rxnorm-catalog-disclosure">
-            Current RxNorm search results only; historical or discontinued drug coverage is not
-            guaranteed. Results are not a complete global drug list.
+          <p className="reference-disclosure">
+            Each result is marked Prescription or Over the counter. RxNorm supplies drug names and
+            FDA drug labeling supplies the marking; the built-in list is used if FDA data is not
+            available. Medicines the built-in list cannot match are not screened for interactions.
           </p>
-          <p className="rxnorm-attribution">
-            This product uses publicly available data from the U.S. National Library of Medicine
-            (NLM), National Institutes of Health, Department of Health and Human Services; NLM is
-            not responsible for the product and does not endorse or recommend this or any other
-            product.
-          </p>
-          <div className="catalog-search-status" role="status" aria-live="polite">
-            {catalogStatus === 'idle' && 'Enter at least 2 characters to search RxNorm.'}
-            {catalogStatus === 'minimum' && 'Enter at least 2 characters to search RxNorm.'}
-            {catalogStatus === 'loading' && `Searching RxNorm for “${catalogSearch.trim()}”…`}
-            {catalogStatus === 'success' &&
-              `${catalogResults.length} RxNorm result${catalogResults.length === 1 ? '' : 's'} found.`}
+          <div className="catalog-search-status" role="status">
+            {catalogTooShort
+              ? 'Enter at least 2 characters to search.'
+              : rxNormLoading
+                ? 'Searching RxNorm and FDA labeling…'
+                : results.length + (results.length === 1 ? ' match' : ' matches') + ' found.'}
           </div>
-          {catalogError && <p className="catalog-search-error" role="alert">{catalogError}</p>}
-          <ul className="medication-list catalog-list" aria-label="Medication catalog">
-            {catalogResults.map((medication) => {
-              const isOnList = activeMedicationIds.has(medication.id);
-              return (
-                <li className="medication-row" key={medication.id}>
-                  <span className="medication-mark" aria-hidden="true">
-                    Rx
-                  </span>
-                  <div className="medication-info">
-                    <div className="medication-name-line">
-                      <strong>{medication.name}</strong>
-                      {isOnList && <span className="medication-status">Patient list</span>}
+          {rxNormCurrent.error && (
+            <p className="catalog-search-error" role="alert">
+              {rxNormCurrent.error}. Showing the built-in list only.
+            </p>
+          )}
+          {results.length > 0 && (
+            <ul className="medication-list catalog-list" aria-label="Medication search results">
+              {results.map((result) => {
+                const options =
+                  result.availability === 'Both'
+                    ? ['Over the counter', 'Prescription']
+                    : result.availability === 'Unknown'
+                      ? []
+                      : [result.availability];
+                return (
+                  <li className="medication-row" key={result.key}>
+                    <span className="medication-mark" aria-hidden="true">
+                      {{ 'Over the counter': 'OTC', Prescription: 'Rx', Both: 'Both' }[result.availability] ?? '?'}
+                    </span>
+                    <div className="medication-info">
+                      <div className="medication-name-line">
+                        <strong>{result.name}</strong>
+                        <span className="medication-status">
+                          {result.availability === 'Both'
+                            ? 'Over the counter and prescription versions'
+                            : result.availability === 'Unknown'
+                              ? 'Prescription status not confirmed'
+                              : result.availability}
+                        </span>
+                      </div>
+                      {result.purpose && <span>{result.purpose}</span>}
+                      <small>
+                        {result.availability === 'Unknown'
+                          ? 'Could not be confirmed as prescription or over the counter. Ask a pharmacist.'
+                          : 'Marked using ' + result.basis + '.'}
+                      </small>
                     </div>
-                    <span>{medication.purpose}</span>
-                    <small>RxCUI {medication.rxcui} · RxNorm</small>
-                  </div>
-                  <button
-                    className="catalog-add-button"
-                    type="button"
-                    disabled={isOnList}
-                    onClick={() => addMedication(medication)}
-                  >
-                    {isOnList ? 'On patient list' : 'Mark patient-reported'}
-                  </button>
-                </li>
-              );
-            })}
-            {catalogStatus === 'success' && catalogResults.length === 0 && (
-              <li className="medication-empty">No active RxNorm matches found for this search.</li>
-            )}
-          </ul>
+                    <div className="catalog-actions">
+                      {options.map((availability) => {
+                        const listed = isCatalogListed(result.key, availability);
+                        const label = result.availability === 'Both' ? availability + ' version' : '';
+                        const base = (result.name + ' ' + label).trim();
+                        return (
+                          <button
+                            key={availability}
+                            className="catalog-add-button"
+                            type="button"
+                            disabled={listed}
+                            aria-label={listed ? base + ' is on the patient list' : 'Add ' + base + ' as reported, unverified'}
+                            onClick={() => addResult(result, availability)}
+                          >
+                            {listed ? 'On patient list' : label ? 'Add ' + label : 'Add as reported'}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {!catalogTooShort && !rxNormLoading && results.length === 0 && (
+            <p className="medication-empty">No matches found. Ask a pharmacist.</p>
+          )}
         </div>
+
+        <DualAvailabilityGuide isListed={isListed} onAdd={addMedication} />
 
         <datalist id="patient-medication-suggestions">
           {activeMedications.map((medication) => (
             <option key={medication.id} value={medication.name} />
           ))}
         </datalist>
-        <datalist id="rxnorm-medication-suggestions">
-          {catalogResults.map((medication) => (
-            <option key={medication.id} value={medication.name} />
+        <datalist id="medication-reference-suggestions">
+          {results.map((medication) => (
+            <option key={medication.key} value={medication.name} />
           ))}
         </datalist>
 
@@ -457,16 +469,23 @@ function Pharmacy({ comorbidities }) {
             <span className="review-count">{interactions.length + contraindications.length} to review</span>
           </div>
 
-          <p className="rxnorm-catalog-disclosure">
+          <p className="reference-disclosure">
             These independently written prompts link to public DailyMed drug labeling. Label
             warnings are not a complete interaction database, and this sample checker does not
-            evaluate every ingredient, product, dose, route, or patient factor. Adding an RxNorm
-            result does not check it for interactions or contraindications. Ask a pharmacist or
+            evaluate every ingredient, product, dose, route, or patient factor. Medicines that
+            cannot be matched to the built-in reference list are not screened. Ask a pharmacist or
             prescriber to review the complete medication list.
           </p>
 
+          {unscreened.length > 0 && (
+            <p className="unscreened-note" role="note">
+              Not screened (not found in the built-in reference list): {unscreened.join(', ')}.
+              Ask a pharmacist to check these.
+            </p>
+          )}
+
           {contraindications.map((item) => (
-            <article className="safety-alert contraindication-alert" key={item.title}>
+            <article className="safety-alert contraindication-alert" key={`${item.title}-${item.medication}`}>
               <span className="alert-level">Patient-specific</span>
               <div>
                 <h5>{item.title}</h5>
@@ -478,7 +497,7 @@ function Pharmacy({ comorbidities }) {
           {interactions.map((interaction) => (
             <article
               className={`safety-alert ${interaction.level === 'High' ? 'high-alert' : 'moderate-alert'}`}
-              key={`${interaction.title}-${interaction.medications.join('-')}`}
+              key={interaction.key}
             >
               <span className="alert-level">{interaction.level} · interaction</span>
               <div>
@@ -492,9 +511,9 @@ function Pharmacy({ comorbidities }) {
                       : `https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=${encodeURIComponent(interaction.sourceDrug)}`
                   }
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                 >
-                  DailyMed labeling: {interaction.sourceDrug}
+                  DailyMed labeling: {interaction.sourceDrug} (opens in new tab)
                 </a>
               </div>
             </article>
@@ -502,7 +521,7 @@ function Pharmacy({ comorbidities }) {
 
           {interactions.length === 0 && contraindications.length === 0 && (
             <p className="no-safety-flags">
-              No known flags from this limited screening list. This does not rule out other risks.
+              No flags detected in this limited demo list. This is not evidence of safety; ask a pharmacist or prescriber.
             </p>
           )}
         </div>

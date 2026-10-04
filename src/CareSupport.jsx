@@ -4,7 +4,7 @@ const emergencyWarningSigns = [
   { id: 'breathing', label: 'Severe difficulty breathing, choking, or blue/gray lips' },
   { id: 'chest-pain', label: 'New severe chest pain or pressure' },
   { id: 'stroke', label: 'Sudden face drooping, one-sided weakness, or trouble speaking' },
-  { id: 'unresponsive', label: 'Unresponsive, a first seizure, or repeated seizures without recovery' },
+  { id: 'unresponsive', label: 'Unresponsive, a first seizure, a seizure lasting about 5 minutes or longer, or repeated seizures without recovery' },
   { id: 'allergy', label: 'Severe allergic reaction with tongue/throat swelling or breathing difficulty' },
   { id: 'bleeding', label: 'Uncontrolled bleeding or a severe injury' },
   { id: 'safety', label: 'Immediate risk of suicide or harm to someone' },
@@ -22,11 +22,17 @@ function CareSupport() {
   const [form, setForm] = useState(initialForm);
   const [selectedWarningSigns, setSelectedWarningSigns] = useState([]);
   const [summary, setSummary] = useState('');
+  const [copyMessage, setCopyMessage] = useState('');
+  const [copyFailed, setCopyFailed] = useState(false);
+  const [exportMessage, setExportMessage] = useState('');
+  const [exportFailed, setExportFailed] = useState(false);
 
   const updateField = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
     setSummary('');
+    setCopyMessage('');
+    setExportMessage('');
   };
 
   const toggleWarningSign = (warningSignId) => {
@@ -39,44 +45,99 @@ function CareSupport() {
 
   const createSummary = (event) => {
     event.preventDefault();
+    setCopyMessage('');
     const selectedWarningLabels = emergencyWarningSigns
       .filter((warningSign) => selectedWarningSigns.includes(warningSign.id))
       .map((warningSign) => warningSign.label);
     const lines = [
-      'Patient-reported visit preparation summary (not a diagnosis)',
+      'Visit preparation notes (personal use only)',
       `Symptoms: ${form.symptoms.trim() || 'Not provided'}`,
       `Started: ${form.onset.trim() || 'Not provided'}`,
       `Severity: ${form.severity || 'Not provided'}`,
       `Course: ${form.course || 'Not provided'}`,
       `Emergency warning signs selected: ${selectedWarningLabels.join('; ') || 'None selected'}`,
-      `Questions for the care team: ${form.questions.trim() || 'Not provided'}`,
+      `Questions to bring up: ${form.questions.trim() || 'Not provided'}`,
     ];
+
     setSummary(lines.join('\n'));
+  };
+
+  const copySummary = async () => {
+    setCopyMessage('');
+    setCopyFailed(false);
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error('Clipboard access is unavailable in this browser.');
+      }
+      await navigator.clipboard.writeText(summary);
+      setCopyMessage('Draft copied. Review it before sharing.');
+    } catch {
+      setCopyFailed(true);
+      setCopyMessage('Could not copy the draft. You can select and copy the text above manually.');
+    }
+  };
+
+  const downloadSummary = () => {
+    setExportMessage('');
+    setExportFailed(false);
+    let objectUrl;
+    try {
+      objectUrl = URL.createObjectURL(new Blob([summary], { type: 'text/plain;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = 'visit-preparation-notes.txt';
+      link.click();
+      setExportMessage('Draft downloaded. Review it before sharing.');
+    } catch {
+      setExportFailed(true);
+      setExportMessage('Could not download the draft. You can select and copy the text above manually.');
+    } finally {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    }
+  };
+
+  const printSummary = () => {
+    setExportMessage('');
+    setExportFailed(false);
+    try {
+      window.print();
+    } catch {
+      setExportFailed(true);
+      setExportMessage('Could not open the print dialog. Try your browser’s print command instead.');
+    }
   };
 
   const clearForm = () => {
     setForm(initialForm);
     setSelectedWarningSigns([]);
     setSummary('');
+    setCopyMessage('');
+    setCopyFailed(false);
+    setExportMessage('');
+    setExportFailed(false);
   };
 
   return (
     <section className="care-support-section" aria-labelledby="care-support-heading">
       <div className="section-heading">
-        <p className="eyebrow">PATIENT &amp; CAREGIVER TOOLS</p>
-        <h3 id="care-support-heading">Prepare for a care conversation</h3>
+        <p className="eyebrow">PATIENT TOOL</p>
+        <h3 id="care-support-heading">Prepare for your next visit</h3>
         <p className="care-support-intro">
-          Organize what you have noticed and questions for your care team. This tool does not
-          diagnose symptoms or send information to anyone.
+          Organize what you have noticed, what matters most to you, and the questions or reminders
+          you want to keep with you. This tool does not diagnose symptoms, send information, or
+          replace a clinical assessment.
         </p>
       </div>
 
       <div className="care-support-card">
+
         <div className="care-support-emergency-note" role="note">
           <strong>Think someone may be having an emergency?</strong>
           <span>
             Contact your local emergency number or go to the nearest emergency department now.
-            Do not wait to fill out this form. This warning-sign list is not complete.
+            For possible poisoning or overdose, contact emergency services or poison control
+            promptly; do not induce vomiting or wait for symptoms. Do not wait to fill out this
+            form. This warning-sign list is not complete.
           </span>
         </div>
 
@@ -155,7 +216,7 @@ function CareSupport() {
           )}
 
           <label className="care-support-field" htmlFor="care-questions">
-            What would you like to ask the care team?
+            What would you like to remember or ask?
             <textarea
               id="care-questions"
               name="questions"
@@ -163,7 +224,7 @@ function CareSupport() {
               onChange={updateField}
               maxLength={1000}
               rows={2}
-              placeholder="Add questions or concerns you want to remember"
+              placeholder="Add questions, concerns, or reminders you want to keep with you"
             />
           </label>
 
@@ -184,15 +245,37 @@ function CareSupport() {
             aria-labelledby="care-support-summary-heading"
             aria-live="polite"
           >
-            <h4 id="care-support-summary-heading">Draft to review with your care team</h4>
+            <h4 id="care-support-summary-heading">Draft to review</h4>
             <pre>{summary}</pre>
             <p>Review and correct this summary before sharing it. Nothing is sent or saved by this page.</p>
+            <div className="care-support-actions">
+              <button className="care-support-submit" type="button" onClick={copySummary}>
+                Copy draft
+              </button>
+              <button className="care-support-submit" type="button" onClick={downloadSummary}>
+                Download draft
+              </button>
+              <button className="care-support-submit" type="button" onClick={printSummary}>
+                Print draft
+              </button>
+            </div>
+            {copyMessage && (
+              <p role={copyFailed ? 'alert' : 'status'} aria-live={copyFailed ? 'assertive' : 'polite'}>
+                {copyMessage}
+              </p>
+            )}
+            {exportMessage && (
+              <p role={exportFailed ? 'alert' : 'status'} aria-live={exportFailed ? 'assertive' : 'polite'}>
+                {exportMessage}
+              </p>
+            )}
           </div>
         )}
 
         <p className="care-support-privacy">
           Only enter information you are comfortable sharing on this device. Entries stay in this
-          page while it is open and are not sent to a clinician.
+          page while it is open and are not sent to a clinician. Healthcare professionals should
+          verify information and use their organization's approved documentation system.
         </p>
       </div>
     </section>

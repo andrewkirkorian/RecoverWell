@@ -1,70 +1,86 @@
-# GitHub Codespaces ♥️ React
+# Recover Well
 
-Welcome to your shiny new Codespace running React! We've got everything fired up and running for you to explore React.
+Recover Well is a React web-app prototype for organizing general post-surgery recovery information. It brings together a sample daily checklist, procedure-planning prompts, medication-list review, and patient-controlled drafts to help prepare for a care conversation.
 
-You've got a blank canvas to work on from a git perspective as well. There's a single initial commit with the what you're seeing right now - where you go from here is up to you!
+> **Prototype only:** Recover Well is not a medical device, clinical decision-support system, patient portal, or medical record. It does not provide diagnosis or treatment recommendations. Do not use it to make care decisions, communicate emergencies, or store real patient information. Follow instructions from the treating care team. For emergencies, contact your local emergency number.
 
-Everything you do here is contained within this one codespace. There is no repository on GitHub yet. If and when you’re ready you can click "Publish Branch" and we’ll create your repository and push up your project. If you were just exploring then and have no further need for this code then you can simply delete your codespace and it's gone forever.
+## Product specification
 
-This project was bootstrapped for you with [Vite](https://vitejs.dev/).
+### Intended users and goal
 
-## Available Scripts
+- **Patients and caregivers:** organize recovery tasks, procedure details, symptoms, and questions to discuss with the care team.
+- **Goal:** make general recovery information and conversation-preparation tools easy to find in one interface, while directing users to their care team for individualized guidance.
 
-In the project directory, you can run:
+### Current features
 
-### `npm start`
+- **Demo profiles:** create a display-name profile and sign in or switch between profiles during one open session. This is not real sign-up or authentication; there are no passwords, accounts, or server-side identity checks.
+- **Home and recovery checklist:** show a sample recovery overview and let users check off example daily tasks.
+- **Personal reminders:** add or remove optional daily-plan and self-care reminders for each demo profile. These are user-created organizers, not care instructions.
+- **Procedure planning:** select from sample service lines and procedures, enter a date and arrival details, and check off general discussion prompts.
+- **Procedure-relevant ICU and recovery modules:** selecting a surgical service and procedure displays related general discussion topics for ICU care and recovery. Topics are prompts to confirm with the care team, not care instructions.
+- **Postoperative destination overview:** shows broad examples of when home, a hospital ward, or ICU/monitored care may be part of a planned pathway for the selected procedure. These are not rules or predictions; procedure approach, the person’s health and recovery, local resources, and clinician assessment determine the actual destination.
+- **Anesthesia education:** a separate overview of general, regional, local, sedation/monitored anesthesia care, and combined approaches, with possible short-term effects, recovery expectations, questions for the anesthesia team, and links to American Society of Anesthesiologists resources. It does not infer which type a selected procedure will use.
+- **Health-history checklist:** optionally note reported health conditions in the active demo profile. It is not exhaustive and does not calculate risk or guide treatment.
+- **Recovery information:** browse general recovery stages, procedure categories, and ICU-care topics.
+- **Medication review:** maintain a separate in-memory reported medicine list for each demo profile, search that list, and see a small set of hard-coded interaction prompts. No health conditions are inferred between profiles.
+- **Medication reference and dual-availability guide:** medicines are listed as Prescription or Over the counter. Searching a medicine looks up names in RxNorm (U.S. National Library of Medicine) and marks each result Prescription or Over the counter using FDA drug labeling (openFDA), falling back to a built-in reference list; search text is sent to those public APIs. RxNorm results are not a separate group. Ten medicines sold both ways (e.g. ibuprofen, naproxen, omeprazole) have a separate dataset (`src/dualAvailabilityMedications.js`) comparing OTC and prescription strengths and directions, paraphrased from FDA labeling with DailyMed links. The interaction check screens by ingredient and class, and flags medicines it cannot screen. Not a dosing or interaction authority; the dosing text has not had clinician or pharmacist review.
+- **Care-visit preparation:** draft a summary of user-entered symptoms and questions. It is an editable personal draft, not a clinical assessment or record.
+- **General health tips:** optional whole-person well-being ideas covering nourishment, movement, rest, emotional well-being, social support, and complementary-product safety, with source links to WHO and NCCIH.
+- **Care-team message preparation:** create a message draft to copy into a separate, secure channel. The app does not send it.
+- **Health reference:** a searchable, filterable (with session-only saved topics, copy, print, and care-team questions), paraphrased set of general medical and nursing education topics with named sources; not clinically reviewed and not a diagnosis or triage tool.
+- **Emergency reminders:** display emergency guidance for urgent situations.
 
-We've already run this for you in the `Codespaces: server` terminal window below. If you need to stop the server for any reason you can just run `npm start` again to bring it back online.
+### Data handling and limitations
 
-Runs the app in the development mode.\
-Open [http://localhost:3000/](http://localhost:3000/) in the built-in Simple Browser (`Cmd/Ctrl + Shift + P > Simple Browser: Show`) to view your running application.
+- Each demo profile has separate in-memory daily and procedure checklist state, procedure-planning fields including the anesthesia education selection, health-history notes, self-care check-in and notes, saved dated check-ins shown on a calendar and optional general wellness suggestions derived from the entered values (not medical advice, not exported, hideable) (user-entered values only, no interpretation), personal reminders, and medication list. Visit-preparation drafts are also held in page memory and are cleared when switching profiles. Profile data is not saved to an account, database, or browser storage. Reloading or leaving the page clears all profiles and their data. Profiles are not private or protected from other people using the same open browser tab.
+- The visit-preparation tool can copy a generated draft, download it as a text file, or open the browser print dialog only when the user selects the corresponding action. Review exported content before sharing; the app does not send or save the draft.
+- The app has no backend, authorization, verified authentication, encryption-at-rest, audit logging, role management, or secure messaging integration.
+- Use a non-identifying display name only. Do not enter real names, contact details, dates of birth, patient identifiers, or protected health information anywhere in the prototype.
+- The medication rules cover only selected combinations and factors. A lack of displayed warnings does not mean a medication combination is safe. Verify the complete medication list with a pharmacist or prescriber.
+- The recovery, ICU, procedure-route, and anesthesia content is general and incomplete. The destination examples do not determine or predict discharge readiness, and anesthesia selection is only an education filter—not a record of the planned anesthetic. Self-care entries are user-reported and are not interpreted as a health assessment. Nothing in the app determines risk, discharge readiness, or treatment. Follow instructions from the care team.
+- Postanesthesia care and anesthesia education links: [ASA Standards for Postanesthesia Care](https://www.asahq.org/standards-and-practice-parameters/standards-for-postanesthesia-care), [ASA Types of Anesthesia](https://madeforthismoment.asahq.org/anesthesia-101/types-of-anesthesia/), and [ASA Anesthesia Recovery](https://madeforthismoment.asahq.org/preparing-for-surgery/recovery/). Local pathways and individual instructions may differ.
+- General health tips are educational, not personalized advice; the linked source pages were accessed in October 2026. Follow professional guidance for individual needs.
 
-The page will reload automatically when you make changes.\
-You may also see any lint errors in the console.
+## Technology
 
-### `npm test`
+- React 18
+- Vite
+- Vitest, jsdom, and Testing Library
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Run locally
 
-### `npm run build`
+Install dependencies and start the development server:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```sh
+npm install
+npm start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Open [http://localhost:3000](http://localhost:3000).
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Available scripts
 
-## Learn More
+| Command | Description |
+| --- | --- |
+| `npm start` | Start the Vite development server on port 3000. |
+| `npm test -- --run` | Run the Vitest suite once (non-interactive). |
+| `npm test` | Start Vitest in watch mode. |
+| `npm run build` | Create a production build in `dist/`. |
+| `npm run preview` | Serve the production build locally for preview. |
 
-You can learn more in the [Vite documentation](https://vitejs.dev/guide/).
+## Project layout
 
-To learn Vitest, a Vite-native testing framework, go to [Vitest documentation](https://vitest.dev/guide/)
+```text
+src/
+  App.jsx          Main app, navigation, recovery and procedure-planning views
+  Pharmacy.jsx     Medication list, interaction screening, local reference search, OTC-vs-Rx dosing guide
+  CareSupport.jsx  Emergency reminders and care-visit preparation
+  SelfCare.jsx     Optional patient-reported check-in and planning prompts
+  App.css          App component styles
+  index.css        Global styles
+  *.test.jsx       Component and interaction tests
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Before production use
 
-### Code Splitting
-
-This section has moved here: [https://sambitsahoo.com/blog/vite-code-splitting-that-works.html](https://sambitsahoo.com/blog/vite-code-splitting-that-works.html)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://github.com/btd/rollup-plugin-visualizer#rollup-plugin-visualizer](https://github.com/btd/rollup-plugin-visualizer#rollup-plugin-visualizer)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://dev.to/hamdankhan364/simplifying-progressive-web-app-pwa-development-with-vite-a-beginners-guide-38cf](https://dev.to/hamdankhan364/simplifying-progressive-web-app-pwa-development-with-vite-a-beginners-guide-38cf)
-
-### Advanced Configuration
-
-This section has moved here: [https://vitejs.dev/guide/build.html#advanced-base-options](https://vitejs.dev/guide/build.html#advanced-base-options)
-
-### Deployment
-
-This section has moved here: [https://vitejs.dev/guide/build.html](https://vitejs.dev/guide/build.html)
-
-### Troubleshooting
-
-This section has moved here: [https://vitejs.dev/guide/troubleshooting.html](https://vitejs.dev/guide/troubleshooting.html)
+This prototype is not ready for real patient or clinical use. A production implementation would need, at minimum, a defined clinical and privacy scope; clinically reviewed content and medication logic; a secure backend and verified identity/authorization model; explicit consent, retention, deletion, and audit policies; secure communication and care-record integrations; accessibility and security reviews; and validation with intended users and qualified clinical stakeholders. Applicable legal, regulatory, and organizational requirements must be assessed before collecting health information or deploying in a care setting.
