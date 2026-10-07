@@ -3,5 +3,10 @@
 		{
 			"path": ".."
 		}
-	]
+	],
+	"settings": {
+		"githubPullRequests.experimental.notificationsMarkPullRequests": "markAsDone",
+		"githubPullRequests.notifications": "pullRequests",
+		"githubPullRequests.experimental.useQuickChat": true
+	}
 }
