@@ -8,6 +8,7 @@ The rig is three moving parts:
 
 | piece | what it is |
 | --- | --- |
+| `provision-mongod.sh` | fetches the `mongod` binary the rig needs (idempotent; see below) |
 | `start-mongo.sh` | a throwaway local `mongod` on **27018**, dbpath `/tmp/rw-verify/data` |
 | `serve-verify.ts` + `start-verify-app.sh` | a second instance of the built site on **127.0.0.1:3100**, with `MONGODB_URI` pointed at that mongod |
 | `verify.sh` | the end-to-end harness — real form POSTs, real cookies, real 303s |
@@ -18,6 +19,7 @@ The rig is three moving parts:
 
 ```bash
 cd /home/team/shared/site
+bash tools/provision-mongod.sh # once per machine: puts mongod under /tmp/mongo-bin
 bun run build                 # the 3100 instance serves whatever is in dist/
 bash tools/reset-verify.sh    # fresh mongod + fresh app on 3100 (wipes the db)
 bash tools/verify.sh 2>&1 | tee /tmp/flow.out
@@ -59,7 +61,37 @@ Steps **h–o** (increment 2):
   correctly (38.5 °C is shown as 101.3 °F against a 100.4 °F limit), and prefills
   the form in the plan's current unit.
 
+Steps **v–w** (increment 3): `v` the recovery timeline — one row per day from the
+surgery date, the patient's own value/note on the day they logged it, a plain
+limit-crossed marker naming the reading and the saved limit, a checklist count per
+day, gap days visible as gaps, nothing of another user's. `w` the printable
+appointment summary — the plan and limits as entered, the logged totals, the
+crossed days, the "record, not an assessment" line, no interpretation or dosage
+wording, a real print control — and the signed-out redirects for both pages.
 `tools/verify-output.txt` is the captured output of a full passing run.
+
+Two runs back to back, with no manual cleanup between them, are the real proof: the
+second one catches a harness that only works on a pristine rig. `OUT=tools/verify-output-run1.txt`
+and `...-run2.txt` hold the two captures, and `tools/verify-pair.log` holds both
+verdict lines in one place.
+
+## Writing an assertion
+Assert what the page promised, not the shape it happened to have the day the check
+was written. A harness that fails a correct app is worse than no harness.
+- **Presence is a floor.** "The page shows X" is `ge … 1`. Showing X twice (once on
+  a day row, once in a heading) is not a defect, and an exact count fails a correct
+  app.
+- **A value that must sit on one day** belongs in that day's row —
+  `dayrow <body> <date> | grep -c …` — which is a stronger statement than counting
+  the whole page. Note `dayrow` follows nested lists, so a row with limit-crossed
+  flags still yields its checklist line.
+- **Exact counts** are only for facts that *are* counts: one row per day, the
+  eleven scores on the 0–10 scale, the number of days that crossed a limit.
+- **A sentence the page owns** gets a tolerant pattern. The pain line reads
+  "each 6 out of 10" for one distinct score and "from 3 to 9 out of 10" for two, so
+  the check accepts both shapes and still requires the count and the values.
+- **A zero is a real fact**: another user's data is absent, no interpretation
+  wording, no 5xx.
 
 ## Gotchas this rig encodes
 
@@ -74,7 +106,12 @@ Steps **h–o** (increment 2):
   cannot reach the app should stop, not look like a pass.
 - A stale app instance holding 3100 survives a rebuild, so `reset-verify.sh`
   kills `serve-verify.ts` **and** the older `serve-3100.ts` name before starting.
-- mongod's binary lives in `/tmp/mongo-bin` (kept between sessions so it is never
-  re-downloaded); the scratch dir `/tmp/rw-verify` is disposable.
+- mongod's binary lives in `/tmp/mongo-bin`, but **`/tmp` does not survive a
+  machine swap or a reboot** — after one, the rig has no mongod and
+  `run-verify.sh` stops on its "missing precondition" line. Re-provision with
+  `bash tools/provision-mongod.sh` (idempotent: it exits 0 and does nothing when
+  a working mongod is already there, and it never leaves a half-extracted
+  `/tmp/mongo-bin` that looks ready). The scratch dir `/tmp/rw-verify` is
+  disposable.
 - `bun run publish` rebuilds `dist/`, so **restart the 3100 instance** after a
   publish or the harness tests the previous build.

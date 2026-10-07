@@ -1,6 +1,6 @@
 =================== preconditions ===================
-run tag        : 261003160723-18284
-test accounts  : alice.261003160723-18284@example.com (+ user B, C, D, mass, nobody, shortpw)
+run tag        : 261003161645-1049
+test accounts  : alice.261003161645-1049@example.com (+ user B, C, D, mass, nobody, shortpw)
 rig OK       : throwaway database is empty and reachable
 
 =================== STEP 0: make index setup fail, before the app's first request ===================
@@ -15,11 +15,11 @@ server UTC date: 2026-10-03
 
 =================== STEP a: signup user A ===================
 
-### a1. POST /api/auth/signup  (alice.261003160723-18284@example.com)
+### a1. POST /api/auth/signup  (alice.261003161645-1049@example.com)
   status: 303
-    set-cookie: rw_session=UiV9uDNgYkeIcp-fYpDdZjR3s0kqZpGWHA68HFNfpRI; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=z4a3K2btDb37Zgb_SLOZtb39cIRlbggywYBTV-05gJM; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
-    cookie jar: rw_session	UiV9uDNgYkeIcp-fYpDdZjR3s0kqZpGWHA68HFNfpRI
+    cookie jar: rw_session	z4a3K2btDb37Zgb_SLOZtb39cIRlbggywYBTV-05gJM
 
 ### a2. GET /plan with that cookie
   status: 200  |  plan form present: 1  |  'Signed in as '
@@ -124,7 +124,7 @@ server UTC date: 2026-10-03
 
 ### e4. POST /api/auth/login (correct password)
   status: 303
-    set-cookie: rw_session=xU-dneJwG8KtzPEb2YsiiBImnfFK6KG-UamnyjoJvMI; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=Q_8joUxG93-PChYiZSOIh3-f-ibxqT7Kfgr1eqxIQBo; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /today
 
 ### e5. GET /today after logging back in
@@ -185,9 +185,9 @@ server UTC date: 2026-10-03
 
 =================== STEP g: isolation between two accounts ===================
 
-### g1. signup user B (bob.261003160723-18284@example.com)
+### g1. signup user B (bob.261003161645-1049@example.com)
   status: 303
-    set-cookie: rw_session=upriWm6y3p6mQNN5F6pgoKd_BxBERJLAmg5WmNXIVpE; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=Zz3ZpS_aM7dTg_0YQBLpTKYK_446-ZNPX-v4wdj3op4; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
 
 ### g2. user B saves a different plan
@@ -330,7 +330,7 @@ server UTC date: 2026-10-03
   completions: 3 document(s)
   sessions: 2 document(s)
   logs: 1 document(s)
-  logs for user 6ac1283c…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac12a6d…: 2026-10-03  (days logged: 1, duplicate days: 0)
   logs indexes: {"_id":1}, {"userId":1,"date":1} unique
 
 =================== STEP l: what user B can and cannot reach ===================
@@ -450,15 +450,15 @@ server UTC date: 2026-10-03
   completions: 3 document(s)
   sessions: 2 document(s)
   logs: 3 document(s)
-  logs for user 6ac1283c…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
-  logs for user 6ac1283d…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac12a6d…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
+  logs for user 6ac12a6e…: 2026-10-03  (days logged: 1, duplicate days: 0)
   logs indexes: {"_id":1}, {"userId":1,"date":1} unique
 
 =================== STEP p: a mistyped limit is refused, never silently dropped ===================
 
-### p1. signup user C (carol.261003160723-18284@example.com) for the limit tests
+### p1. signup user C (carol.261003161645-1049@example.com) for the limit tests
   status: 303
-    set-cookie: rw_session=B9fCAEx_0uHQ6dV1dqo6AZiylR1UYkGtqE7WkiVJLUQ; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=1ynqYgtpfiQcIvteu2Hb0L-6gAcq5WQusPdKb3Uto5w; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
   PASS p1 carol has an account (/plan)
 
@@ -506,17 +506,17 @@ server UTC date: 2026-10-03
 
 =================== STEP q: sign-in throttling, and equal-cost answers ===================
 
-### q1. signup user D (dave.261003160723-18284@example.com), the account the throttle test grinds
+### q1. signup user D (dave.261003161645-1049@example.com), the account the throttle test grinds
   status: 303
-    set-cookie: rw_session=JsrpZzL4iGICH7t1RE9UA_JSg4JtxodkOytUYCaCBbA; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=1fUD43xhNnhKWdU0r_E-eLpXmJFSEtUWdLg0tGtYGUg; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /plan
   PASS q1 dave has an account (/plan)
 
 ### q2. an unknown email must cost about what a wrong password costs
-  3 unknown-email sign-ins: 103 ms total
-  3 wrong-password sign-ins: 104 ms total
-  PASS q2 the unknown-email path is doing real hash work (103 >= 100)
-  PASS q2 the two paths cost about the same (103ms vs 104ms, within 3x)
+  3 unknown-email sign-ins: 112 ms total
+  3 wrong-password sign-ins: 100 ms total
+  PASS q2 the unknown-email path is doing real hash work (112 >= 100)
+  PASS q2 the two paths cost about the same (112ms vs 100ms, within 3x)
 
 ### q3. six wrong passwords for one account, then the right one
   status: 303
@@ -535,7 +535,7 @@ server UTC date: 2026-10-03
 
 ### q4. the wait is a backoff, not a permanent lockout
   status: 303
-    set-cookie: rw_session=krSkrcM0kSK9fWMeZBaQ-aSGA7BRumYwfqef7ifO6Hc; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
+    set-cookie: rw_session=JaLzAGB6wxqupD3G67oPrLyV6C7CrfBwFv0ztEX5NGM; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000
     Location: /today
   PASS q4 after the wait the correct password works again (/today)
   PASS q4 and a session is handed out (1)
@@ -603,9 +603,9 @@ server UTC date: 2026-10-03
   completions: 5 document(s)
   sessions: 5 document(s)
   logs: 4 document(s)
-  logs for user 6ac1283c…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
-  logs for user 6ac1283d…: 2026-10-03  (days logged: 1, duplicate days: 0)
-  logs for user 6ac1283e…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac12a6d…: 2026-10-02, 2026-10-03  (days logged: 2, duplicate days: 0)
+  logs for user 6ac12a6e…: 2026-10-03  (days logged: 1, duplicate days: 0)
+  logs for user 6ac12a6f…: 2026-10-03  (days logged: 1, duplicate days: 0)
   logs indexes: {"_id":1}, {"userId":1,"date":1} unique
   PASS t1 the index failure was reported exactly once for the whole run (1)
   PASS t2 the unique key that keeps one log per user per day was still built (1)
@@ -642,21 +642,27 @@ server UTC date: 2026-10-03
 ### v2. GET /timeline as user A
   status: 200
   PASS v2 the timeline loads for the signed-in patient (200)
-  PASS v2 A's own logged value is shown (1)
-  PASS v2 A's own note is shown (1)
-  PASS v2 the day a limit was crossed carries a plain marker (1)
-  PASS v2 the marker names the reading and the limit the patient saved (1)
-  PASS v2 the checklist count is shown for a day (2)
+  PASS v2 A's own logged value is shown (1 >= 1)
+  PASS v2 A's own note is shown (1 >= 1)
+  PASS v2 and the value sits on the day it was logged (yesterday) (1)
+  PASS v2 and today's row does not carry that value (0)
+  PASS v2 the day a limit was crossed carries a plain marker (1 >= 1)
+  PASS v2 the marker is on the day that crossed the limit (1)
+  PASS v2 and the day under the limit carries no marker (0)
+  PASS v2 the marker names the reading and the limit the patient saved (1 >= 1)
+  PASS v2 today's row carries its own checklist count (1)
+  PASS v2 yesterday's row carries its own checklist count (1)
+  PASS v2 the gap day carries a count with nothing ticked (1)
   PASS v2 a day with no entry still has a row (1)
   PASS v2 and that gap row carries no logged value (0)
   PASS v2 every day from the surgery date to today has a row ()
-/home/team/shared/site/tools/verify.sh: line 906: 14: command not found
-  PASS v2 the page links to the appointment summary (1)
+/home/team/shared/site/tools/verify.sh: line 916: 14: command not found
+  PASS v2 the page links to the appointment summary (1 >= 1)
   PASS v2 the page keeps no patient values in its address ()
 
 ### v3. user B's timeline: B's own days, and nothing of A's
   status: 200
-  PASS v3 B's own logged note is shown to B (1)
+  PASS v3 B's own logged note is shown to B (1 >= 1)
   PASS v3 A's note never reaches B's timeline (0)
   PASS v3 A's marked day never reaches B's timeline (0)
   PASS v3 A's pain score never reaches B's timeline (0)
@@ -682,12 +688,13 @@ server UTC date: 2026-10-03
   PASS w1 the temperature limit and its unit are shown (1 >= 1)
   PASS w1 the care-team phone number is shown (1 >= 1)
   PASS w1 the warning signs the patient saved are shown (1 >= 1)
-  PASS w1 the days logged are counted (1)
-  PASS w1 the pain-score range is given (1)
-  PASS w1 the temperature readings are counted (1)
-  PASS w1 the days a saved limit was met or passed are counted (1)
-  PASS w1 and those days are named (1)
-  PASS w1 it says plainly that it is a record, not an assessment (1)
+  PASS w1 the days logged are counted (1 >= 1)
+  PASS w1 the pain scores are counted, each score given in 10s (1)
+  PASS w1 and the scores shown are the patient's own two (3 and 9) (1)
+  PASS w1 the temperature readings are counted (1 >= 1)
+  PASS w1 the days a saved limit was met or passed are counted (1 >= 1)
+  PASS w1 and those days are named (1 >= 1)
+  PASS w1 it says plainly that it is a record, not an assessment (1 >= 1)
   PASS w1 the page keeps no patient values in its address ()
 
 ### w2. the summary carries no interpretation, prediction or advice wording
@@ -695,14 +702,16 @@ server UTC date: 2026-10-03
   PASS w2 no medication instruction of any kind (0)
 
 ### w3. the printable sheet: one page, no app frame, no chart library
-  PASS w3 a print stylesheet ships with the page (1)
+  PASS w3 a print stylesheet ships with the page (1 >= 1)
   PASS w3 the app frame is hidden on paper (2 >= 1)
-  PASS w3 the print control is there for a phone as well (2 >= 1)
+  PASS w3 the print control is a real button on the page (1 >= 1)
+  PASS w3 and it is labelled in plain words a patient can act on (2 >= 1)
+  PASS w3 and it is wired to window.print (1 >= 1)
   PASS w3 no chart or canvas markup on the printable sheet (0)
 
 ### w4. the summary is reachable from the Today view, and only for the signed-in patient
-  PASS w4 the Today view links to the summary (1)
-  PASS w4 the Today view links to the timeline (2 >= 2)
+  PASS w4 the Today view links to the summary (1 >= 1)
+  PASS w4 the Today view links to the timeline (2 >= 1)
   status: 307
     Location: /login
   PASS w4 /summary sends a signed-out visitor to the log-in page (/login)
@@ -715,7 +724,7 @@ server UTC date: 2026-10-03
   PASS w5 no 5xx answered any request in this run (0)
 
 =================== summary ===================
-  assertions: 129 passed, 0 failed
+  assertions: 138 passed, 0 failed
   every check passed
 
 =================== done ===================

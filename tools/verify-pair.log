@@ -1,0 +1,38 @@
+######## RecoverWell verification pair ########
+started:  2026-10-07T14:57:24+00:00
+tree:     /home/team/shared/site (branch main @ e97cad8)
+
+=================== provision mongod ===================
+downloading MongoDB 7.0.14 (ubuntu2204-x86_64)
+  https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2204-7.0.14.tgz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0 92 80.7M   92 74.7M    0     0  95.9M      0 --:--:-- --:--:-- --:--:-- 95.9M100 80.7M  100 80.7M    0     0  99.9M      0 --:--:-- --:--:-- --:--:-- 99.8M
+provisioned: /tmp/mongo-bin/bin/mongod
+  db version v7.0.14
+provision exit: 0
+
+=================== RUN 1 of 2 (OUT=tools/verify-output-run1.txt) ===================
+started:  2026-10-07T14:57:27+00:00
+run 1 exit status: 0
+  assertions: 138 passed, 0 failed
+  every check passed
+rig stopped (app on 3100 and the throwaway mongod); no processes left from this run
+captured output: tools/verify-output-run1.txt
+RESULT: harness passed
+finished: 2026-10-07T14:57:45+00:00
+
+=================== RUN 2 of 2 (OUT=tools/verify-output-run2.txt) ===================
+started:  2026-10-07T14:57:45+00:00
+run 2 exit status: 0
+  assertions: 138 passed, 0 failed
+  every check passed
+rig stopped (app on 3100 and the throwaway mongod); no processes left from this run
+captured output: tools/verify-output-run2.txt
+RESULT: harness passed
+finished: 2026-10-07T14:58:04+00:00
+
+=================== PAIR SUMMARY ===================
+run 1: assertions: 138 passed, 0 failed
+run 2: assertions: 138 passed, 0 failed
+finished: 2026-10-07T14:58:04+00:00

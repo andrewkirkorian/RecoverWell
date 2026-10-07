@@ -19,12 +19,28 @@ html = re.sub(r"<script.*?</script>", "", html, flags=re.S)
 
 wanted = sys.argv[2] if len(sys.argv) > 2 else None
 if wanted is not None:
-    start = html.find('data-day="%s"' % wanted)
-    if start < 0:
+    marker = html.find('data-day="%s"' % wanted)
+    if marker < 0:
         print("(no row for %s)" % wanted)
         sys.exit(0)
-    end = html.find("</li>", start)
-    html = html[start : end if end > 0 else len(html)]
+    # Walk back to the row's own opening tag, then forward to its OWN closing
+    # </li> — not the first one after the marker. A day that crossed a saved limit
+    # carries its flags in a nested <ul><li>, and stopping at that inner tag would
+    # cut the row off before its checklist line.
+    start = html.rfind("<li", 0, marker)
+    if start < 0:
+        start = marker
+    depth = 0
+    end = len(html)
+    for tag in re.finditer(r"<li\b|</li>", html[start:]):
+        if tag.group(0) == "</li>":
+            depth -= 1
+            if depth <= 0:
+                end = start + tag.start()
+                break
+        else:
+            depth += 1
+    html = html[start:end]
 
 html = re.sub(r"<!--.*?-->", "", html, flags=re.S)
 if wanted is not None:

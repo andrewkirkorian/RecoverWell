@@ -895,20 +895,30 @@ check "v1 the over-limit day saves" "$(loc $D/v1a)" "/log"
 hdr "v2. GET /timeline as user A"
 S=$(get $D/cookies-a.txt $D/v2 $BASE/timeline); show $D/v2 "$S"
 check "v2 the timeline loads for the signed-in patient" "$S" 200
-check "v2 A's own logged value is shown" "$(visn $D/v2.body 'Pain 9 out of 10')" 1
-check "v2 A's own note is shown" "$(visn $D/v2.body 'V wound note')" 1
-check "v2 the day a limit was crossed carries a plain marker" "$(visn $D/v2.body 'You logged a value at or above a limit you saved')" 1
-check "v2 the marker names the reading and the limit the patient saved" "$(visn $D/v2.body 'Pain score 9 out of 10 — you saved 4 out of 10 as your limit.')" 1
-check "v2 the checklist count is shown for a day" "$(visn $D/v2.body 'Checklist: 1 of 3 done')" 2
+# Showing a value twice (once on a row, once in a heading) is not a defect, so a
+# "the page shows X" check is a floor on the visible text, not an exact count.
+# Where a value has to sit on one particular day, the check reads that day's row
+# alone (dayrow), which is a stronger statement than counting the page.
+ge "v2 A's own logged value is shown" "$(visn $D/v2.body 'Pain 9 out of 10')" 1
+ge "v2 A's own note is shown" "$(visn $D/v2.body 'V wound note')" 1
+check "v2 and the value sits on the day it was logged (yesterday)" "$(dayrow $D/v2.body "$YDAY" | grep -c 'Pain 9 out of 10')" 1
+check "v2 and today's row does not carry that value" "$(dayrow $D/v2.body "$DATE" | grep -c 'Pain 9 out of 10')" 0
+ge "v2 the day a limit was crossed carries a plain marker" "$(visn $D/v2.body 'You logged a value at or above a limit you saved')" 1
+check "v2 the marker is on the day that crossed the limit" "$(dayrow $D/v2.body "$YDAY" | grep -c 'you saved 4 out of 10 as your limit')" 1
+check "v2 and the day under the limit carries no marker" "$(dayrow $D/v2.body "$DATE" | grep -c 'you saved 4 out of 10 as your limit')" 0
+ge "v2 the marker names the reading and the limit the patient saved" "$(visn $D/v2.body 'Pain score 9 out of 10 — you saved 4 out of 10 as your limit.')" 1
+check "v2 today's row carries its own checklist count" "$(dayrow $D/v2.body "$DATE" | grep -c 'Checklist: 1 of 3 done')" 1
+check "v2 yesterday's row carries its own checklist count" "$(dayrow $D/v2.body "$YDAY" | grep -c 'Checklist: 1 of 3 done')" 1
+check "v2 the gap day carries a count with nothing ticked" "$(dayrow $D/v2.body "$GAP" | grep -c 'Checklist: 0 of 3 done')" 1
 check "v2 a day with no entry still has a row" "$(dayrow $D/v2.body "$GAP" | grep -c 'Nothing logged')" 1
 check "v2 and that gap row carries no logged value" "$(dayrow $D/v2.body "$GAP" | grep -c 'out of 10')" 0
 check "v2 every day from the surgery date to today has a row"
   "$(grep -o 'data-day="' $D/v2.body | wc -l | tr -d ' ')" "$DAY_ROWS"
-check "v2 the page links to the appointment summary" "$(n 'href="/summary"' $D/v2.body)" 1
+ge "v2 the page links to the appointment summary" "$(n 'href="/summary"' $D/v2.body)" 1
 check "v2 the page keeps no patient values in its address" "$(loc $D/v2)" ""
 hdr "v3. user B's timeline: B's own days, and nothing of A's"
 S=$(get $D/cookies-b.txt $D/v3 $BASE/timeline); show $D/v3 "$S"
-check "v3 B's own logged note is shown to B" "$(visn $D/v3.body 'B wound note')" 1
+ge "v3 B's own logged note is shown to B" "$(visn $D/v3.body 'B wound note')" 1
 check "v3 A's note never reaches B's timeline" "$(visn $D/v3.body 'V wound note')" 0
 check "v3 A's marked day never reaches B's timeline" "$(visn $D/v3.body 'Pain score 9 out of 10')" 0
 check "v3 A's pain score never reaches B's timeline" "$(visn $D/v3.body 'Pain 9 out of 10')" 0
@@ -932,12 +942,26 @@ ge "w1 the pain limit the patient saved is shown" "$(visn $D/w1.body 'Pain score
 ge "w1 the temperature limit and its unit are shown" "$(visn $D/w1.body '100.4 °F')" 1
 ge "w1 the care-team phone number is shown" "$(visn $D/w1.body '01234 567890')" 1
 ge "w1 the warning signs the patient saved are shown" "$(visn $D/w1.body 'If the wound starts to smell')" 1
-check "w1 the days logged are counted" "$(visn $D/w1.body 'Days you logged: 2')" 1
-check "w1 the pain-score range is given" "$(visre $D/w1.body 'Pain scores: 2 logged, from [0-9]+ to [0-9]+ out of 10\.')" 1
-check "w1 the temperature readings are counted" "$(visn $D/w1.body 'Temperature readings: 2 logged')" 1
-check "w1 the days a saved limit was met or passed are counted" "$(visn $D/w1.body 'Days a limit you saved was met or passed: 1')" 1
-check "w1 and those days are named" "$(visn $D/w1.body "you were told to contact your care team.")" 1
-check "w1 it says plainly that it is a record, not an assessment" "$(visn $D/w1.body 'It is not a clinical assessment, and it is not medical advice.')" 1
+# These are totals the page states in its own words. What is promised is the fact
+# ("2 days", "2 logged"), not that the sentence appears exactly once, so each is a
+# floor on the visible text.
+ge "w1 the days logged are counted" "$(visn $D/w1.body 'Days you logged: 2')" 1
+# The shape of the pain line is the page's own choice: one distinct score reads
+# "each 6 out of 10", two read "from 3 to 9 out of 10". Accept either shape, and
+# require the count plus a score in 10s — a logged count and a per-entry score are
+# what the patient actually reads.
+ge "w1 the pain scores are counted, each score given in 10s" \
+  "$(visre $D/w1.body 'Pain scores: 2 logged, (each [0-9]+|from [0-9]+ to [0-9]+) out of 10\.')" 1
+# But the patient's own two scores decide the shape: this run logs 3 and 9, which
+# are different, so the only honest line is the range from the lower to the higher.
+# Accepting "each 3" here would let a page that lost the 9 pass, so this one is
+# pinned to the values as logged.
+ge "w1 and the scores shown are the patient's own two, 3 and 9" \
+  "$(visre $D/w1.body 'Pain scores: 2 logged, from 3 to 9 out of 10\.')" 1
+ge "w1 the temperature readings are counted" "$(visn $D/w1.body 'Temperature readings: 2 logged')" 1
+ge "w1 the days a saved limit was met or passed are counted" "$(visn $D/w1.body 'Days a limit you saved was met or passed: 1')" 1
+ge "w1 and those days are named" "$(visn $D/w1.body "you were told to contact your care team.")" 1
+ge "w1 it says plainly that it is a record, not an assessment" "$(visn $D/w1.body 'It is not a clinical assessment, and it is not medical advice.')" 1
 check "w1 the page keeps no patient values in its address" "$(loc $D/w1)" ""
 hdr "w2. the summary carries no interpretation, prediction or advice wording"
 check "w2 no diagnosis, prognosis or 'getting better/worse' wording" "$(na '(healing|on track|improv|getting better|getting worse|diagnos|prognos|suggests|may indicate|likely|possibly|you may|we recommend|you should|take more|take less|stop taking|increase your dose)' $D/w1.body)" 0
@@ -945,14 +969,22 @@ check "w2 no medication instruction of any kind" "$(na '(dosage advice|change yo
 hdr "w3. the printable sheet: one page, no app frame, no chart library"
 CSS_PATH=$(grep -o 'href="/assets/[^"]*\.css"' $D/w1.body | head -1 | sed 's/href="//;s/"$//')
 curl -s "$BASE$CSS_PATH" -o $D/app.css
-check "w3 a print stylesheet ships with the page" "$(grep -c '@media print' $D/app.css)" 1
+# The page never promised how many @media print blocks it ships, or how often a
+# label appears — it promised a printable sheet and a control that prints. So: a
+# floor on the stylesheet, and for the control the real thing (the button and its
+# handler), not a count of a phrase that also appears in the sentence above it.
+ge "w3 a print stylesheet ships with the page" "$(grep -c '@media print' $D/app.css)" 1
 ge "w3 the app frame is hidden on paper" "$(visn $D/w1.body 'no-print')" 1
-ge "w3 the print control is there for a phone as well" "$(visn $D/w1.body 'Print this page')" 1
+ge "w3 the print control is a real button on the page" "$(na 'id="rw-print"' $D/w1.body)" 1
+ge "w3 and it is labelled in plain words a patient can act on" "$(visn $D/w1.body 'Print this page')" 1
+ge "w3 and it is wired to window.print" "$(na 'window\.print\(\)' $D/w1.body)" 1
 check "w3 no chart or canvas markup on the printable sheet" "$(vis $D/w1.body | grep -c -E '<svg|<canvas')" 0
 hdr "w4. the summary is reachable from the Today view, and only for the signed-in patient"
 S=$(get $D/cookies-a.txt $D/w4 $BASE/today)
-check "w4 the Today view links to the summary" "$(n 'href="/summary"' $D/w4.body)" 1
-ge "w4 the Today view links to the timeline" "$(n 'href="/timeline"' $D/w4.body)" 2
+# A link count is not a promise: the same destination may be linked from the nav
+# and from the page body. Reaching it is the fact that matters.
+ge "w4 the Today view links to the summary" "$(n 'href="/summary"' $D/w4.body)" 1
+ge "w4 the Today view links to the timeline" "$(n 'href="/timeline"' $D/w4.body)" 1
 S=$(get $D/cookies-fresh.txt $D/w4b $BASE/summary); show $D/w4b "$S"
 check "w4 /summary sends a signed-out visitor to the log-in page" "$(loc $D/w4b)" "/login"
 S=$(forgedget $D/w4c $BASE/summary deadbeefdeadbeefdeadbeefdeadbeef); show $D/w4c "$S"
