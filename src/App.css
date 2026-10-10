@@ -490,6 +490,23 @@ h3 {
   flex: 0 0 auto;
 }
 
+.prototype-disclaimer {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border: 2px solid #b9782e;
+  border-radius: 12px;
+  background: #fffdf4;
+  color: #553d1f;
+  line-height: 1.5;
+}
+
+.prototype-disclaimer strong {
+  flex: 0 0 auto;
+}
+
 .home-page > .summary-grid {
   margin-top: 18px;
 }
@@ -1489,6 +1506,17 @@ h3 {
   line-height: 1.5;
 }
 
+.medication-data-notice {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #c9dfd1;
+  border-radius: 10px;
+  background: #f5faf6;
+  color: #315c4b;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
 .catalog-add-button {
   flex: 0 0 auto;
   padding: 8px 11px;
@@ -2201,6 +2229,11 @@ h3 {
   }
 
   .emergency-banner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .prototype-disclaimer {
     align-items: flex-start;
     flex-direction: column;
   }

@@ -122,7 +122,10 @@ function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
       searchRxNorm(catalogTerm, controller.signal)
         .then((items) => setRxNorm({ term: catalogTerm, items, error: '' }))
         .catch((error) => {
-          if (error.name !== 'AbortError') setRxNorm({ term: catalogTerm, items: [], error: error.message });
+          if (error.name !== 'AbortError') {
+            const message = error instanceof Error ? error.message : 'Medication search failed';
+            setRxNorm({ term: catalogTerm, items: [], error: message });
+          }
         });
     }, 250);
     return () => {
@@ -373,6 +376,11 @@ function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
             Each result is marked Prescription or Over the counter. RxNorm supplies drug names and
             FDA drug labeling supplies the marking; the built-in list is used if FDA data is not
             available. Medicines the built-in list cannot match are not screened for interactions.
+          </p>
+          <p className="medication-data-notice" role="note">
+            Search text is sent to the U.S. National Library of Medicine RxNorm API and the U.S.
+            Food and Drug Administration openFDA API. Do not enter names, diagnoses, or other
+            identifying information.
           </p>
           <div className="catalog-search-status" role="status">
             {catalogTooShort

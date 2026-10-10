@@ -58,6 +58,13 @@ npm start
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## CI and deployment
+
+The [CI and deploy workflow](./.github/workflows/ci-deploy.yml) runs tests, lint, and a
+production build for pull requests and pushes. Pushes to `main` also deploy the `dist/` output to
+GitHub Pages at the repository path. GitHub Pages must be enabled with **GitHub Actions** as its
+source in the repository settings.
+
 ## Available scripts
 
 | Command | Description |

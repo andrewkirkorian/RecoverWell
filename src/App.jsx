@@ -880,6 +880,14 @@ function App() {
             wait for this website.
           </span>
         </aside>
+        <aside className="prototype-disclaimer" role="note">
+          <strong>Prototype only — not medical advice.</strong>
+          <span>
+            Recover Well does not diagnose, prescribe, or replace a licensed clinician or pharmacist.
+            Verify medication names, doses, interactions, and recovery instructions with your care
+            team. Do not enter identifying health information.
+          </span>
+        </aside>
 
         <section className="home-page" hidden={activePage !== 'home'}>
           <div className="hero-card">

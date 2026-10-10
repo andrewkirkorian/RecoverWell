@@ -201,6 +201,15 @@ test('falls back to the built-in list with a notice when RxNorm is unavailable',
   expect(within(screen.getByRole('list', { name: 'Medication search results' })).getByText('Warfarin')).toBeDefined();
 });
 
+test('explains the public APIs used for medication searches', () => {
+  render(<Pharmacy comorbidities="" />);
+
+  expect(
+    screen.getByText(/Search text is sent to the U\.S\. National Library of Medicine RxNorm API/i),
+  ).toBeDefined();
+  expect(screen.getByText(/Do not enter names, diagnoses, or other identifying information/i)).toBeDefined();
+});
+
 test('dose menus list strengths by form and allow a custom dose', () => {
   render(<Pharmacy comorbidities="" />);
   const list = screen.getByRole('list', { name: 'Patient medication list' });

@@ -18,9 +18,10 @@ function DualAvailabilityGuide({ isListed, onAdd }) {
         </div>
       </div>
       <p className="reference-disclosure" role="note">
-        For education only, not personal medical advice. Do not use these figures to choose a dose.
-        They paraphrase examples of typical adult directions from FDA-authorized labeling. Follow
-        the exact Drug Facts label or the prescriber’s or pharmacist’s instructions; products and
+        Prototype educational content only—not medical advice. The dosing text has not been
+        reviewed by a clinician or pharmacist. Do not use these figures to choose a dose. They
+        paraphrase examples of typical adult directions from FDA-authorized labeling. Follow the
+        exact Drug Facts label or the prescriber’s or pharmacist’s instructions; products and
         formulations differ.
       </p>
       {dualAvailabilityMedications.map((entry) => (
