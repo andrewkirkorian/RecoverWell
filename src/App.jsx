@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ErrorBoundary from './ErrorBoundary';
 import CareSupport from './CareSupport';
 import Pharmacy from './Pharmacy';
 import SelfCare from './SelfCare';
@@ -1052,20 +1053,24 @@ function App() {
         </section>
 
         <section className="tools-page" hidden={activePage !== 'reference'}>
-          <HealthReference />
+          <ErrorBoundary key={activeProfile.id} section="Health reference">
+            <HealthReference />
+          </ErrorBoundary>
         </section>
 
         <section className="tools-page" hidden={activePage !== 'selfcare'}>
-          <SelfCare
-            profileCheckIn={activeProfile.checkIn}
-            onProfileCheckInChange={(update) => updateActiveProfile('checkIn', update)}
-            profilePlannedHabits={activeProfile.plannedHabits}
-            onProfilePlannedHabitsChange={(update) => updateActiveProfile('plannedHabits', update)}
-            profileCustomHabits={activeProfile.customHabits}
-            onProfileCustomHabitsChange={(update) => updateActiveProfile('customHabits', update)}
-            profileCheckInEntries={activeProfile.checkInEntries}
-            onProfileCheckInEntriesChange={(update) => updateActiveProfile('checkInEntries', update)}
-          />
+          <ErrorBoundary key={activeProfile.id} section="Self-care toolkit">
+            <SelfCare
+              profileCheckIn={activeProfile.checkIn}
+              onProfileCheckInChange={(update) => updateActiveProfile('checkIn', update)}
+              profilePlannedHabits={activeProfile.plannedHabits}
+              onProfilePlannedHabitsChange={(update) => updateActiveProfile('plannedHabits', update)}
+              profileCustomHabits={activeProfile.customHabits}
+              onProfileCustomHabitsChange={(update) => updateActiveProfile('customHabits', update)}
+              profileCheckInEntries={activeProfile.checkInEntries}
+              onProfileCheckInEntriesChange={(update) => updateActiveProfile('checkInEntries', update)}
+            />
+          </ErrorBoundary>
         </section>
 
         <div hidden={activePage !== 'guide'}>
@@ -1303,17 +1308,21 @@ function App() {
         </div>
 
         <section className="tools-page" hidden={activePage !== 'care'}>
-          <CareSupport key={activeProfile.id} />
+          <ErrorBoundary key={activeProfile.id} section="Prepare for your visit">
+            <CareSupport />
+          </ErrorBoundary>
         </section>
         <section className="tools-page" hidden={activePage !== 'medications'}>
-          <Pharmacy
-            comorbidities={[
-              ...activeProfile.healthHistory.map((id) => healthHistoryLabels[id]),
-              activeProfile.otherHealthHistory,
-            ].filter(Boolean).join(', ')}
-            medications={activeProfile.medications}
-            onMedicationsChange={(update) => updateActiveProfile('medications', update)}
-          />
+          <ErrorBoundary key={activeProfile.id} section="Medicines">
+            <Pharmacy
+              comorbidities={[
+                ...activeProfile.healthHistory.map((id) => healthHistoryLabels[id]),
+                activeProfile.otherHealthHistory,
+              ].filter(Boolean).join(', ')}
+              medications={activeProfile.medications}
+              onMedicationsChange={(update) => updateActiveProfile('medications', update)}
+            />
+          </ErrorBoundary>
         </section>
         <section className="tools-page" hidden={activePage !== 'health-history'}>
           <div className="section-heading">
