@@ -548,6 +548,10 @@ const surgeryChecklists = {
   ],
 };
 
+const healthHistoryLabels = Object.fromEntries(
+  healthHistoryGroups.flatMap((group) => group.conditions.map(({ id, label }) => [id, label])),
+);
+
 function App() {
   const [profiles, setProfiles] = useState([]);
   const [nextProfileId, setNextProfileId] = useState(1);
@@ -1303,6 +1307,10 @@ function App() {
         </section>
         <section className="tools-page" hidden={activePage !== 'medications'}>
           <Pharmacy
+            comorbidities={[
+              ...activeProfile.healthHistory.map((id) => healthHistoryLabels[id]),
+              activeProfile.otherHealthHistory,
+            ].filter(Boolean).join(', ')}
             medications={activeProfile.medications}
             onMedicationsChange={(update) => updateActiveProfile('medications', update)}
           />

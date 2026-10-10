@@ -362,3 +362,22 @@ test('opens the health reference from its own top-level tab', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Health reference' }));
   expect(screen.getByRole('heading', { name: /medical issues and nursing assistant/i })).toBeDefined();
 });
+
+test('passes reported kidney disease from health history to the Pharmacy screening', () => {
+  render(<App />);
+  createDemoProfile('Avery');
+
+  openSection('My recovery', 'Medicines');
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search medication reference' }), {
+    target: { value: 'ibuprofen' },
+  });
+  const reference = screen.getByRole('list', { name: 'Medication search results' });
+  fireEvent.click(within(reference).getAllByRole('button', { name: /Add Ibuprofen/ })[0]);
+  expect(screen.queryByText(/kidney disease noted in patient profile/i)).toBeNull();
+
+  openSection('My recovery', 'Health history');
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Chronic kidney disease (CKD)' }));
+
+  openSection('My recovery', 'Medicines');
+  expect(screen.getByText(/kidney disease noted in patient profile/i)).toBeDefined();
+});
