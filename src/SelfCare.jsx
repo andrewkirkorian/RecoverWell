@@ -270,7 +270,7 @@ function SelfCare({
     <section className="selfcare-section" aria-labelledby="selfcare-heading">
       <div className="section-heading">
         <p className="eyebrow">SELF-CARE TOOLKIT</p>
-        <h3 id="selfcare-heading">Patient-first care that supports independence</h3>
+        <h2 id="selfcare-heading">Patient-first care that supports independence</h2>
         <p className="planner-disclaimer">
           Use only the parts that feel helpful. This is a personal note, not a medical assessment
           or a measure of recovery. Follow the instructions from your own care team.
@@ -280,7 +280,7 @@ function SelfCare({
       <div className="selfcare-overview-grid">
         <article className="selfcare-card selfcare-highlight">
           <p className="eyebrow">MY CHECKLIST</p>
-          <h4>{completedHabits} of {totalHabits} choices checked off</h4>
+          <h3>{completedHabits} of {totalHabits} choices checked off</h3>
           <p>This only tracks boxes you choose to check; it does not measure your health or recovery.</p>
         </article>
 
@@ -301,7 +301,7 @@ function SelfCare({
         <article className="selfcare-card">
           <div className="selfcare-card-header">
             <p className="eyebrow">CHECK-IN</p>
-            <h4>How I feel today</h4>
+            <h3>How I feel today</h3>
           </div>
 
           <div className="selfcare-form-grid">
@@ -433,7 +433,7 @@ function SelfCare({
           </div>
 
           <div className="checkin-selected">
-            <h5>{formatDateKey(selectedDate)}</h5>
+            <h4>{formatDateKey(selectedDate)}</h4>
             {selectedEntry ? (
               <>
                 <p>{summarizeCheckIn(selectedEntry)}</p>
@@ -455,7 +455,7 @@ function SelfCare({
         <article className="selfcare-card">
           <div className="selfcare-card-header">
             <p className="eyebrow">SELF-CARE PLAN</p>
-            <h4>What I want to do today</h4>
+            <h3>What I want to do today</h3>
           </div>
 
           <div className="habit-list">
@@ -525,7 +525,7 @@ function SelfCare({
       <article className="selfcare-card selfcare-summary-panel">
         <div className="selfcare-card-header">
           <p className="eyebrow">MY SUMMARY</p>
-          <h4>Your check-in notes</h4>
+          <h3>Your check-in notes</h3>
         </div>
         <p>{summary}</p>
         <p>
@@ -537,7 +537,7 @@ function SelfCare({
       <section className="selfcare-card selfcare-suggestions" aria-labelledby="checkin-suggestions-heading">
         <div className="selfcare-card-header">
           <p className="eyebrow">OPTIONAL IDEAS</p>
-          <h4 id="checkin-suggestions-heading">Suggestions based on this check-in</h4>
+          <h3 id="checkin-suggestions-heading">Suggestions based on this check-in</h3>
         </div>
         <div aria-live="polite">
           {tipsHidden ? (
@@ -565,7 +565,7 @@ function SelfCare({
       <section className="selfcare-health-tips" aria-labelledby="general-health-tips-heading">
         <div className="section-heading">
           <p className="eyebrow">WHOLE-PERSON WELL-BEING</p>
-          <h4 id="general-health-tips-heading">General health tips</h4>
+          <h3 id="general-health-tips-heading">General health tips</h3>
           <p>
             Small, realistic choices can support well-being across different parts of life. Pick
             what feels useful; these general ideas are not personal medical advice.
@@ -574,7 +574,7 @@ function SelfCare({
         <div className="selfcare-overview-grid">
           {generalHealthTips.map((tip) => (
             <article className="selfcare-card" key={tip.title}>
-              <h5>{tip.title}</h5>
+              <h4>{tip.title}</h4>
               <p>{tip.detail}</p>
             </article>
           ))}
@@ -627,7 +627,7 @@ function SelfCare({
       <article className="selfcare-card">
         <div className="selfcare-card-header">
           <p className="eyebrow">SELF CARE REMINDERS</p>
-          <h4>Helpful reminders</h4>
+          <h3>Helpful reminders</h3>
         </div>
         <ul className="reminder-list">
           {selfCareReminders.map((reminder) => (

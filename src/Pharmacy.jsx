@@ -233,7 +233,7 @@ function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
     <section className="pharmacy-section" aria-labelledby="pharmacy-heading">
       <div className="section-heading">
         <p className="eyebrow">MEDICATION RECONCILIATION</p>
-        <h3 id="pharmacy-heading">Pharmacy</h3>
+        <h2 id="pharmacy-heading">Pharmacy</h2>
         <p className="pharmacy-intro">
           Review the patient’s reported medicines and check common medication safety concerns.
         </p>
@@ -271,7 +271,7 @@ function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
 
         <div className="medication-list-header">
           <div>
-            <h4>Patient medication list</h4>
+            <h3>Patient medication list</h3>
             <p>Only medicines on this list are used for the interaction screen below.</p>
           </div>
           <label className="medication-search">
@@ -358,7 +358,7 @@ function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
         <div className="medication-catalog">
           <div className="medication-list-header">
             <div>
-              <h4>Find a medicine to add</h4>
+              <h3>Find a medicine to add</h3>
               <p>Search by generic name, brand name, or purpose.</p>
             </div>
             <label className="medication-search">
@@ -472,7 +472,7 @@ function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
           <div className="safety-review-heading">
             <div>
               <p className="mini-label">LIMITED INTERACTION SCREEN</p>
-              <h4>Interactions &amp; contraindications</h4>
+              <h3>Interactions &amp; contraindications</h3>
             </div>
             <span className="review-count">{interactions.length + contraindications.length} to review</span>
           </div>
@@ -496,7 +496,7 @@ function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
             <article className="safety-alert contraindication-alert" key={`${item.title}-${item.medication}`}>
               <span className="alert-level">Patient-specific</span>
               <div>
-                <h5>{item.title}</h5>
+                <h4>{item.title}</h4>
                 <p><strong>{item.medication}:</strong> {item.description}</p>
               </div>
             </article>
@@ -509,7 +509,7 @@ function Pharmacy({ comorbidities = '', medications, onMedicationsChange }) {
             >
               <span className="alert-level">{interaction.level} · interaction</span>
               <div>
-                <h5>{interaction.title}</h5>
+                <h4>{interaction.title}</h4>
                 <p>{interaction.description}</p>
                 <a
                   className="interaction-source"

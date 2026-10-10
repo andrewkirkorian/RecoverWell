@@ -10,7 +10,7 @@ function DualAvailabilityGuide({ isListed, onAdd }) {
     <div className="dual-guide">
       <div className="medication-list-header">
         <div>
-          <h4>Sold both over the counter and by prescription</h4>
+          <h3>Sold both over the counter and by prescription</h3>
           <p>
             The over-the-counter and prescription versions of these medicines have different
             strengths and dosing. Pick the version the patient actually uses.
@@ -36,7 +36,7 @@ function DualAvailabilityGuide({ isListed, onAdd }) {
               const listed = isListed(entry.id, form.availability);
               return (
                 <section className="dual-column" key={form.key} aria-label={`${entry.name} ${form.label}`}>
-                  <h5>{form.label}</h5>
+                  <h4>{form.label}</h4>
                   <dl>
                     <dt>Strengths</dt>
                     <dd>{info.strengths}</dd>

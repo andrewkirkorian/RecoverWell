@@ -51,7 +51,7 @@ test('shows a simple home page and opens the daily recovery plan from navigation
   fireEvent.click(screen.getByRole('button', { name: 'Daily plan' }));
   expect(screen.getByRole('heading', { name: /things you may want to remember/i })).toBeDefined();
 
-  fireEvent.click(screen.getByRole('checkbox', { name: /mark walk to the window complete/i }));
+  fireEvent.click(screen.getByRole('checkbox', { name: /11:00 AM Walk to the window/i }));
 
   expect(screen.getByText(/25% complete/i)).toBeDefined();
   fireEvent.click(screen.getByText('Recovery information'));
@@ -59,6 +59,29 @@ test('shows a simple home page and opens the daily recovery plan from navigation
   expect(screen.getByRole('heading', { name: /from icu care to at-home recovery/i })).toBeDefined();
   expect(screen.getByRole('heading', { name: 'Day one after surgery: ICU care' })).toBeDefined();
   expect(screen.getByText(/your ICU team will tailor care to your operation/i)).toBeDefined();
+});
+
+test('marks the active dropdown page and closes menus accessibly', () => {
+  render(<App />);
+  createDemoProfile('Avery');
+
+  const summary = screen.getByText('My recovery');
+  fireEvent.click(summary);
+  fireEvent.click(screen.getByRole('button', { name: 'Daily plan' }));
+  const details = summary.parentElement;
+  expect(details.open).toBe(false);
+  expect(summary.classList.contains('is-active')).toBe(true);
+
+  fireEvent.click(summary);
+  const activePageButton = screen.getByRole('button', { name: 'Daily plan' });
+  expect(activePageButton.getAttribute('aria-current')).toBe('page');
+  fireEvent.keyDown(activePageButton, { key: 'Escape' });
+  expect(details.open).toBe(false);
+  expect(document.activeElement).toBe(summary);
+
+  fireEvent.click(summary);
+  fireEvent.click(screen.getByRole('button', { name: 'Home' }));
+  expect(details.open).toBe(false);
 });
 
 test('opens self-care from its own top-level navigation tab', () => {
@@ -91,11 +114,13 @@ test('lets a demo profile add and remove personal daily reminders', () => {
   expect(screen.getByText('0/5 done')).toBeDefined();
   expect(screen.getByText('Afternoon')).toBeDefined();
   expect(screen.getByText('Write down a question')).toBeDefined();
+  expect(screen.getByText('Added reminder: Write down a question, Afternoon.')).toBeDefined();
 
-  fireEvent.click(screen.getByRole('checkbox', { name: /mark write down a question complete/i }));
+  fireEvent.click(screen.getByRole('checkbox', { name: /Afternoon Write down a question/i }));
   expect(screen.getByText(/20% complete/i)).toBeDefined();
   fireEvent.click(screen.getByRole('button', { name: 'Remove reminder Write down a question' }));
   expect(screen.queryByText('Write down a question')).toBeNull();
+  expect(screen.getByText('Removed reminder: Write down a question, Afternoon.')).toBeDefined();
   expect(screen.getByText('0/4 done')).toBeDefined();
 });
 
@@ -257,7 +282,7 @@ test('keeps checklist, self-care notes, and medicines separate between demo prof
   createDemoProfile('Avery');
 
   openSection('My recovery', 'Daily plan');
-  fireEvent.click(screen.getByRole('checkbox', { name: /mark walk to the window complete/i }));
+  fireEvent.click(screen.getByRole('checkbox', { name: /11:00 AM Walk to the window/i }));
   fireEvent.click(screen.getByRole('button', { name: 'Self-care' }));
   fireEvent.change(screen.getByLabelText('Recovery note'), {
     target: { value: 'Avery personal note' },
@@ -277,7 +302,7 @@ test('keeps checklist, self-care notes, and medicines separate between demo prof
 
   openSection('My recovery', 'Daily plan');
   expect(screen.getByText(/0% complete/i)).toBeDefined();
-  fireEvent.click(screen.getByRole('checkbox', { name: /mark walk to the window complete/i }));
+  fireEvent.click(screen.getByRole('checkbox', { name: /11:00 AM Walk to the window/i }));
   fireEvent.click(screen.getByRole('button', { name: 'Self-care' }));
   expect(screen.queryByText('Avery personal note')).toBeNull();
 

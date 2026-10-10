@@ -121,7 +121,7 @@ function CareSupport() {
     <section className="care-support-section" aria-labelledby="care-support-heading">
       <div className="section-heading">
         <p className="eyebrow">PATIENT TOOL</p>
-        <h3 id="care-support-heading">Prepare for your next visit</h3>
+        <h2 id="care-support-heading">Prepare for your next visit</h2>
         <p className="care-support-intro">
           Organize what you have noticed, what matters most to you, and the questions or reminders
           you want to keep with you. This tool does not diagnose symptoms, send information, or
@@ -245,7 +245,7 @@ function CareSupport() {
             aria-labelledby="care-support-summary-heading"
             aria-live="polite"
           >
-            <h4 id="care-support-summary-heading">Draft to review</h4>
+            <h3 id="care-support-summary-heading">Draft to review</h3>
             <pre>{summary}</pre>
             <p>Review and correct this summary before sharing it. Nothing is sent or saved by this page.</p>
             <div className="care-support-actions">

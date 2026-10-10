@@ -180,7 +180,7 @@
 
 .signup-form-heading > p:last-child {
   margin-top: 9px;
-  color: #718078;
+  color: #5f7067;
   font-size: 0.9rem;
 }
 
@@ -217,13 +217,14 @@
 }
 
 .signup-form input::placeholder {
-  color: #6b7c74;
+  color: #607168;
 }
 
 .signup-form input:focus,
 .signup-form select:focus {
   border-color: #659477;
-  outline: none;
+  outline: 2px solid #4f765f;
+  outline-offset: 2px;
   background: #fff;
   box-shadow: 0 0 0 3px rgba(101, 148, 119, 0.14);
 }
@@ -264,14 +265,14 @@
 
 .signup-privacy {
   margin-top: 18px;
-  color: #7b8981;
+  color: #5f7067;
   font-size: 0.74rem;
   line-height: 1.6;
 }
 
 .signup-alternate {
   margin-top: 20px;
-  color: #6c7d74;
+  color: #61736b;
   font-size: 0.84rem;
   text-align: center;
 }
@@ -348,7 +349,7 @@
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #70857d;
+  color: #5e7168;
   font-size: 11px;
   letter-spacing: 0.12em;
   font-weight: 700;
@@ -417,6 +418,11 @@ h3 {
   background: #edf6ef;
 }
 
+.nav-dropdown summary.is-active {
+  border-color: #b8d1bf;
+  background: #edf6ef;
+}
+
 .nav-dropdown {
   position: relative;
 }
@@ -463,6 +469,11 @@ h3 {
 
 .nav-dropdown-menu button:hover,
 .nav-dropdown-menu button:focus-visible {
+  background: #edf6ef;
+}
+
+.nav-dropdown-menu button[aria-current="page"] {
+  border: 1px solid #b8d1bf;
   background: #edf6ef;
 }
 
@@ -591,7 +602,7 @@ h3 {
 }
 
 .hero-badge span {
-  color: #6c847d;
+  color: #61736b;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -767,7 +778,7 @@ h3 {
 }
 
 .task-time {
-  color: #6a7b76;
+  color: #626f69;
   font-size: 0.8rem;
 }
 
@@ -777,7 +788,7 @@ h3 {
 }
 
 .task-item.done .task-name {
-  color: #75867f;
+  color: #63736b;
   text-decoration: line-through;
 }
 
@@ -788,6 +799,7 @@ h3 {
   background: #f7faf7;
 }
 
+.care-panel h2,
 .care-panel h3 {
   margin-bottom: 10px;
 }
@@ -810,6 +822,7 @@ h3 {
   margin-bottom: 16px;
 }
 
+.section-heading h2,
 .section-heading h3 {
   margin-top: 2px;
 }
@@ -827,6 +840,7 @@ h3 {
   background: #f7faf8;
 }
 
+.icu-model-card h3,
 .icu-model-card h4 {
   margin-bottom: 10px;
   font-size: 1.08rem;
@@ -899,8 +913,11 @@ h3 {
   gap: 10px;
 }
 
+.route-card h3,
 .route-card h4,
+.anesthesia-detail h3,
 .anesthesia-detail h4,
+.anesthesia-questions h3,
 .anesthesia-questions h4 {
   margin: 0;
   font-size: 1.08rem;
@@ -952,6 +969,7 @@ h3 {
   background: #f8fbf8;
 }
 
+.anesthesia-detail h4,
 .anesthesia-detail h5 {
   margin: 14px 0 6px;
   color: #315c4b;
@@ -1080,6 +1098,7 @@ h3 {
   margin-top: 16px;
 }
 
+.surgery-checklist-card h3,
 .surgery-checklist-card h4 {
   font-size: 1.1rem;
 }
@@ -1153,6 +1172,7 @@ h3 {
   background: #f8fbf8;
 }
 
+.patient-summary h3,
 .patient-summary h4 {
   margin: 8px 0 10px;
   font-size: 1.12rem;
@@ -1193,6 +1213,7 @@ h3 {
   font-weight: 600;
 }
 
+.patient-risk-card h3,
 .patient-risk-card h4 {
   margin: 8px 0 10px;
   font-size: 1.08rem;
@@ -1235,7 +1256,7 @@ h3 {
 
 .mini-label {
   margin: 0;
-  color: #6b7a75;
+  color: #617168;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1273,7 +1294,9 @@ h3 {
   text-transform: uppercase;
 }
 
+.timeline-card h3,
 .timeline-card h4,
+.procedure-card h3,
 .procedure-card h4 {
   margin-bottom: 10px;
   font-size: 1.08rem;
@@ -1351,7 +1374,7 @@ h3 {
 
 .pharmacy-summary span,
 .medication-list-header p {
-  color: #6a7b76;
+  color: #626f69;
   font-size: 0.83rem;
 }
 
@@ -1363,7 +1386,9 @@ h3 {
   gap: 16px;
 }
 
+.medication-list-header h3,
 .medication-list-header h4,
+.safety-review-heading h3,
 .safety-review-heading h4 {
   color: #243c33;
   font-size: 1.1rem;
@@ -1532,7 +1557,7 @@ h3 {
 .catalog-add-button:disabled {
   border-color: #e4ebe6;
   background: #f4f6f4;
-  color: #75867f;
+  color: #63736b;
   cursor: default;
 }
 
@@ -1548,6 +1573,7 @@ h3 {
   margin-bottom: 3px;
 }
 
+.safety-review-heading h3,
 .safety-review-heading h4 {
   margin-top: 5px;
 }
@@ -1571,6 +1597,7 @@ h3 {
   border-radius: 12px;
 }
 
+.safety-alert h4,
 .safety-alert h5 {
   margin: 0 0 5px;
   color: #3a342c;
@@ -1851,6 +1878,7 @@ h3 {
   background: #f8fbf8;
 }
 
+.care-support-summary h3,
 .care-support-summary h4 {
   color: #243c33;
   font-size: 1rem;
@@ -1941,6 +1969,7 @@ h3 {
   box-shadow: 0 10px 24px rgba(36, 52, 46, 0.04);
 }
 
+.selfcare-card h3,
 .selfcare-card h4 {
   margin-top: 4px;
   font-size: 1.15rem;
@@ -2326,6 +2355,7 @@ h3 {
 .dual-card summary span { color: #4b5b6b; font-size: 0.9rem; }
 .dual-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
 .dual-column { border: 1px solid #e1e7ed; border-radius: 8px; padding: 10px 12px; }
+.dual-column h4,
 .dual-column h5 { margin: 0 0 6px; }
 .dual-column dt { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #4b5b6b; margin-top: 8px; }
 .dual-column dd { margin: 2px 0 0; font-size: 0.92rem; }

@@ -80,7 +80,7 @@ function HealthReference() {
     <section className="selfcare-section reference-page" aria-labelledby="health-reference-heading">
       <div className="section-heading">
         <p className="eyebrow">HEALTH REFERENCE</p>
-        <h3 id="health-reference-heading">Medical issues and nursing assistant</h3>
+        <h2 id="health-reference-heading">Medical issues and nursing assistant</h2>
         <p>
           General education drawn from open science and health references. It does not diagnose,
           assess urgency, or replace your care team.
@@ -142,7 +142,7 @@ function HealthReference() {
       <div id="reference-results" className="selfcare-grid">
         {visibleEntries.length === 0 && (
           <article className="selfcare-card">
-            <h4>No topics match</h4>
+            <h3>No topics match</h3>
             <p>
               {area === 'saved' && !query
                 ? 'You have not saved any topics yet.'
@@ -161,7 +161,7 @@ function HealthReference() {
                 <p className="eyebrow">
                   {areaLabel(entry.area).toUpperCase()} · {entry.topic.toUpperCase()}
                 </p>
-                <h4>{entry.title}</h4>
+                <h3>{entry.title}</h3>
               </div>
               <p>{entry.summary}</p>
               <details className="reference-details">
@@ -171,7 +171,7 @@ function HealthReference() {
                 <ul>
                   {entry.points.map((point) => <li key={point}>{point}</li>)}
                 </ul>
-                <h5>Questions to ask your care team</h5>
+                <h4>Questions to ask your care team</h4>
                 <ul>
                   {entry.questions.map((question) => <li key={question}>{question}</li>)}
                 </ul>

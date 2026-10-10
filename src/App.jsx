@@ -1,9 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CareSupport from './CareSupport';
 import Pharmacy from './Pharmacy';
 import SelfCare from './SelfCare';
 import HealthReference from './HealthReference';
 import './App.css';
+
+const pageTitles = {
+  home: 'Home',
+  plan: 'Procedure planning',
+  medications: 'Pharmacy',
+  'health-history': 'Health history',
+  care: 'Prepare for your visit',
+  selfcare: 'Self-care toolkit',
+  guide: 'Anesthesia and ICU guide',
+  journey: 'Recovery journey',
+  reference: 'Health reference',
+};
 
 const initialTasks = [
   { id: 'meds', time: '8:00 AM', label: 'Morning medication', done: false },
@@ -541,11 +553,14 @@ function App() {
   const [nextProfileId, setNextProfileId] = useState(1);
   const [taskLabel, setTaskLabel] = useState('');
   const [taskTime, setTaskTime] = useState('');
+  const [taskAnnouncement, setTaskAnnouncement] = useState('');
   const [activeProfileId, setActiveProfileId] = useState(null);
   const [authMode, setAuthMode] = useState('signup');
   const [profileName, setProfileName] = useState('');
   const [loginProfileId, setLoginProfileId] = useState('');
   const [activePage, setActivePage] = useState('home');
+  const taskListRef = useRef(null);
+  const taskLabelInputRef = useRef(null);
 
   const activeProfile = profiles.find((profile) => profile.id === activeProfileId);
   const tasks = activeProfile?.tasks ?? initialTasks;
@@ -636,23 +651,32 @@ function App() {
     event.preventDefault();
     const label = taskLabel.trim();
     if (!label) return;
+    const time = taskTime.trim();
     updateActiveProfile('tasks', (currentTasks) => [
       ...currentTasks,
       {
         id: `custom-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        time: taskTime.trim(),
+        time,
         label,
         done: false,
       },
     ]);
+    setTaskAnnouncement('Added reminder: ' + label + (time ? ', ' + time : '') + '.');
     setTaskLabel('');
     setTaskTime('');
   };
 
   const removeTask = (taskId) => {
+    const taskIndex = tasks.findIndex((task) => task.id === taskId);
+    const removedTask = tasks[taskIndex];
     updateActiveProfile('tasks', (currentTasks) =>
       currentTasks.filter((task) => task.id !== taskId),
     );
+    setTaskAnnouncement('Removed reminder: ' + removedTask.label + (removedTask.time ? ', ' + removedTask.time : '') + '.');
+    requestAnimationFrame(() => {
+      const removeButtons = taskListRef.current?.querySelectorAll('.task-remove-button') ?? [];
+      (removeButtons[Math.min(taskIndex, removeButtons.length - 1)] ?? taskLabelInputRef.current)?.focus();
+    });
   };
 
   const toggleChecklistItem = (item) => {
@@ -672,6 +696,39 @@ function App() {
         : [...currentConditions, conditionId],
     );
   };
+
+  useEffect(() => {
+    if (!activeProfileId) {
+      document.title = 'Recover Well';
+      return;
+    }
+    document.title = `${pageTitles[activePage] ?? 'Recover Well'} – Recover Well`;
+    document.documentElement.scrollTop = 0;
+    document.getElementById('main-content')?.focus({ preventScroll: true });
+  }, [activePage, activeProfileId]);
+
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key !== 'Escape') return;
+      const openMenu = [...document.querySelectorAll('.nav-dropdown[open]')]
+        .find((menu) => menu.contains(event.target)) ?? document.querySelector('.nav-dropdown[open]');
+      if (!openMenu) return;
+      event.preventDefault();
+      openMenu.removeAttribute('open');
+      openMenu.querySelector('summary')?.focus();
+    };
+    const closeOnOutsideClick = (event) => {
+      document.querySelectorAll('.nav-dropdown[open]').forEach((menu) => {
+        if (!menu.contains(event.target)) menu.removeAttribute('open');
+      });
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    document.addEventListener('click', closeOnOutsideClick);
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape);
+      document.removeEventListener('click', closeOnOutsideClick);
+    };
+  }, []);
 
   const navigateTo = (page, event) => {
     setActivePage(page);
@@ -794,7 +851,7 @@ function App() {
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <header className="topbar">
         <div className="brand-wrap">
-          <span className="brand-badge">RW</span>
+          <span className="brand-badge" aria-hidden="true">RW</span>
           <div>
             <p className="eyebrow">RECOVERY APP</p>
             <h1>Recover Well</h1>
@@ -844,29 +901,61 @@ function App() {
           Health reference
         </button>
         <details className="nav-dropdown">
-          <summary>My recovery</summary>
+          <summary
+            className={['plan', 'medications', 'health-history', 'care'].includes(activePage) ? 'is-active' : undefined}
+          >
+            My recovery
+          </summary>
           <div className="nav-dropdown-menu">
-            <button type="button" onClick={(event) => navigateTo('plan', event)}>
+            <button
+              type="button"
+              aria-current={activePage === 'plan' ? 'page' : undefined}
+              onClick={(event) => navigateTo('plan', event)}
+            >
               Daily plan
             </button>
-            <button type="button" onClick={(event) => navigateTo('medications', event)}>
+            <button
+              type="button"
+              aria-current={activePage === 'medications' ? 'page' : undefined}
+              onClick={(event) => navigateTo('medications', event)}
+            >
               Medicines
             </button>
-            <button type="button" onClick={(event) => navigateTo('health-history', event)}>
+            <button
+              type="button"
+              aria-current={activePage === 'health-history' ? 'page' : undefined}
+              onClick={(event) => navigateTo('health-history', event)}
+            >
               Health history
             </button>
-            <button type="button" onClick={(event) => navigateTo('care', event)}>
+            <button
+              type="button"
+              aria-current={activePage === 'care' ? 'page' : undefined}
+              onClick={(event) => navigateTo('care', event)}
+            >
               Prepare for your visit
             </button>
           </div>
         </details>
         <details className="nav-dropdown">
-          <summary>Recovery information</summary>
+          <summary
+            className={['guide', 'journey'].includes(activePage) ? 'is-active' : undefined}
+          >
+            Recovery information
+          </summary>
           <div className="nav-dropdown-menu">
-            <button type="button" onClick={(event) => navigateTo('guide', event)}>
+            <button
+              type="button"
+              aria-current={activePage === 'guide' ? 'page' : undefined}
+              onClick={(event) => navigateTo('guide', event)}
+            >
               Procedure planning
             </button>
-            <button type="button" onClick={(event) => navigateTo('journey', event)}>
+            <button
+              type="button"
+              aria-current={activePage === 'journey' ? 'page' : undefined}
+              onClick={(event) => navigateTo('journey', event)}
+            >
               Recovery journey
             </button>
           </div>
@@ -958,11 +1047,11 @@ function App() {
           </section>
         </section>
 
-        <section className="tools-page" hidden={activePage !== 'reference'} aria-label="Health reference">
+        <section className="tools-page" hidden={activePage !== 'reference'}>
           <HealthReference />
         </section>
 
-        <section className="tools-page" hidden={activePage !== 'selfcare'} aria-label="Self-care toolkit">
+        <section className="tools-page" hidden={activePage !== 'selfcare'}>
           <SelfCare
             profileCheckIn={activeProfile.checkIn}
             onProfileCheckInChange={(update) => updateActiveProfile('checkIn', update)}
@@ -979,7 +1068,7 @@ function App() {
         <section className="procedure-planner-section" aria-labelledby="procedure-planner-heading">
           <div className="section-heading">
             <p className="eyebrow">PROCEDURE PLANNING</p>
-            <h3 id="procedure-planner-heading">Keep your procedure details together</h3>
+            <h2 id="procedure-planner-heading">Keep your procedure details together</h2>
             <p className="planner-disclaimer">
               This is a personal planning aid only. It does not book or confirm a procedure.
               Follow instructions directly from your surgical team.
@@ -1044,7 +1133,7 @@ function App() {
           </div>
 
           <div className="surgery-checklist-card">
-            <h4>Checklist for {selectedProcedure}</h4>
+            <h3>Checklist for {selectedProcedure}</h3>
             <p>General prompts to discuss with your care team; they are not personalized medical instructions.</p>
             <ul className="surgery-checklist">
               {[
@@ -1072,7 +1161,7 @@ function App() {
         <section className="icu-model-section" aria-labelledby="procedure-care-modules-heading">
           <div className="section-heading">
             <p className="eyebrow">PROCEDURE-RELEVANT CARE TOPICS</p>
-            <h3 id="procedure-care-modules-heading">ICU and recovery topics to discuss</h3>
+            <h2 id="procedure-care-modules-heading">ICU and recovery topics to discuss</h2>
             <p className="planner-disclaimer">
               Based on the {selectedService} procedure category and {selectedProcedure} selected
               above. These general prompts are not a description of your care or a personalized
@@ -1082,7 +1171,7 @@ function App() {
 
           <div className="patient-profile-grid">
             <article className="icu-model-card">
-              <h4>ICU care topics</h4>
+              <h3>ICU care topics</h3>
               <ul>
                 {selectedProcedureGroup.icuTopics.map((topic) => (
                   <li key={topic}>{topic}</li>
@@ -1090,7 +1179,7 @@ function App() {
               </ul>
             </article>
             <article className="icu-model-card">
-              <h4>Recovery care topics</h4>
+              <h3>Recovery care topics</h3>
               <ul>
                 {selectedProcedureGroup.recoveryTopics.map((topic) => (
                   <li key={topic}>{topic}</li>
@@ -1103,7 +1192,7 @@ function App() {
         <section className="icu-model-section" aria-labelledby="postoperative-route-heading">
           <div className="section-heading">
             <p className="eyebrow">AFTER THE PROCEDURE</p>
-            <h3 id="postoperative-route-heading">Possible next step after PACU</h3>
+            <h2 id="postoperative-route-heading">Possible next step after PACU</h2>
             <p className="planner-disclaimer">
               These are broad examples of planned pathways, not a rule about where anyone will go.
               The operation and approach, your health and recovery, local resources, and clinical
@@ -1114,12 +1203,12 @@ function App() {
 
           <article className="icu-model-card route-card">
             <p className="mini-label">Selected procedure: {selectedProcedure}</p>
-            <h4>
+            <h3>
               {postoperativeRoute.route === 'home' && 'PACU → home may be planned'}
               {postoperativeRoute.route === 'floor' && 'PACU → hospital floor is commonly planned'}
               {postoperativeRoute.route === 'icu' && 'PACU → ICU or monitored unit may be planned'}
               {postoperativeRoute.route === 'variable' && 'The planned route can vary'}
-            </h4>
+            </h3>
             <p>{postoperativeRoute.detail}</p>
             <p>
               Going home depends on meeting the care team’s discharge criteria; needing more
@@ -1129,9 +1218,9 @@ function App() {
             <a
               href="https://www.asahq.org/standards-and-practice-parameters/standards-for-postanesthesia-care"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
-              American Society of Anesthesiologists: Standards for Postanesthesia Care
+              American Society of Anesthesiologists: Standards for Postanesthesia Care (opens in new tab)
             </a>
           </article>
         </section>
@@ -1139,7 +1228,7 @@ function App() {
         <section className="icu-model-section" aria-labelledby="anesthesia-education-heading">
           <div className="section-heading">
             <p className="eyebrow">ANESTHESIA EDUCATION</p>
-            <h3 id="anesthesia-education-heading">What anesthesia may feel like</h3>
+            <h2 id="anesthesia-education-heading">What anesthesia may feel like</h2>
             <p className="planner-disclaimer">
               This section is separate from the procedure-route examples: a procedure name does not
               tell you which anesthesia you will receive. Types can be combined, and your
@@ -1161,10 +1250,12 @@ function App() {
               </select>
             </label>
 
-            <article className="anesthesia-detail" aria-live="polite">
-              <h4>{anesthesiaInfo.label}</h4>
-              <p>{anesthesiaInfo.description}</p>
-              <h5>Possible effects and recovery</h5>
+            <article className="anesthesia-detail">
+              <div aria-live="polite">
+                <h3>{anesthesiaInfo.label}</h3>
+                <p>{anesthesiaInfo.description}</p>
+              </div>
+              <h4>Possible effects and recovery</h4>
               <p>{anesthesiaInfo.effects}</p>
               <p>
                 After anesthesia, people are monitored in PACU or an appropriate equivalent area.
@@ -1174,7 +1265,7 @@ function App() {
             </article>
 
             <div className="anesthesia-questions">
-              <h4>Questions for your anesthesiology team</h4>
+              <h3>Questions for your anesthesiology team</h3>
               <ul>
                 <li>Which type or combination is planned, and why?</li>
                 <li>What might I notice as it wears off, and which symptoms should I report?</li>
@@ -1190,16 +1281,16 @@ function App() {
               <a
                 href="https://madeforthismoment.asahq.org/anesthesia-101/types-of-anesthesia/"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
-                American Society of Anesthesiologists: Types of Anesthesia
+                American Society of Anesthesiologists: Types of Anesthesia (opens in new tab)
               </a>
               <a
                 href="https://madeforthismoment.asahq.org/preparing-for-surgery/recovery/"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
-                American Society of Anesthesiologists: Anesthesia and Recovery
+                American Society of Anesthesiologists: Anesthesia and Recovery (opens in new tab)
               </a>
             </div>
           </div>
@@ -1207,19 +1298,19 @@ function App() {
 
         </div>
 
-        <section className="tools-page" hidden={activePage !== 'care'} aria-label="Prepare for your visit">
+        <section className="tools-page" hidden={activePage !== 'care'}>
           <CareSupport key={activeProfile.id} />
         </section>
-        <section className="tools-page" hidden={activePage !== 'medications'} aria-label="Medicines">
+        <section className="tools-page" hidden={activePage !== 'medications'}>
           <Pharmacy
             medications={activeProfile.medications}
             onMedicationsChange={(update) => updateActiveProfile('medications', update)}
           />
         </section>
-        <section className="tools-page" hidden={activePage !== 'health-history'} aria-labelledby="health-history-heading">
+        <section className="tools-page" hidden={activePage !== 'health-history'}>
           <div className="section-heading">
             <p className="eyebrow">MY PROFILE</p>
-            <h3 id="health-history-heading">Health history to discuss</h3>
+            <h2 id="health-history-heading">Health history to discuss</h2>
             <p className="planner-disclaimer">
               Optional organizer for conditions you report having been diagnosed with or told about
               by your care team. This list is not complete and does not assess risk or change your
@@ -1281,7 +1372,7 @@ function App() {
             <div className="plan-header">
               <div>
                 <p className="eyebrow">EXAMPLE DAILY CHECKLIST</p>
-                <h3>Things you may want to remember</h3>
+                <h2>Things you may want to remember</h2>
               </div>
               <span>{completedCount}/{tasks.length} done</span>
             </div>
@@ -1290,7 +1381,8 @@ function App() {
               instructions and do not change medicines or activity based on this checklist.
             </p>
 
-            <ul className="task-list">
+            <p className="visually-hidden" role="status" aria-live="polite">{taskAnnouncement}</p>
+            <ul className="task-list" ref={taskListRef}>
               {tasks.map((task) => (
                 <li key={task.id} className={task.done ? 'task-item done' : 'task-item'}>
                   <label>
@@ -1298,7 +1390,6 @@ function App() {
                       type="checkbox"
                       checked={task.done}
                       onChange={() => toggleTask(task.id)}
-                      aria-label={`Mark ${task.label.toLowerCase()} complete`}
                     />
                     <span className="task-time">{task.time}</span>
                     <span className="task-name">{task.label}</span>
@@ -1319,6 +1410,7 @@ function App() {
                 Add a personal reminder
                 <input
                   id="new-task-label"
+                  ref={taskLabelInputRef}
                   type="text"
                   maxLength={100}
                   value={taskLabel}
@@ -1348,7 +1440,7 @@ function App() {
 
           <aside className="care-panel">
             <p className="eyebrow">YOUR FOCUS</p>
-            <h3>Daily planning</h3>
+            <h2>Daily planning</h2>
             <p>Choose what feels helpful. Ask your care team what guidance applies to your activity, fluids, and medicines.</p>
           </aside>
         </section>
@@ -1357,7 +1449,7 @@ function App() {
         <section className="timeline-section">
           <div className="section-heading">
             <p className="eyebrow">CONTINUUM OF CARE</p>
-            <h3>From ICU care to at-home recovery</h3>
+            <h2>From ICU care to at-home recovery</h2>
             <p className="planner-disclaimer">
               This is general education, not a schedule or care plan. Your experience and
               instructions may differ; ask your care team what applies to you.
@@ -1368,7 +1460,7 @@ function App() {
             {recoveryStages.map((stage) => (
               <article key={stage.phase} className="timeline-card">
                 <span className="stage-badge">{stage.phase}</span>
-                <h4>{stage.focus}</h4>
+                <h3>{stage.focus}</h3>
                 <ul>
                   {stage.items.map((item) => (
                     <li key={item}>{item}</li>
@@ -1382,7 +1474,7 @@ function App() {
         <section className="timeline-section" aria-labelledby="icu-day-one-heading">
           <div className="section-heading">
             <p className="eyebrow">WHAT TO EXPECT</p>
-            <h3 id="icu-day-one-heading">Day one after surgery: ICU care</h3>
+            <h2 id="icu-day-one-heading">Day one after surgery: ICU care</h2>
             <p className="planner-disclaimer">
               Every recovery is different. Your ICU team will tailor care to your operation and
               explain what applies to you; follow their instructions.
@@ -1392,7 +1484,7 @@ function App() {
           <div className="timeline-grid">
             <article className="timeline-card">
               <span className="stage-badge">After surgery</span>
-              <h4>Arrival and close monitoring</h4>
+              <h3>Arrival and close monitoring</h3>
               <ul>
                 <li>Your team checks breathing, circulation, alertness, and comfort.</li>
                 <li>Monitors and any tubes or drains are reviewed as part of your care.</li>
@@ -1401,7 +1493,7 @@ function App() {
             </article>
             <article className="timeline-card">
               <span className="stage-badge">Throughout day one</span>
-              <h4>Support and reassessment</h4>
+              <h3>Support and reassessment</h3>
               <ul>
                 <li>Nurses reassess you regularly and respond to changes.</li>
                 <li>Pain, nausea, wound, and fluid needs are managed by your care team.</li>
@@ -1410,7 +1502,7 @@ function App() {
             </article>
             <article className="timeline-card">
               <span className="stage-badge">As recovery progresses</span>
-              <h4>Small steps, guided by your team</h4>
+              <h3>Small steps, guided by your team</h3>
               <ul>
                 <li>Ask what the goals are for your next few hours and who to call with concerns.</li>
                 <li>Your team decides when you are ready for less intensive monitoring or a different unit.</li>
@@ -1423,13 +1515,13 @@ function App() {
         <section className="procedures-section">
           <div className="section-heading">
             <p className="eyebrow">COMMON SURGICAL TYPES</p>
-            <h3>Procedure-specific recovery priorities</h3>
+            <h2>Procedure-specific recovery priorities</h2>
           </div>
 
           <div className="procedure-grid">
             {procedureOptions.map((procedure) => (
               <article key={procedure.name} className="procedure-card">
-                <h4>{procedure.name}</h4>
+                <h3>{procedure.name}</h3>
                 <p>{procedure.recovery}</p>
               </article>
             ))}
