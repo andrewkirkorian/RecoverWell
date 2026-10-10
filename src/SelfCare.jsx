@@ -621,7 +621,7 @@ function SelfCare({
             </a>
           </li>
         </ul>
-        <p className="health-tip-source-date">Sources accessed October 2026.</p>
+        <p className="health-tip-source-date">Sources last checked on 10 October 2026.</p>
       </section>
 
       <article className="selfcare-card">

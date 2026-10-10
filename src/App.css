@@ -217,7 +217,7 @@
 }
 
 .signup-form input::placeholder {
-  color: #a1ada5;
+  color: #6b7c74;
 }
 
 .signup-form input:focus,
@@ -1465,7 +1465,7 @@ h3 {
 }
 
 .medication-info small {
-  color: #788780;
+  color: #5f726b;
   font-size: 0.76rem;
 }
 
@@ -2341,3 +2341,30 @@ h3 {
 .regimen-fields input { font: inherit; font-weight: 400; padding: 6px 8px; border: 1px solid #c5cfd8; border-radius: 6px; min-width: 150px; }
 .regimen-missing { color: #8a5a00; }
 .regimen-fields select { font: inherit; font-weight: 400; padding: 6px 8px; border: 1px solid #c5cfd8; border-radius: 6px; min-width: 150px; background: #fff; }
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 1000;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  background: #2c4137;
+  color: #fff;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+.page-content:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

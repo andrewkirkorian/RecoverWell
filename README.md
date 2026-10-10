@@ -39,7 +39,7 @@ Recover Well is a React web-app prototype for organizing general post-surgery re
 - The medication rules cover only selected combinations and factors. A lack of displayed warnings does not mean a medication combination is safe. Verify the complete medication list with a pharmacist or prescriber.
 - The recovery, ICU, procedure-route, and anesthesia content is general and incomplete. The destination examples do not determine or predict discharge readiness, and anesthesia selection is only an education filter—not a record of the planned anesthetic. Self-care entries are user-reported and are not interpreted as a health assessment. Nothing in the app determines risk, discharge readiness, or treatment. Follow instructions from the care team.
 - Postanesthesia care and anesthesia education links: [ASA Standards for Postanesthesia Care](https://www.asahq.org/standards-and-practice-parameters/standards-for-postanesthesia-care), [ASA Types of Anesthesia](https://madeforthismoment.asahq.org/anesthesia-101/types-of-anesthesia/), and [ASA Anesthesia Recovery](https://madeforthismoment.asahq.org/preparing-for-surgery/recovery/). Local pathways and individual instructions may differ.
-- General health tips are educational, not personalized advice; the linked source pages were accessed in October 2026. Follow professional guidance for individual needs.
+- General health tips are educational, not personalized advice; the linked source pages were last checked on 10 October 2026 (the CDC site blocks automated checks, so verify that link manually). Follow professional guidance for individual needs.
 
 ## Technology
 
@@ -79,13 +79,25 @@ source in the repository settings.
 
 ```text
 src/
-  App.jsx          Main app, navigation, recovery and procedure-planning views
-  Pharmacy.jsx     Medication list, interaction screening, local reference search, OTC-vs-Rx dosing guide
-  CareSupport.jsx  Emergency reminders and care-visit preparation
-  SelfCare.jsx     Optional patient-reported check-in and planning prompts
-  App.css          App component styles
-  index.css        Global styles
-  *.test.jsx       Component and interaction tests
+  index.jsx                      App entry point
+  App.jsx                        Main app, navigation, recovery and procedure-planning views
+  Pharmacy.jsx                   Medication list, interaction screening, medication search
+  DualAvailabilityGuide.jsx      OTC-vs-Rx comparison cards (unreviewed educational content)
+  CareSupport.jsx                Emergency reminders and care-visit preparation
+  SelfCare.jsx                   Optional patient-reported check-in and planning prompts
+  HealthReference.jsx            Plain-language health topic reference
+  rxnormSearch.js                NLM RxNorm and openFDA lookups (with built-in fallback)
+  medicationFormulary.js         Built-in medication list
+  medicationStrengths.js         Strength options per medication
+  medicationInteractions.js      Selected interaction and factor rules
+  dualAvailabilityMedications.js Data for the OTC-vs-Rx guide
+  healthReferenceData.js         Data for the health reference
+  App.css, index.css             Styles
+  setupTests.js, reportWebVitals.js
+  *.test.jsx                     Component and interaction tests
+public/                          Static assets (icons are placeholders, not final branding)
+.github/workflows/ci-deploy.yml  Test, lint, build, and GitHub Pages deploy
+RecoverWell.code-workspace       VS Code workspace file
 ```
 
 ## Before production use

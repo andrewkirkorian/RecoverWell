@@ -791,6 +791,7 @@ function App() {
 
   return (
     <div className="recovery-app">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <header className="topbar">
         <div className="brand-wrap">
           <span className="brand-badge">RW</span>
@@ -872,7 +873,7 @@ function App() {
         </details>
       </nav>
 
-      <main className="page-content">
+      <main className="page-content" id="main-content" tabIndex={-1}>
         <aside className="emergency-banner" role="note">
           <strong>Need urgent help?</strong>
           <span>
