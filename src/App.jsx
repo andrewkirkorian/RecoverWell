@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
+import {
+  clearSavedProfiles,
+  isStorageAvailable,
+  loadSavedProfiles,
+  saveProfiles,
+} from './profileStorage';
 import ErrorBoundary from './ErrorBoundary';
 import CareSupport from './CareSupport';
 import Pharmacy from './Pharmacy';
 import SelfCare from './SelfCare';
 import HealthReference from './HealthReference';
 import './App.css';
+import './ProfileSaving.css';
 
 const pageTitles = {
   home: 'Home',
@@ -599,13 +606,17 @@ const healthHistoryLabels = Object.fromEntries(
 );
 
 function App() {
-  const [profiles, setProfiles] = useState([]);
-  const [nextProfileId, setNextProfileId] = useState(1);
+  const [savedData] = useState(loadSavedProfiles);
+  const [profiles, setProfiles] = useState(() => savedData?.profiles ?? []);
+  const [nextProfileId, setNextProfileId] = useState(() => savedData?.nextProfileId ?? 1);
+  const [saveOnDevice, setSaveOnDevice] = useState(() => savedData !== null);
+  const [storageAvailable] = useState(isStorageAvailable);
+  const [storageMessage, setStorageMessage] = useState('');
   const [taskLabel, setTaskLabel] = useState('');
   const [taskTime, setTaskTime] = useState('');
   const [taskAnnouncement, setTaskAnnouncement] = useState('');
   const [activeProfileId, setActiveProfileId] = useState(null);
-  const [authMode, setAuthMode] = useState('signup');
+  const [authMode, setAuthMode] = useState(() => (savedData?.profiles.length ? 'signin' : 'signup'));
   const [profileName, setProfileName] = useState('');
   const [loginProfileId, setLoginProfileId] = useState('');
   const [activePage, setActivePage] = useState('home');
@@ -748,6 +759,35 @@ function App() {
   };
 
   useEffect(() => {
+    if (saveOnDevice) saveProfiles(profiles, nextProfileId);
+  }, [saveOnDevice, profiles, nextProfileId]);
+
+  const handleSaveOnDeviceChange = (event) => {
+    const enabled = event.target.checked;
+    setSaveOnDevice(enabled);
+    if (enabled) {
+      setStorageMessage(
+        saveProfiles(profiles, nextProfileId)
+          ? 'Saving is on. Your profiles will still be here after you refresh or close this page.'
+          : 'This browser would not let us save. Your profiles will be erased when you close the page.',
+      );
+    } else {
+      clearSavedProfiles();
+      setStorageMessage('Saving is off. The saved copy was erased from this device.');
+    }
+  };
+
+  const eraseAllProfiles = () => {
+    clearSavedProfiles();
+    setProfiles([]);
+    setNextProfileId(1);
+    setLoginProfileId('');
+    setSaveOnDevice(false);
+    setAuthMode('signup');
+    setStorageMessage('All demo profiles were erased from this page and this device.');
+  };
+
+  useEffect(() => {
     if (!activeProfileId) {
       document.title = 'Recover Well';
       return;
@@ -822,7 +862,9 @@ function App() {
               <h2 id="signup-heading">{isSigningIn ? 'Sign in to a demo profile' : 'Sign up for a demo profile'}</h2>
               <p>
                 {isSigningIn
-                  ? 'Pick a profile you made since you opened this page.'
+                  ? saveOnDevice
+                    ? 'Pick one of your saved demo profiles.'
+                    : 'Pick a profile you made since you opened this page.'
                   : 'Pick a name to show. Use a nickname, not your real name.'}
               </p>
             </div>
@@ -884,11 +926,32 @@ function App() {
               </button>
             </p>
 
-            <p className="signup-privacy">
-              Your profile, checklist, notes, and medicine list are only kept in this browser tab.
-              They are not private or protected, and they are erased when you refresh or close the
-              page. Do not enter real health details or anything that could identify you.
-            </p>
+            <div className="signup-storage">
+              {storageAvailable ? (
+                <label className="signup-storage-toggle" htmlFor="save-on-device">
+                  <input
+                    id="save-on-device"
+                    type="checkbox"
+                    checked={saveOnDevice}
+                    onChange={handleSaveOnDeviceChange}
+                    aria-describedby="save-on-device-help"
+                  />
+                  Save my demo profiles on this device
+                </label>
+              ) : null}
+              <p id="save-on-device-help" className="signup-privacy">
+                {saveOnDevice
+                  ? 'Your profiles, checklist, notes, and medicine list are saved in this browser without encryption. They are not private or protected: anyone who uses this browser can see them. Turn saving off or erase them when you are done.'
+                  : 'Your profile, checklist, notes, and medicine list are only kept in this browser tab. They are not private or protected, and they are erased when you refresh or close the page.'}{' '}
+                Do not enter real health details or anything that could identify you.
+              </p>
+              {profiles.length > 0 || saveOnDevice ? (
+                <button type="button" className="signup-erase-button" onClick={eraseAllProfiles}>
+                  Erase all demo profiles
+                </button>
+              ) : null}
+              <p className="visually-hidden" role="status" aria-live="polite">{storageMessage}</p>
+            </div>
           </div>
         </section>
       </main>
@@ -1179,9 +1242,11 @@ function App() {
               </label>
             </div>
             <p className="planner-local-note">
-              These details are only kept on this page while it is open. They are not sent to a
-              clinic or saved as an appointment. Do not enter names, addresses, or anything that
-              could identify you.
+              {saveOnDevice
+                ? 'These details are saved in this browser because you turned on saving.'
+                : 'These details are only kept on this page while it is open.'}{' '}
+              They are not sent to a clinic or saved as an appointment. Do not enter names,
+              addresses, or anything that could identify you.
             </p>
           </div>
 
@@ -1423,8 +1488,10 @@ function App() {
             </label>
           </fieldset>
           <p className="planner-local-note">
-            This is only kept in this demo profile while this page is open. Do not enter anything
-            that could identify you or that you want to keep private.
+            {saveOnDevice
+              ? 'This is saved with this demo profile in this browser because you turned on saving.'
+              : 'This is only kept in this demo profile while this page is open.'}{' '}
+            Do not enter anything that could identify you or that you want to keep private.
           </p>
         </section>
 
@@ -1494,8 +1561,10 @@ function App() {
               <button className="task-add-button" type="submit">Add reminder</button>
             </form>
             <p className="planner-local-note">
-              Your reminders are only kept on this page and are erased when you refresh or close
-              it. Do not include names or other personal details.
+              {saveOnDevice
+                ? 'Your reminders are saved in this browser because you turned on saving.'
+                : 'Your reminders are only kept on this page and are erased when you refresh or close it.'}{' '}
+              Do not include names or other personal details.
             </p>
           </article>
 
