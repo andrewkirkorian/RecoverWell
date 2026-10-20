@@ -12,17 +12,17 @@ function DualAvailabilityGuide({ isListed, onAdd }) {
         <div>
           <h3>Sold both over the counter and by prescription</h3>
           <p>
-            The over-the-counter and prescription versions of these medicines have different
-            strengths and dosing. Pick the version the patient actually uses.
+            You can buy these medicines off the shelf (over the counter) or get them from a doctor
+            (prescription). The two versions come in different strengths and doses. Pick the one
+            you actually take.
           </p>
         </div>
       </div>
       <p className="reference-disclosure" role="note">
-        Prototype educational content only—not medical advice. The dosing text has not been
-        reviewed by a clinician or pharmacist. Do not use these figures to choose a dose. They
-        paraphrase examples of typical adult directions from FDA-authorized labeling. Follow the
-        exact Drug Facts label or the prescriber’s or pharmacist’s instructions; products and
-        formulations differ.
+        For learning only. This is not medical advice. A doctor or pharmacist has not checked
+        these doses, so do not use them to decide how much to take. They are typical adult
+        directions from FDA-approved labels, put in simpler words. Follow the label on your
+        package or the instructions from your doctor or pharmacist. Products are not all the same.
       </p>
       {dualAvailabilityMedications.map((entry) => (
         <details className="dual-card" key={entry.id}>
@@ -40,11 +40,11 @@ function DualAvailabilityGuide({ isListed, onAdd }) {
                   <dl>
                     <dt>Strengths</dt>
                     <dd>{info.strengths}</dd>
-                    <dt>Typical adult directions</dt>
+                    <dt>Usual adult directions</dt>
                     <dd>{info.directions}</dd>
-                    <dt>Daily limit</dt>
+                    <dt>Most you can take in a day</dt>
                     <dd>{info.maxDaily}</dd>
-                    <dt>Duration and cautions</dt>
+                    <dt>How long to use it, and warnings</dt>
                     <dd>{info.limits}</dd>
                   </dl>
                   <button
@@ -53,18 +53,18 @@ function DualAvailabilityGuide({ isListed, onAdd }) {
                     disabled={listed}
                     aria-label={
                       listed
-                        ? `${entry.name} ${form.label} is on the patient list`
-                        : `Add ${entry.name} ${form.label} version as reported, unverified`
+                        ? `${entry.name} ${form.label} is on your list`
+                        : `Add ${entry.name} ${form.label} version to your list`
                     }
                     onClick={() => onAdd(entry.id, form.availability)}
                   >
-                    {listed ? 'On patient list' : `Add ${form.label} version`}
+                    {listed ? 'On your list' : `Add ${form.label} version`}
                   </button>
                 </section>
               );
             })}
           </div>
-          <p className="dual-cautions"><strong>Cautions:</strong> {entry.cautions}</p>
+          <p className="dual-cautions"><strong>Be careful:</strong> {entry.cautions}</p>
           <p className="dual-sources">
             {entry.sources.map((source) => (
               <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer">

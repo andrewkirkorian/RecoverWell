@@ -8,7 +8,7 @@ test('starts without invented check-in values and summarizes only user-entered d
   expect(screen.getByText('No check-in details entered.')).toBeDefined();
   expect(screen.getByRole('spinbutton', { name: /pain level/i }).value).toBe('');
   expect(screen.getByRole('checkbox', { name: /drink water regularly/i }).checked).toBe(false);
-  expect(screen.getByText(/not a medical assessment or a measure of recovery/i)).toBeDefined();
+  expect(screen.getByText(/not a medical checkup or a\s+measure of how well you are recovering/i)).toBeDefined();
 
   fireEvent.change(screen.getByRole('spinbutton', { name: /pain level/i }), {
     target: { value: '4' },
@@ -99,7 +99,7 @@ test('shows optional check-in-based suggestions with boundaries and a hide contr
   fireEvent.change(screen.getByLabelText(/^Mood/), { target: { value: 'Anxious' } });
   const panel = within(screen.getByRole('region', { name: /suggestions based on this check-in/i }));
   expect(panel.getByText(/slow breathing/i)).toBeDefined();
-  expect(panel.getByText(/not medical advice, diagnosis/i)).toBeDefined();
+  expect(panel.getByText(/not medical advice, and\s+they cannot tell you what is wrong/i)).toBeDefined();
 
   fireEvent.click(screen.getByRole('button', { name: 'Hide suggestions' }));
   expect(panel.queryByText(/slow breathing/i)).toBeNull();

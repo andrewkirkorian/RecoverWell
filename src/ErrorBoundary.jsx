@@ -21,8 +21,8 @@ class ErrorBoundary extends Component {
         <div className="error-boundary error-boundary-section" role="alert">
           <h2>{this.props.section} couldn't be shown</h2>
           <p>
-            Something went wrong in this section. The rest of Recover Well should still work, and
-            you can use the menu to go to another page.
+            Something went wrong here. The rest of Recover Well should still work. You can use the
+            menu to go to another page.
           </p>
           <button type="button" onClick={this.retry}>
             Try again
@@ -35,9 +35,9 @@ class ErrorBoundary extends Component {
       <main className="error-boundary" role="alert">
         <h1>Something went wrong</h1>
         <p>
-          Recover Well hit an unexpected problem. Demo profiles are kept only in this open page, so
-          reloading will clear them. If someone may be having an emergency, contact your local
-          emergency number now.
+          Recover Well ran into a problem. Reloading the page will erase your demo profiles, because
+          they are only kept while the page is open. If someone may be having an emergency, call
+          your local emergency number now.
         </p>
         <button type="button" onClick={() => window.location.reload()}>
           Reload the page

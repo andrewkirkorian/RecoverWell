@@ -15,7 +15,7 @@ test('creates an editable patient-reported summary for a visit', () => {
   fireEvent.change(screen.getByLabelText(/when did they start/i), {
     target: { value: 'Yesterday afternoon' },
   });
-  fireEvent.change(screen.getByLabelText(/how severe do they feel/i), {
+  fireEvent.change(screen.getByLabelText(/how bad are they/i), {
     target: { value: 'Moderate' },
   });
   fireEvent.change(screen.getByLabelText(/what would you like to remember or ask/i), {
@@ -24,11 +24,11 @@ test('creates an editable patient-reported summary for a visit', () => {
   fireEvent.click(screen.getByRole('button', { name: /create visit summary/i }));
 
   const summary = within(screen.getByRole('region', { name: /draft to review/i }));
-  expect(summary.getByText(/Visit preparation notes \(personal use only\)/i)).toBeDefined();
+  expect(summary.getByText(/Notes for my visit \(for my own use\)/i)).toBeDefined();
   expect(summary.getByText(/My incision has been more sore since yesterday/i)).toBeDefined();
   expect(summary.getByText(/Yesterday afternoon/)).toBeDefined();
   expect(summary.getByText(/Should I arrange a follow-up/)).toBeDefined();
-  expect(summary.getByText(/Nothing is sent or saved by this page/i)).toBeDefined();
+  expect(summary.getByText(/This page does not send or save anything/i)).toBeDefined();
 });
 
 test('copies the user-created visit draft only after an explicit action', async () => {
@@ -57,7 +57,7 @@ test('shows a manual-copy instruction when clipboard access fails', async () => 
   fireEvent.click(screen.getByRole('button', { name: /create visit summary/i }));
   fireEvent.click(screen.getByRole('button', { name: /copy draft/i }));
 
-  expect((await screen.findByRole('alert')).textContent).toMatch(/select and copy the text above manually/i);
+  expect((await screen.findByRole('alert')).textContent).toMatch(/highlight the text above and copy it yourself/i);
 });
 
 test('downloads the generated visit draft only after an explicit action', () => {
@@ -98,7 +98,7 @@ test('shows emergency directions immediately when a warning sign is selected', (
   );
 
   expect(screen.getByRole('alert')).toBeDefined();
-  expect(screen.getByRole('alert').textContent).toMatch(/contact your local emergency number now/i);
+  expect(screen.getByRole('alert').textContent).toMatch(/call your local emergency number now/i);
 
   fireEvent.click(screen.getByRole('button', { name: /clear entries/i }));
   expect(screen.queryByRole('alert')).toBeNull();

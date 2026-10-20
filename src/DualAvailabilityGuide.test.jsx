@@ -6,7 +6,7 @@ import { dualAvailabilityMedications } from './dualAvailabilityMedications';
 describe('DualAvailabilityGuide', () => {
   test('shows the unreviewed disclosure and one card per medicine', () => {
     const { container } = render(<DualAvailabilityGuide isListed={() => false} onAdd={() => {}} />);
-    expect(screen.getByRole('note').textContent).toMatch(/has not been\s+reviewed by a clinician or pharmacist/);
+    expect(screen.getByRole('note').textContent).toMatch(/A doctor or pharmacist has not checked\s+these doses/);
     expect(container.querySelectorAll('details.dual-card')).toHaveLength(dualAvailabilityMedications.length);
   });
 
@@ -19,7 +19,7 @@ describe('DualAvailabilityGuide', () => {
     expect(onAdd).toHaveBeenCalledWith(entry.id, 'Prescription');
   });
 
-  test('disables a version already on the patient list', () => {
+  test('disables a version already on your list', () => {
     render(
       <DualAvailabilityGuide
         isListed={(id, availability) => id === 'ibuprofen' && availability === 'Over the counter'}
@@ -29,7 +29,7 @@ describe('DualAvailabilityGuide', () => {
     const column = screen.getByRole('region', { name: 'Ibuprofen Over the counter', hidden: true });
     const button = within(column).getByRole('button', { hidden: true });
     expect(button.disabled).toBe(true);
-    expect(button.textContent).toContain('On patient list');
+    expect(button.textContent).toContain('On your list');
   });
 
   test('links sources to external pages that open in a new tab', () => {

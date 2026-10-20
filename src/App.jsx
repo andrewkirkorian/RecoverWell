@@ -27,56 +27,56 @@ const initialTasks = [
 
 const healthHistoryGroups = [
   {
-    category: 'Heart and circulation',
+    category: 'Heart and blood vessels',
     conditions: [
       { id: 'hypertension', label: 'High blood pressure' },
-      { id: 'heart-disease', label: 'Heart or coronary artery disease' },
-      { id: 'heart-failure', label: 'Heart failure' },
-      { id: 'arrhythmia', label: 'Heart rhythm condition' },
-      { id: 'stroke-tia', label: 'Prior stroke or TIA' },
-      { id: 'vascular-disease', label: 'Peripheral vascular disease' },
+      { id: 'heart-disease', label: 'Heart disease or blocked heart arteries' },
+      { id: 'heart-failure', label: 'Heart failure (heart does not pump as well as it should)' },
+      { id: 'arrhythmia', label: 'Irregular heartbeat' },
+      { id: 'stroke-tia', label: 'Past stroke or mini-stroke (TIA)' },
+      { id: 'vascular-disease', label: 'Poor blood flow in the legs or arms' },
     ],
   },
   {
     category: 'Lungs and sleep',
     conditions: [
       { id: 'asthma', label: 'Asthma' },
-      { id: 'copd', label: 'COPD or emphysema' },
-      { id: 'sleep-apnea', label: 'Sleep apnea' },
+      { id: 'copd', label: 'COPD or emphysema (long-term lung disease)' },
+      { id: 'sleep-apnea', label: 'Sleep apnea (breathing stops and starts during sleep)' },
     ],
   },
   {
-    category: 'Endocrine and metabolic',
+    category: 'Hormones, blood sugar, and weight',
     conditions: [
       { id: 'diabetes-type-1', label: 'Type 1 diabetes' },
       { id: 'diabetes-type-2', label: 'Type 2 diabetes' },
       { id: 'obesity', label: 'Obesity' },
-      { id: 'thyroid-disease', label: 'Thyroid condition' },
+      { id: 'thyroid-disease', label: 'Thyroid problem' },
     ],
   },
   {
-    category: 'Kidney, liver, and digestive',
+    category: 'Kidneys, liver, and stomach',
     conditions: [
-      { id: 'ckd', label: 'Chronic kidney disease (CKD)' },
-      { id: 'liver-disease', label: 'Chronic liver disease' },
-      { id: 'inflammatory-bowel-disease', label: 'Inflammatory bowel disease' },
+      { id: 'ckd', label: 'Long-term kidney disease (CKD)' },
+      { id: 'liver-disease', label: 'Long-term liver disease' },
+      { id: 'inflammatory-bowel-disease', label: "Crohn's disease or ulcerative colitis" },
     ],
   },
   {
-    category: 'Brain and nervous system',
+    category: 'Brain and nerves',
     conditions: [
-      { id: 'seizure-disorder', label: 'Seizure disorder' },
-      { id: 'cognitive-condition', label: 'Dementia or cognitive condition' },
+      { id: 'seizure-disorder', label: 'Seizures or epilepsy' },
+      { id: 'cognitive-condition', label: 'Dementia or memory problems' },
       { id: 'parkinsons', label: "Parkinson's disease" },
     ],
   },
   {
     category: 'Blood, immune system, and cancer',
     conditions: [
-      { id: 'anemia', label: 'Anemia' },
-      { id: 'clotting-condition', label: 'Bleeding or clotting condition' },
-      { id: 'autoimmune-condition', label: 'Autoimmune condition' },
-      { id: 'immunocompromised', label: 'Immunocompromised' },
+      { id: 'anemia', label: 'Anemia (low red blood cells)' },
+      { id: 'clotting-condition', label: 'Bleeding or blood clot problem' },
+      { id: 'autoimmune-condition', label: 'Autoimmune disease (immune system attacks the body)' },
+      { id: 'immunocompromised', label: 'Weak immune system' },
       { id: 'cancer', label: 'Cancer' },
     ],
   },
@@ -84,468 +84,513 @@ const healthHistoryGroups = [
     category: 'Mental health',
     conditions: [
       { id: 'depression', label: 'Depression' },
-      { id: 'anxiety', label: 'Anxiety disorder' },
+      { id: 'anxiety', label: 'Anxiety' },
     ],
   },
 ];
 
 const recoveryStages = [
   {
-    phase: 'ICU / PACU',
-    focus: 'Stabilization and monitoring',
-    items: ['Continuous vital sign monitoring', 'Pain control and sedation management', 'Early breathing support and mobility'],
+    phase: 'ICU or recovery room',
+    focus: 'Close watch right after surgery',
+    items: ['Staff check your heart rate, breathing, and blood pressure all the time', 'Pain and sleepiness are kept under control', 'Help with breathing and first small movements'],
   },
   {
-    phase: 'Hospital ward',
-    focus: 'Mobility and daily recovery',
-    items: ['Regular turning and walking', 'Wound checks and drain care', 'Hydration, nutrition, and medication rounds'],
+    phase: 'Hospital room',
+    focus: 'Getting moving again',
+    items: ['Turning in bed and walking often', 'Checks on your wound and any drains (tubes that remove fluid)', 'Fluids, food, and medicines on a schedule'],
   },
   {
-    phase: 'Discharge',
-    focus: 'Transition to home',
-    items: ['Medication teaching and follow-up plan', 'Home safety setup and mobility goals', 'Symptoms to call the care team about'],
+    phase: 'Leaving the hospital',
+    focus: 'Getting ready to go home',
+    items: ['Learning about your medicines and follow-up visits', 'Making your home safe and setting movement goals', 'Knowing which symptoms mean you should call your care team'],
   },
   {
     phase: 'At home',
-    focus: 'Ongoing healing',
-    items: ['Short walks and activity progression', 'Sleep, hydration, and nutrition', 'Wound, swelling, and pain tracking'],
+    focus: 'Healing day by day',
+    items: ['Short walks that slowly get longer', 'Sleep, fluids, and good food', 'Keeping track of your wound, swelling, and pain'],
   },
 ];
 
 const procedureOptions = [
   {
     name: 'General surgery',
-    recovery: 'Focus on breathing exercises, early walking, diet progression, and wound monitoring.',
+    recovery: 'Do breathing exercises, walk early, slowly go back to normal food, and keep an eye on your wound.',
   },
   {
-    name: 'Orthopedic surgery',
-    recovery: 'Protect the joint, manage swelling, and follow physical therapy for safe movement.',
+    name: 'Bone and joint surgery (orthopedic)',
+    recovery: 'Protect the joint, keep swelling down, and follow your physical therapy plan.',
   },
   {
-    name: 'Cardiac surgery',
-    recovery: 'Gradual mobility, heart rhythm monitoring, breathing support, and careful medication adherence.',
+    name: 'Heart surgery (cardiac)',
+    recovery: 'Slowly move more each day, have your heartbeat checked, get help with breathing, and take medicines exactly as told.',
   },
   {
-    name: 'Neurosurgery',
-    recovery: 'Track alertness, head pain, nausea, and follow all neuro checks and activity restrictions.',
+    name: 'Brain surgery (neurosurgery)',
+    recovery: 'Watch how alert you feel, head pain, and nausea. Follow all brain checks and activity limits.',
   },
   {
-    name: 'Abdominal surgery',
-    recovery: 'Support digestion, rest, hydration, and avoid lifting until the team approves it.',
+    name: 'Belly surgery (abdominal)',
+    recovery: 'Help your digestion, rest, drink fluids, and do not lift things until your team says it is okay.',
   },
   {
-    name: 'Spine surgery',
-    recovery: 'Use guarded movement, core care, and therapist-guided mobility to avoid strain.',
+    name: 'Back surgery (spine)',
+    recovery: 'Move carefully, protect your back and stomach muscles, and move the way your therapist shows you.',
   },
   {
-    name: 'Urologic surgery',
-    recovery: 'Manage catheters, stay hydrated, watch urine color, and follow lifting limits.',
+    name: 'Bladder, kidney, or prostate surgery (urologic)',
+    recovery: 'Care for any catheter (a tube that drains urine), drink fluids, watch the color of your urine, and follow lifting limits.',
   },
   {
-    name: 'Gynecologic surgery',
-    recovery: 'Track bleeding and pain, walk gradually, and avoid heavy lifting until cleared.',
+    name: "Women's health surgery (gynecologic)",
+    recovery: 'Keep track of bleeding and pain, walk a little more each day, and avoid heavy lifting until your team says it is okay.',
   },
   {
-    name: 'Oncologic surgery',
-    recovery: 'Protect wounds, support nutrition, and follow pathology and treatment follow-up.',
+    name: 'Cancer surgery (oncologic)',
+    recovery: 'Protect your wounds, eat well, and go to follow-up visits about test results and treatment.',
   },
   {
-    name: 'Vascular surgery',
-    recovery: 'Check limb color, warmth, and pulses, and follow walking and medicine plans closely.',
+    name: 'Blood vessel surgery (vascular)',
+    recovery: 'Check the color, warmth, and pulse of your arm or leg, and follow your walking and medicine plans closely.',
   },
 ];
 
 const serviceLineBundles = [
   {
     service: 'Neuro',
+    label: 'Brain and spine (neuro)',
     procedures: ['Craniotomy', 'Spine surgery', 'Cerebral aneurysm repair'],
     icuTopics: [
-      'Ask what monitoring is planned after your procedure and which new changes your team wants you to report promptly.',
-      'Ask the team to explain any equipment, checks, or activity limits that apply to your specific procedure.',
+      'Ask what checks are planned after your surgery and which changes your team wants to hear about right away.',
+      'Ask the team to explain any machines, checks, or activity limits for your surgery.',
     ],
     recoveryTopics: [
-      'Confirm which head, spine, wound, movement, and follow-up instructions apply to you.',
-      'Ask whom to contact if you notice a new or worsening symptom after leaving care.',
+      'Ask which instructions apply to you for your head, back, wound, movement, and follow-up visits.',
+      'Ask who to call if a symptom is new or getting worse after you leave.',
     ],
   },
   {
     service: 'Cardiac',
+    label: 'Heart (cardiac)',
     procedures: ['CABG', 'Valve repair', 'Heart failure surgery'],
     icuTopics: [
-      'Ask the team to explain any heart monitors, breathing support, lines, or drains used in your care.',
-      'Ask which changes or symptoms your team wants you to report promptly.',
+      'Ask the team to explain any heart monitors, breathing help, IV lines, or drains used in your care.',
+      'Ask which changes or symptoms your team wants to hear about right away.',
     ],
     recoveryTopics: [
-      'Confirm the activity, incision-care, and follow-up instructions for your procedure with your cardiac team.',
-      'Ask whom to contact with new or worsening symptoms after discharge.',
+      'Ask your heart team which activity, wound care, and follow-up instructions apply to your surgery.',
+      'Ask who to call if a symptom is new or getting worse after you go home.',
     ],
   },
   {
     service: 'General surgery',
+    label: 'Belly and digestion (general surgery)',
     procedures: ['Abdominal surgery', 'Bariatric surgery', 'GI resections'],
     icuTopics: [
-      'Ask what comfort, breathing, eating or drinking, and wound or drain support applies to your care.',
-      'Ask which changes your team wants you to report promptly.',
+      'Ask what help you will get with comfort, breathing, eating and drinking, and your wound or drain.',
+      'Ask which changes your team wants to hear about right away.',
     ],
     recoveryTopics: [
-      'Confirm your procedure-specific eating, drinking, bowel, wound, and activity instructions with the team.',
-      'Ask whether any drain, ostomy, or nutrition teaching applies to you and where to get help.',
+      'Ask your team what to eat and drink, what to expect with bowel movements, and how to care for your wound and stay active.',
+      'Ask if you need to learn how to care for a drain, an ostomy (an opening for waste on the belly), or special nutrition, and where to get help.',
     ],
   },
   {
     service: 'Orthopedic',
+    label: 'Bones and joints (orthopedic)',
     procedures: ['Hip arthroplasty', 'Knee replacement', 'Spine fusion'],
     icuTopics: [
-      'Ask which comfort, circulation, and movement checks are part of your care and what they mean.',
-      'Ask what help is available for moving safely while you are in the hospital.',
+      'Ask which comfort, blood flow, and movement checks are part of your care and what they mean.',
+      'Ask what help you can get to move safely while you are in the hospital.',
     ],
     recoveryTopics: [
-      'Confirm your procedure-specific movement, weight-bearing, equipment, and therapy instructions.',
-      'Ask what support or home arrangements may help and whom to contact with concerns.',
+      'Ask how you can move, how much weight you can put on the joint, what equipment you need, and what therapy is planned.',
+      'Ask what help at home might be useful and who to call with concerns.',
     ],
   },
   {
     service: 'Urology',
+    label: 'Bladder, kidneys, and prostate (urology)',
     procedures: ['Prostatectomy', 'Nephrectomy', 'Cystectomy', 'TURP', 'Ureteroscopy'],
     icuTopics: [
-      'Ask whether a catheter, stent, or other equipment is part of your care and who can explain it.',
-      'Ask what changes in urination, comfort, or symptoms you should report to your team.',
+      'Ask if you will have a catheter (tube that drains urine), a stent (small tube that keeps urine flowing), or other equipment, and who can explain it.',
+      'Ask what changes in peeing, comfort, or symptoms you should tell your team about.',
     ],
     recoveryTopics: [
-      'Confirm any catheter, stent, hydration, wound, activity, or follow-up instructions directly with your team.',
-      'Ask how and when to get help if you have a concern after leaving care.',
+      'Ask your team about any catheter, stent, how much to drink, wound care, activity, and follow-up visits.',
+      'Ask how and when to get help if you have a concern after you leave.',
     ],
   },
   {
     service: 'Gynecology',
+    label: "Women's health (gynecology)",
     procedures: ['Hysterectomy', 'Myomectomy', 'Oophorectomy', 'Laparoscopic endometriosis excision', 'Pelvic organ prolapse repair'],
     icuTopics: [
-      'Ask how your team will support comfort and what bleeding or other changes they want you to report.',
-      'Ask which checks, equipment, or activity guidance apply to your specific procedure.',
+      'Ask how your team will keep you comfortable and what bleeding or other changes they want to hear about.',
+      'Ask which checks, equipment, or activity limits apply to your surgery.',
     ],
     recoveryTopics: [
-      'Confirm your procedure-specific incision, bleeding, activity, and follow-up instructions.',
-      'Ask whom to contact if symptoms change or you are unsure about an instruction.',
+      'Ask about wound care, bleeding, activity, and follow-up visits for your surgery.',
+      'Ask who to call if your symptoms change or you are not sure about an instruction.',
     ],
   },
   {
     service: 'Oncology',
+    label: 'Cancer (oncology)',
     procedures: ['Mastectomy', 'Lumpectomy', 'Colon cancer resection', 'Lung lobectomy', 'Tumor debulking'],
     icuTopics: [
-      'Ask what comfort, breathing, wound, or drain support applies to your procedure and care setting.',
-      'Ask which changes your team wants you to report and how results or updates will be shared.',
+      'Ask what help you will get with comfort, breathing, your wound, or drains.',
+      'Ask which changes your team wants to hear about and how they will share test results.',
     ],
     recoveryTopics: [
-      'Confirm any wound, drain, nutrition, movement, or follow-up instructions with your team.',
-      'Ask who will discuss results and coordinate any next steps, if applicable.',
+      'Ask your team about wound and drain care, eating, movement, and follow-up visits.',
+      'Ask who will go over your results and plan any next steps.',
     ],
   },
   {
     service: 'Vascular',
+    label: 'Blood vessels (vascular)',
     procedures: ['Carotid endarterectomy', 'Aortic aneurysm repair', 'Peripheral artery bypass', 'Amputation', 'AV fistula creation'],
     icuTopics: [
-      'Ask what circulation or incision checks are part of your care and what they mean.',
-      'Ask which changes need prompt attention and how to reach your team.',
+      'Ask what blood flow or wound checks are part of your care and what they mean.',
+      'Ask which changes need quick attention and how to reach your team.',
     ],
     recoveryTopics: [
-      'Confirm your procedure-specific activity, wound, limb or access-site care, and follow-up instructions.',
-      'Ask what changes should prompt a call or urgent assessment after leaving care.',
+      'Ask about activity, wound care, care of your arm or leg, and follow-up visits for your surgery.',
+      'Ask which changes mean you should call or get checked right away after you leave.',
     ],
   },
 ];
 
+const procedureLabels = {
+  Craniotomy: 'Craniotomy (opening the skull for brain surgery)',
+  'Spine surgery': 'Spine surgery',
+  'Cerebral aneurysm repair': 'Brain aneurysm repair (fixing a bulging blood vessel in the brain)',
+  CABG: 'Heart bypass surgery (CABG)',
+  'Valve repair': 'Heart valve repair',
+  'Heart failure surgery': 'Heart failure surgery',
+  'Abdominal surgery': 'Belly (abdominal) surgery',
+  'Bariatric surgery': 'Weight-loss (bariatric) surgery',
+  'GI resections': 'Removing part of the stomach or bowel (GI resection)',
+  'Hip arthroplasty': 'Hip replacement (hip arthroplasty)',
+  'Knee replacement': 'Knee replacement',
+  'Spine fusion': 'Spine fusion (joining bones in the back)',
+  Prostatectomy: 'Prostate removal (prostatectomy)',
+  Nephrectomy: 'Kidney removal (nephrectomy)',
+  Cystectomy: 'Bladder removal (cystectomy)',
+  TURP: 'Prostate trimming through the urethra (TURP)',
+  Ureteroscopy: 'Kidney stone procedure with a small scope (ureteroscopy)',
+  Hysterectomy: 'Removing the uterus (hysterectomy)',
+  Myomectomy: 'Removing fibroids from the uterus (myomectomy)',
+  Oophorectomy: 'Removing one or both ovaries (oophorectomy)',
+  'Laparoscopic endometriosis excision': 'Keyhole surgery to remove endometriosis',
+  'Pelvic organ prolapse repair': 'Repair of a dropped bladder, uterus, or bowel (prolapse repair)',
+  Mastectomy: 'Breast removal (mastectomy)',
+  Lumpectomy: 'Removing a breast lump (lumpectomy)',
+  'Colon cancer resection': 'Removing part of the colon for cancer',
+  'Lung lobectomy': 'Removing part of a lung (lobectomy)',
+  'Tumor debulking': 'Removing as much of a tumor as possible (debulking)',
+  'Carotid endarterectomy': 'Clearing a blocked neck artery (carotid endarterectomy)',
+  'Aortic aneurysm repair': 'Repair of a bulging main artery (aortic aneurysm repair)',
+  'Peripheral artery bypass': 'Leg or arm artery bypass',
+  Amputation: 'Amputation (removing a limb or part of a limb)',
+  'AV fistula creation': 'Dialysis access in the arm (AV fistula)',
+};
+
+const procedureLabel = (procedure) => procedureLabels[procedure] ?? procedure;
+
 const postoperativeRoutes = {
   Craniotomy: {
     route: 'icu',
-    detail: 'ICU or another closely monitored unit may be planned, depending on the operation and local pathway.',
+    detail: 'You may go to the ICU or another unit where staff watch you closely. It depends on the surgery and the hospital.',
   },
   'Spine surgery': {
     route: 'floor',
-    detail: 'A hospital ward is common; the approach, extent of surgery, and recovery can change the plan.',
+    detail: 'A regular hospital room is common. The type and size of the surgery, and how you recover, can change this.',
   },
   'Cerebral aneurysm repair': {
     route: 'icu',
-    detail: 'Close monitoring in an ICU or step-down unit may be planned, depending on the repair and the person’s condition.',
+    detail: 'You may be watched closely in the ICU or a step-down unit (one level below the ICU). It depends on the repair and how you are doing.',
   },
   CABG: {
     route: 'icu',
-    detail: 'A cardiac ICU stay for close monitoring is commonly planned after the operation, followed by a cardiac ward when appropriate.',
+    detail: 'Most people stay in a heart ICU first so staff can watch them closely, then move to a regular heart unit when ready.',
   },
   'Valve repair': {
     route: 'icu',
-    detail: 'An ICU stay for close monitoring is commonly planned after open heart surgery, followed by a cardiac ward when appropriate.',
+    detail: 'Most people stay in the ICU after open heart surgery so staff can watch them closely, then move to a regular heart unit when ready.',
   },
   'Heart failure surgery': {
     route: 'icu',
-    detail: 'An ICU stay is commonly planned for close monitoring after major heart surgery; the exact pathway depends on the operation.',
+    detail: 'Most people stay in the ICU after major heart surgery so staff can watch them closely. The exact plan depends on the surgery.',
   },
   'Abdominal surgery': {
     route: 'variable',
-    detail: 'The term covers many operations: some planned outpatient procedures go home, while more extensive operations commonly stay on a ward.',
+    detail: 'This covers many kinds of surgery. After some smaller ones you go home the same day. After bigger ones you usually stay in a hospital room.',
   },
   'Bariatric surgery': {
     route: 'floor',
-    detail: 'A hospital ward stay is commonly planned, though some programs use selected same-day pathways.',
+    detail: 'A stay in a regular hospital room is common, though some hospitals send certain people home the same day.',
   },
   'GI resections': {
     route: 'floor',
-    detail: 'A hospital ward stay is commonly planned; ICU care may be considered for more complex operations or recovery needs.',
+    detail: 'A stay in a regular hospital room is common. The ICU may be used after more complex surgery.',
   },
   'Hip arthroplasty': {
     route: 'floor',
-    detail: 'A ward stay or a planned same-day pathway may be used, depending on the person, procedure, and local program.',
+    detail: 'You may stay in a hospital room or go home the same day. It depends on you, the surgery, and the hospital.',
   },
   'Knee replacement': {
     route: 'floor',
-    detail: 'A ward stay or a planned same-day pathway may be used, depending on the person, procedure, and local program.',
+    detail: 'You may stay in a hospital room or go home the same day. It depends on you, the surgery, and the hospital.',
   },
   'Spine fusion': {
     route: 'floor',
-    detail: 'A hospital ward is common; a more extensive fusion or recovery needs may lead to closer monitoring.',
+    detail: 'A regular hospital room is common. A bigger fusion or slower recovery may mean closer watching.',
   },
   Prostatectomy: {
     route: 'floor',
-    detail: 'A short ward stay is common, although the surgical approach and local pathway can allow earlier discharge.',
+    detail: 'A short stay in a hospital room is common. Depending on how the surgery is done, you may go home sooner.',
   },
   Nephrectomy: {
     route: 'floor',
-    detail: 'A hospital ward stay is commonly planned; the approach and recovery can change the length or level of care.',
+    detail: 'A stay in a regular hospital room is common. How the surgery is done and how you recover can change how long you stay.',
   },
   Cystectomy: {
     route: 'floor',
-    detail: 'A hospital ward stay is commonly planned; more complex needs may call for closer monitoring.',
+    detail: 'A stay in a regular hospital room is common. If you need more care, you may be watched more closely.',
   },
   TURP: {
     route: 'floor',
-    detail: 'A short ward stay or same-day discharge may be used, depending on the procedure and recovery.',
+    detail: 'You may have a short hospital stay or go home the same day. It depends on the surgery and how you recover.',
   },
   Ureteroscopy: {
     route: 'home',
-    detail: 'Often planned as a same-day procedure, with discharge only after the care team’s criteria are met.',
+    detail: 'Usually you go home the same day, once your care team says you are ready.',
   },
   Hysterectomy: {
     route: 'variable',
-    detail: 'Some minimally invasive procedures use same-day discharge; other approaches or recovery needs involve a ward stay.',
+    detail: 'After some keyhole surgeries you go home the same day. Other types of surgery may need a hospital stay.',
   },
   Myomectomy: {
     route: 'variable',
-    detail: 'The approach and extent vary; same-day discharge or a ward stay may be planned.',
+    detail: 'This surgery can be done in different ways. You may go home the same day or stay in the hospital.',
   },
   Oophorectomy: {
     route: 'variable',
-    detail: 'Same-day discharge may be planned for some minimally invasive procedures; other approaches may involve a ward stay.',
+    detail: 'After some keyhole surgeries you go home the same day. Other types of surgery may need a hospital stay.',
   },
   'Laparoscopic endometriosis excision': {
     route: 'variable',
-    detail: 'Same-day discharge may be planned for some procedures; a longer or more extensive operation may involve a ward stay.',
+    detail: 'You may go home the same day. A longer or bigger surgery may need a hospital stay.',
   },
   'Pelvic organ prolapse repair': {
     route: 'variable',
-    detail: 'Same-day discharge or a ward stay may be planned, depending on the repair and recovery.',
+    detail: 'You may go home the same day or stay in the hospital. It depends on the repair and how you recover.',
   },
   Mastectomy: {
     route: 'variable',
-    detail: 'Some people go home the same day; others stay on a ward, depending on the operation, reconstruction, and recovery.',
+    detail: 'Some people go home the same day. Others stay in the hospital, depending on the surgery, any breast rebuilding, and recovery.',
   },
   Lumpectomy: {
     route: 'home',
-    detail: 'Often planned as a same-day procedure, with discharge only after the care team’s criteria are met.',
+    detail: 'Usually you go home the same day, once your care team says you are ready.',
   },
   'Colon cancer resection': {
     route: 'floor',
-    detail: 'A hospital ward stay is commonly planned; ICU care may be considered for selected complex cases or recovery needs.',
+    detail: 'A stay in a regular hospital room is common. The ICU may be used after some complex surgeries.',
   },
   'Lung lobectomy': {
     route: 'floor',
-    detail: 'A hospital ward is common; closer monitoring may be planned depending on the operation and recovery.',
+    detail: 'A regular hospital room is common. You may be watched more closely depending on the surgery and how you recover.',
   },
   'Tumor debulking': {
     route: 'variable',
-    detail: 'The operation can vary substantially; a ward stay is common, with ICU care considered for selected extensive procedures or recovery needs.',
+    detail: 'This surgery can be very different from person to person. A hospital room is common, and the ICU may be used after bigger surgeries.',
   },
   'Carotid endarterectomy': {
     route: 'floor',
-    detail: 'A monitored ward or step-down stay is common; some hospitals use ICU-level observation.',
+    detail: 'A stay in a closely watched hospital room is common. Some hospitals use the ICU.',
   },
   'Aortic aneurysm repair': {
     route: 'variable',
-    detail: 'Open and endovascular repairs have different pathways; a ward, step-down unit, or ICU may be planned.',
+    detail: 'Open surgery and repair through a small tube in the blood vessel have different plans. You may go to a regular room, a step-down unit, or the ICU.',
   },
   'Peripheral artery bypass': {
     route: 'floor',
-    detail: 'A hospital ward is common; closer monitoring may be planned depending on the operation and recovery.',
+    detail: 'A regular hospital room is common. You may be watched more closely depending on the surgery and how you recover.',
   },
   Amputation: {
     route: 'floor',
-    detail: 'A hospital ward stay is commonly planned for recovery and rehabilitation assessment; individual needs vary.',
+    detail: 'A stay in a hospital room is common so you can recover and be checked for rehab. Needs are different for each person.',
   },
   'AV fistula creation': {
     route: 'home',
-    detail: 'Often planned as a same-day procedure, with discharge only after the care team’s criteria are met.',
+    detail: 'Usually you go home the same day, once your care team says you are ready.',
   },
 };
 
 const anesthesiaTypes = {
   unknown: {
-    label: 'Not sure / not discussed',
-    description: 'Anesthesia plans are specific to the procedure and person. Your anesthesiology team can explain what is planned and whether more than one type will be combined.',
-    effects: 'It is okay not to know the planned type yet. Ask the anesthesia team what to expect and which instructions apply to you.',
+    label: 'Not sure / not talked about yet',
+    description: 'The type of anesthesia (medicine that blocks pain during surgery) depends on the surgery and on you. Your anesthesia team can explain what is planned and whether they will use more than one type.',
+    effects: 'It is okay not to know yet. Ask the anesthesia team what to expect and which instructions apply to you.',
   },
   general: {
-    label: 'General anesthesia',
-    description: 'Medicines make you unconscious and unable to feel the procedure. The anesthesia team monitors and supports breathing and circulation during anesthesia.',
-    effects: 'You may feel sleepy, nauseated, chilled, or temporarily groggy afterward. A breathing device can leave a sore throat. Effects and recovery time vary.',
+    label: 'General anesthesia (fully asleep)',
+    description: 'Medicine puts you in a deep sleep so you do not feel the surgery. The anesthesia team watches and supports your breathing and heart the whole time.',
+    effects: 'Afterward you may feel sleepy, sick to your stomach, cold, or foggy for a while. A breathing tube can leave a sore throat. How you feel and how long it lasts is different for everyone.',
   },
   regional: {
-    label: 'Regional anesthesia (spinal, epidural, or nerve block)',
-    description: 'Medicine temporarily numbs a larger area, such as part of the body or a limb. You may be awake or receive sedation, and it can be combined with general anesthesia.',
-    effects: 'Temporary numbness, heaviness, or weakness can occur while it wears off. The team will explain what to expect for your block and when to ask for help.',
+    label: 'Regional anesthesia (numbing a large area, like a spinal, epidural, or nerve block)',
+    description: 'Medicine numbs a large part of your body, such as from the waist down or one arm or leg. You may be awake or get medicine to relax you. It can also be used along with general anesthesia.',
+    effects: 'As it wears off, the area may feel numb, heavy, or weak for a while. The team will tell you what to expect and when to ask for help.',
   },
   local: {
-    label: 'Local anesthesia',
-    description: 'Medicine numbs a small, specific area. You are generally awake; local anesthesia may also be combined with sedation or another type.',
-    effects: 'The area may remain numb for a while and sensation returns gradually. Ask what is expected for your procedure and when to protect the area.',
+    label: 'Local anesthesia (numbing a small area)',
+    description: 'Medicine numbs one small area. You are usually awake. It may also be used with medicine to relax you or with another type.',
+    effects: 'The area may stay numb for a while, and feeling comes back slowly. Ask what to expect and how to protect the area while it is numb.',
   },
   sedation: {
-    label: 'Sedation / monitored anesthesia care (MAC)',
-    description: 'Medicines help you relax or feel sleepy. The depth can vary; sedation is often combined with local or regional anesthesia, and monitoring is provided.',
-    effects: 'Sleepiness, slowed coordination, or patchy memory can happen afterward. Ask whether you need an escort and what activities to avoid, and follow your team’s written instructions.',
+    label: 'Sedation (medicine to relax you or make you sleepy)',
+    description: 'Medicine helps you relax or feel sleepy. You may be lightly or deeply sleepy. It is often used with numbing medicine, and staff watch you the whole time. Your team may call this MAC (monitored anesthesia care).',
+    effects: 'Afterward you may feel sleepy, a bit clumsy, or not remember parts of the day. Ask if someone needs to take you home and what to avoid, and follow your written instructions.',
   },
   combined: {
-    label: 'Combined anesthesia',
-    description: 'More than one approach may be used, such as general anesthesia with a nerve block or local anesthesia with sedation.',
-    effects: 'What you feel afterward depends on the combination. Ask which effects to expect from each part and which recovery instructions apply.',
+    label: 'More than one type',
+    description: 'Your team may use more than one kind, such as general anesthesia plus a nerve block, or numbing medicine plus sedation.',
+    effects: 'How you feel afterward depends on the mix. Ask what each part may cause and which recovery instructions apply.',
   },
 };
 
 const surgeryChecklists = {
   Craniotomy: [
-    'Ask the surgical team which neurologic changes need urgent attention and who to contact.',
-    'Confirm any head-care, activity, and follow-up instructions with the team.',
+    'Ask the surgery team which changes in thinking, speech, movement, or alertness need help right away, and who to call.',
+    'Ask about head care, activity, and follow-up visits.',
   ],
   'Spine surgery': [
-    'Ask the team which movement, lifting, and wound-care instructions apply to your procedure.',
-    'Confirm whether equipment or help at home is recommended by your care team.',
+    'Ask which movement, lifting, and wound care instructions apply to your surgery.',
+    'Ask if you will need equipment or help at home.',
   ],
   'Cerebral aneurysm repair': [
-    'Ask the team what symptoms after this procedure need urgent attention.',
-    'Confirm your monitoring and follow-up plan before leaving the hospital.',
+    'Ask the team which symptoms after this surgery need help right away.',
+    'Ask about your checkups and follow-up plan before you leave the hospital.',
   ],
   CABG: [
-    'Ask the team which activity and incision-care instructions apply after bypass surgery.',
-    'Confirm the cardiac follow-up plan and whom to contact with recovery concerns.',
+    'Ask which activity and wound care instructions apply after bypass surgery.',
+    'Ask about your heart follow-up visits and who to call with concerns.',
   ],
   'Valve repair': [
-    'Ask the team what follow-up and monitoring are planned after valve repair.',
-    'Confirm which activity and incision-care instructions apply to you.',
+    'Ask what follow-up visits and checkups are planned after valve repair.',
+    'Ask which activity and wound care instructions apply to you.',
   ],
   'Heart failure surgery': [
-    'Ask the team how recovery follow-up will be coordinated with your heart-care team.',
-    'Confirm which symptoms or changes should prompt a call or urgent assessment.',
+    'Ask how your follow-up will be planned with your heart doctor.',
+    'Ask which symptoms or changes mean you should call or get checked right away.',
   ],
   'Abdominal surgery': [
-    'Ask the team what eating, drinking, and activity guidance applies after your procedure.',
-    'Confirm incision or drain care instructions and whom to contact with concerns.',
+    'Ask what you can eat and drink and how active you can be after surgery.',
+    'Ask how to care for your wound or drain and who to call with concerns.',
   ],
   'Bariatric surgery': [
-    'Ask the team for your procedure-specific eating and drinking plan.',
-    'Confirm nutrition follow-up and any support resources recommended by your care team.',
+    'Ask for your eating and drinking plan after surgery.',
+    'Ask about nutrition follow-up and any support groups or resources.',
   ],
   'GI resections': [
-    'Ask the team what bowel, diet, and activity changes to expect and report.',
-    'Confirm incision or ostomy care instructions if they apply to your procedure.',
+    'Ask what changes to expect with bowel movements, food, and activity, and which to report.',
+    'Ask how to care for your wound or ostomy (an opening for waste on the belly), if you have one.',
   ],
   'Hip arthroplasty': [
-    'Ask your surgeon or physical therapist which movement and weight-bearing guidance applies.',
-    'Confirm your mobility aid, home setup, and physical therapy plan with the care team.',
+    'Ask your surgeon or physical therapist how you can move and how much weight you can put on your leg.',
+    'Ask about a walker or cane, setting up your home, and your physical therapy plan.',
   ],
   'Knee replacement': [
-    'Ask your surgeon or physical therapist which movement and weight-bearing guidance applies.',
-    'Confirm your mobility aid, home setup, and physical therapy plan with the care team.',
+    'Ask your surgeon or physical therapist how you can move and how much weight you can put on your leg.',
+    'Ask about a walker or cane, setting up your home, and your physical therapy plan.',
   ],
   'Spine fusion': [
-    'Ask the team which movement, lifting, and brace instructions apply to your fusion.',
-    'Confirm whether equipment or help at home is recommended by your care team.',
+    'Ask which movement, lifting, and back brace instructions apply to you.',
+    'Ask if you will need equipment or help at home.',
   ],
   Prostatectomy: [
-    'Ask how long the catheter stays in and how to care for it at home.',
-    'Confirm pelvic floor exercise, lifting, and follow-up guidance with the team.',
+    'Ask how long the catheter (tube that drains urine) stays in and how to care for it at home.',
+    'Ask about pelvic floor exercises (exercises to help control your bladder), lifting, and follow-up visits.',
   ],
   Nephrectomy: [
-    'Ask which pain, activity, and hydration instructions apply with one kidney or a partial kidney.',
-    'Confirm which medicines to avoid and when kidney function will be rechecked.',
+    'Ask about pain, activity, and how much to drink now that you have one kidney or part of a kidney.',
+    'Ask which medicines to avoid and when your kidneys will be checked again.',
   ],
   Cystectomy: [
-    'Ask for teaching on urinary diversion or stoma care if it applies to your procedure.',
-    'Confirm nutrition, supplies, and follow-up plans with the team.',
+    'Ask to be taught how urine will leave your body now, and how to care for a stoma (an opening on the belly) if you have one.',
+    'Ask about nutrition, supplies, and follow-up visits.',
   ],
   TURP: [
-    'Ask what to expect with blood in the urine and when to call.',
-    'Confirm catheter, fluid, and activity instructions with the team.',
+    'Ask how much blood in your urine is normal and when to call.',
+    'Ask about the catheter (tube that drains urine), how much to drink, and activity.',
   ],
   Ureteroscopy: [
-    'Ask whether a stent was placed and when it will be removed.',
-    'Confirm which pain, urinary, and fever symptoms need urgent attention.',
+    'Ask if a stent (small tube) was placed and when it will come out.',
+    'Ask which pain, peeing, or fever symptoms need help right away.',
   ],
   Hysterectomy: [
-    'Ask which lifting, driving, and intimacy restrictions apply to your procedure.',
-    'Confirm what vaginal bleeding or discharge is expected and when to call.',
+    'Ask when you can lift things, drive, and have sex again.',
+    'Ask what vaginal bleeding or discharge is normal and when to call.',
   ],
   Myomectomy: [
-    'Ask about activity limits, expected bleeding, and any future pregnancy planning guidance.',
-    'Confirm follow-up timing and incision care instructions.',
+    'Ask about activity limits, what bleeding is normal, and any advice about future pregnancy.',
+    'Ask about wound care and when your follow-up visit is.',
   ],
   Oophorectomy: [
-    'Ask how the procedure may affect hormones and what symptom support is available.',
-    'Confirm incision care and follow-up plans with the team.',
+    'Ask how surgery may change your hormones and what help is available for symptoms.',
+    'Ask about wound care and follow-up visits.',
   ],
   'Laparoscopic endometriosis excision': [
-    'Ask what pain and shoulder discomfort are expected after laparoscopy.',
-    'Confirm follow-up plans for symptom tracking and any pathology results.',
+    'Ask what pain is normal after keyhole surgery, including shoulder pain (which is common).',
+    'Ask about follow-up for your symptoms and any lab test results.',
   ],
   'Pelvic organ prolapse repair': [
-    'Ask about lifting, straining, and bowel care to protect the repair.',
-    'Confirm bladder emptying checks and when to resume activity.',
+    'Ask about lifting, straining, and keeping bowel movements soft to protect the repair.',
+    'Ask how staff will check that your bladder empties and when you can get back to activities.',
   ],
   Mastectomy: [
-    'Ask how to care for drains, the incision, and arm mobility exercises.',
-    'Confirm lymphedema precautions, reconstruction plans, and pathology follow-up.',
+    'Ask how to care for drains, your wound, and arm exercises.',
+    'Ask how to lower your risk of arm swelling (lymphedema), about any breast rebuilding, and about lab test results.',
   ],
   Lumpectomy: [
-    'Ask about incision care, activity, and whether radiation or other treatment follows.',
-    'Confirm when pathology results and follow-up visits are expected.',
+    'Ask about wound care, activity, and whether radiation or other treatment comes next.',
+    'Ask when you will get lab test results and follow-up visits.',
   ],
   'Colon cancer resection': [
-    'Ask about diet progression, bowel function, and incision or ostomy care.',
-    'Confirm pathology follow-up and any planned additional treatment.',
+    'Ask how to slowly return to normal food, what to expect with bowel movements, and how to care for your wound or ostomy.',
+    'Ask about lab test results and any more treatment that is planned.',
   ],
   'Lung lobectomy': [
     'Ask about breathing exercises, chest tube care, and activity limits.',
-    'Confirm which breathing or pain changes need urgent attention.',
+    'Ask which breathing or pain changes need help right away.',
   ],
   'Tumor debulking': [
-    'Ask what recovery milestones and nutrition support to expect.',
-    'Confirm how pathology results and next treatment steps will be shared with you.',
+    'Ask what recovery steps to expect and what nutrition help is available.',
+    'Ask how you will get lab test results and hear about next treatment steps.',
   ],
   'Carotid endarterectomy': [
-    'Ask which stroke warning signs need emergency help and blood pressure targets to follow.',
-    'Confirm neck incision care and antiplatelet medicine plans.',
+    'Ask which stroke warning signs need emergency help, and what blood pressure numbers to aim for.',
+    'Ask about neck wound care and any blood-thinning medicine (antiplatelet) you should take.',
   ],
   'Aortic aneurysm repair': [
-    'Ask about activity and lifting limits, and long-term imaging follow-up.',
-    'Confirm which abdominal, back, or leg symptoms need urgent attention.',
+    'Ask about activity and lifting limits, and how often you will need scans.',
+    'Ask which belly, back, or leg symptoms need help right away.',
   ],
   'Peripheral artery bypass': [
-    'Ask how to check your leg warmth, color, and pulses and when to call.',
-    'Confirm walking, leg elevation, and medicine instructions with the team.',
+    'Ask how to check the warmth, color, and pulse in your leg, and when to call.',
+    'Ask about walking, raising your leg, and medicines.',
   ],
   Amputation: [
-    'Ask about residual limb care, positioning, and phantom pain management.',
-    'Confirm rehabilitation, prosthetic timing, and emotional support options.',
+    'Ask how to care for the remaining part of your limb, how to position it, and how to manage phantom pain (pain that feels like it is in the missing part).',
+    'Ask about rehab, when you might get an artificial limb, and emotional support.',
   ],
   'AV fistula creation': [
-    'Ask how to check for a thrill, and which arm precautions to follow.',
-    'Confirm when the fistula can be used and what signs of clotting or infection to report.',
+    'Ask how to feel for the buzzing (called a thrill) in your arm, and how to protect that arm.',
+    'Ask when the fistula can be used for dialysis and what signs of a clot or infection to report.',
   ],
 };
 
@@ -573,7 +618,7 @@ function App() {
   const selectedProcedure = activeProfile?.selectedProcedure ?? serviceLineBundles[0].procedures[0];
   const postoperativeRoute = postoperativeRoutes[selectedProcedure] ?? {
     route: 'variable',
-    detail: 'The planned destination depends on the procedure, the person, and the local pathway.',
+    detail: 'Where you go next depends on the surgery, on you, and on the hospital.',
   };
   const selectedAnesthesiaType = activeProfile?.anesthesiaType ?? 'unknown';
   const anesthesiaInfo = anesthesiaTypes[selectedAnesthesiaType] ?? anesthesiaTypes.unknown;
@@ -756,8 +801,7 @@ function App() {
               <p className="signup-eyebrow">A LITTLE MORE SUPPORT, EVERY DAY</p>
               <h1>Your recovery journey starts here.</h1>
               <p>
-                Create a demo profile to keep your own checklist, notes, and medicine list separate
-                from other profiles in this open page.
+                Make a demo profile to keep your own checklist, notes, and medicine list in one place.
               </p>
             </div>
 
@@ -765,7 +809,7 @@ function App() {
               <span className="signup-promise-icon" aria-hidden="true">✓</span>
               <p>
                 <strong>Demo profiles only</strong>
-                <span>No password, account, or secure sign-in is provided.</span>
+                <span>There is no password or real account.</span>
               </p>
             </div>
             <span className="signup-decoration signup-decoration-one" aria-hidden="true" />
@@ -778,8 +822,8 @@ function App() {
               <h2 id="signup-heading">{isSigningIn ? 'Sign in to a demo profile' : 'Sign up for a demo profile'}</h2>
               <p>
                 {isSigningIn
-                  ? 'Choose a profile created during this open session.'
-                  : 'Choose a display name. Avoid real names or other identifying details.'}
+                  ? 'Pick a profile you made since you opened this page.'
+                  : 'Pick a name to show. Use a nickname, not your real name.'}
               </p>
             </div>
 
@@ -806,7 +850,7 @@ function App() {
                     </button>
                   </>
                 ) : (
-                  <p role="status">No demo profiles exist in this session yet. Create one to begin.</p>
+                  <p role="status">You have not made a demo profile yet. Make one to get started.</p>
                 )}
               </form>
             ) : (
@@ -831,7 +875,7 @@ function App() {
             )}
 
             <p className="signup-alternate">
-              {isSigningIn ? 'Need a new demo profile?' : 'Already created one this session?'}{' '}
+              {isSigningIn ? 'Need a new demo profile?' : 'Already made one?'}{' '}
               <button
                 type="button"
                 onClick={() => setAuthMode(isSigningIn ? 'signup' : 'signin')}
@@ -841,9 +885,9 @@ function App() {
             </p>
 
             <p className="signup-privacy">
-              Profiles and their checklist, self-care notes, and medicine list stay only in this
-              browser tab’s memory. They are not protected accounts and disappear when the page is
-              reloaded or closed. Do not enter real health or identifying information.
+              Your profile, checklist, notes, and medicine list are only kept in this browser tab.
+              They are not private or protected, and they are erased when you refresh or close the
+              page. Do not enter real health details or anything that could identify you.
             </p>
           </div>
         </section>
@@ -971,16 +1015,16 @@ function App() {
         <aside className="emergency-banner" role="note">
           <strong>Need urgent help?</strong>
           <span>
-            If someone may be having an emergency, contact your local emergency number now. Do not
-            wait for this website.
+            If someone may be having an emergency, call your local emergency number (such as 911)
+            now. Do not wait for this website.
           </span>
         </aside>
         <aside className="prototype-disclaimer" role="note">
-          <strong>Prototype only — not medical advice.</strong>
+          <strong>This is a test version. It is not medical advice.</strong>
           <span>
-            Recover Well does not diagnose, prescribe, or replace a licensed clinician or pharmacist.
-            Verify medication names, doses, interactions, and recovery instructions with your care
-            team. Do not enter identifying health information.
+            Recover Well cannot tell you what is wrong, prescribe medicine, or take the place of your
+            doctor, nurse, or pharmacist. Check medicine names, doses, and recovery instructions with
+            your care team. Do not enter anything that could identify you.
           </span>
         </aside>
 
@@ -990,8 +1034,7 @@ function App() {
               <p className="eyebrow">WELCOME TO RECOVER WELL</p>
               <h2>{activeProfile.name}'s recovery, in one place.</h2>
               <p>
-                Find general information, organize your questions, and choose what support would
-                help you today.
+                Learn the basics, keep track of your questions, and pick what would help you today.
               </p>
             </div>
           </div>
@@ -1014,7 +1057,7 @@ function App() {
             <article className="summary-card">
               <p className="eyebrow">QUICK REMINDER</p>
               <h3>Follow your care team's guidance</h3>
-              <p>Use these tools to organize questions and personal notes, not to make care decisions.</p>
+              <p>Use these tools to keep track of questions and notes, not to make health decisions.</p>
             </article>
           </section>
 
@@ -1030,23 +1073,23 @@ function App() {
               </button>
               <button type="button" onClick={(event) => navigateTo('medications', event)}>
                 <strong>Review medicines</strong>
-                <span>Organize medicines and view limited interaction prompts.</span>
+                <span>List your medicines and see some that may not mix well.</span>
               </button>
               <button type="button" onClick={(event) => navigateTo('care', event)}>
                 <strong>Prepare for your visit</strong>
-                <span>Record symptoms, questions, and goals for your next check-in.</span>
+                <span>Write down symptoms and questions for your next visit.</span>
               </button>
               <button type="button" onClick={(event) => navigateTo('selfcare', event)}>
                 <strong>Open self-care toolkit</strong>
-                <span>Track symptoms, energy, hydration, and daily recovery habits.</span>
+                <span>Track how you feel, your energy, drinking water, and daily habits.</span>
               </button>
               <button type="button" onClick={(event) => navigateTo('guide', event)}>
-                <strong>Plan for a procedure</strong>
-                <span>Record procedure details and review a procedure-specific checklist.</span>
+                <strong>Plan for surgery</strong>
+                <span>Save your surgery details and see a checklist for your surgery.</span>
               </button>
               <button type="button" onClick={(event) => navigateTo('journey', event)}>
-                <strong>Explore recovery information</strong>
-                <span>Explore general recovery information and topics.</span>
+                <strong>Learn about recovery</strong>
+                <span>See what recovery usually looks like, step by step.</span>
               </button>
             </div>
           </section>
@@ -1077,17 +1120,17 @@ function App() {
         <section className="procedure-planner-section" aria-labelledby="procedure-planner-heading">
           <div className="section-heading">
             <p className="eyebrow">PROCEDURE PLANNING</p>
-            <h2 id="procedure-planner-heading">Keep your procedure details together</h2>
+            <h2 id="procedure-planner-heading">Keep your surgery details in one place</h2>
             <p className="planner-disclaimer">
-              This is a personal planning aid only. It does not book or confirm a procedure.
-              Follow instructions directly from your surgical team.
+              This is only for your own planning. It does not book or confirm your surgery. Follow
+              the instructions from your surgery team.
             </p>
           </div>
 
           <div className="procedure-planner-card">
             <div className="planner-fields">
               <label htmlFor="procedure-date">
-                Procedure date
+                Surgery date
                 <input
                   id="procedure-date"
                   type="date"
@@ -1096,7 +1139,7 @@ function App() {
                 />
               </label>
               <label htmlFor="procedure-arrival">
-                Arrival time (optional; no names or location details)
+                Arrival time (optional; do not add names or places)
                 <input
                   id="procedure-arrival"
                   type="text"
@@ -1107,7 +1150,7 @@ function App() {
                 />
               </label>
               <label htmlFor="operative-service">
-                Surgical service
+                Type of surgery
                 <select
                   id="operative-service"
                   value={selectedService}
@@ -1115,13 +1158,13 @@ function App() {
                 >
                   {serviceLineBundles.map((bundle) => (
                     <option key={bundle.service} value={bundle.service}>
-                      {bundle.service}
+                      {bundle.label}
                     </option>
                   ))}
                 </select>
               </label>
               <label htmlFor="operative-procedure">
-                Procedure
+                Surgery
                 <select
                   id="operative-procedure"
                   value={selectedProcedure}
@@ -1129,28 +1172,29 @@ function App() {
                 >
                   {selectedProcedureGroup.procedures.map((procedure) => (
                     <option key={procedure} value={procedure}>
-                      {procedure}
+                      {procedureLabel(procedure)}
                     </option>
                   ))}
                 </select>
               </label>
             </div>
             <p className="planner-local-note">
-              These details stay in this page while it is open. They are not sent to a clinic or
-              saved as an appointment. Avoid entering names, addresses, or other identifying details.
+              These details are only kept on this page while it is open. They are not sent to a
+              clinic or saved as an appointment. Do not enter names, addresses, or anything that
+              could identify you.
             </p>
           </div>
 
           <div className="surgery-checklist-card">
-            <h3>Checklist for {selectedProcedure}</h3>
-            <p>General prompts to discuss with your care team; they are not personalized medical instructions.</p>
+            <h3>Checklist for {procedureLabel(selectedProcedure)}</h3>
+            <p>Things to ask your care team about. These are not instructions made for you.</p>
             <ul className="surgery-checklist">
               {[
-                'Confirm the procedure name, date, arrival time, and location with the surgical team.',
-                'Ask your team which food, drink, and medication instructions apply to you. Do not change medicines unless your team tells you to.',
-                'Make sure your team knows about your medicines, supplements, and allergies.',
+                'Check the name of the surgery, the date, the arrival time, and the place with your surgery team.',
+                'Ask your team when to stop eating and drinking, and what to do about your medicines. Do not change medicines unless your team tells you to.',
+                'Make sure your team knows about all your medicines, vitamins, supplements, and allergies.',
                 ...(surgeryChecklists[selectedProcedure] ?? []),
-                'Ask what transportation, home support, and follow-up arrangements you should plan for.',
+                'Ask how you will get home, what help you will need at home, and when your follow-up visits are.',
               ].map((item) => (
                 <li key={item}>
                   <label>
@@ -1169,18 +1213,18 @@ function App() {
 
         <section className="icu-model-section" aria-labelledby="procedure-care-modules-heading">
           <div className="section-heading">
-            <p className="eyebrow">PROCEDURE-RELEVANT CARE TOPICS</p>
-            <h2 id="procedure-care-modules-heading">ICU and recovery topics to discuss</h2>
+            <p className="eyebrow">QUESTIONS FOR YOUR TEAM</p>
+            <h2 id="procedure-care-modules-heading">Hospital and recovery questions to ask</h2>
             <p className="planner-disclaimer">
-              Based on the {selectedService} procedure category and {selectedProcedure} selected
-              above. These general prompts are not a description of your care or a personalized
-              care plan. Confirm what applies with your care team.
+              Based on the {selectedProcedureGroup.label} surgery type and{' '}
+              {procedureLabel(selectedProcedure)} you picked above. These are general questions, not
+              a plan made for you. Check with your care team about what applies to you.
             </p>
           </div>
 
           <div className="patient-profile-grid">
             <article className="icu-model-card">
-              <h3>ICU care topics</h3>
+              <h3>In the hospital or ICU (intensive care unit)</h3>
               <ul>
                 {selectedProcedureGroup.icuTopics.map((topic) => (
                   <li key={topic}>{topic}</li>
@@ -1188,7 +1232,7 @@ function App() {
               </ul>
             </article>
             <article className="icu-model-card">
-              <h3>Recovery care topics</h3>
+              <h3>During recovery</h3>
               <ul>
                 {selectedProcedureGroup.recoveryTopics.map((topic) => (
                   <li key={topic}>{topic}</li>
@@ -1200,54 +1244,54 @@ function App() {
 
         <section className="icu-model-section" aria-labelledby="postoperative-route-heading">
           <div className="section-heading">
-            <p className="eyebrow">AFTER THE PROCEDURE</p>
-            <h2 id="postoperative-route-heading">Possible next step after PACU</h2>
+            <p className="eyebrow">AFTER SURGERY</p>
+            <h2 id="postoperative-route-heading">Where you might go after the recovery room</h2>
             <p className="planner-disclaimer">
-              These are broad examples of planned pathways, not a rule about where anyone will go.
-              The operation and approach, your health and recovery, local resources, and clinical
-              assessment all matter. The responsible care team decides when PACU discharge criteria
-              are met; an ICU may provide equivalent postanesthesia care.
+              Right after surgery, most people wake up in a recovery room (also called PACU). These
+              are common examples of where people go next, not a rule. It depends on the surgery,
+              your health, how you recover, and the hospital. Your care team decides when you are
+              ready to leave the recovery room. Some people go straight to the ICU instead.
             </p>
           </div>
 
           <article className="icu-model-card route-card">
-            <p className="mini-label">Selected procedure: {selectedProcedure}</p>
+            <p className="mini-label">Your surgery: {procedureLabel(selectedProcedure)}</p>
             <h3>
-              {postoperativeRoute.route === 'home' && 'PACU → home may be planned'}
-              {postoperativeRoute.route === 'floor' && 'PACU → hospital floor is commonly planned'}
-              {postoperativeRoute.route === 'icu' && 'PACU → ICU or monitored unit may be planned'}
-              {postoperativeRoute.route === 'variable' && 'The planned route can vary'}
+              {postoperativeRoute.route === 'home' && 'Recovery room → home the same day is possible'}
+              {postoperativeRoute.route === 'floor' && 'Recovery room → regular hospital room is common'}
+              {postoperativeRoute.route === 'icu' && 'Recovery room → ICU or a closely watched unit is possible'}
+              {postoperativeRoute.route === 'variable' && 'Where you go next can vary'}
             </h3>
             <p>{postoperativeRoute.detail}</p>
             <p>
-              Going home depends on meeting the care team’s discharge criteria; needing more
-              monitoring or treatment can change the plan. Confirm your expected destination with
-              your surgeon and anesthesia team.
+              You go home only when your care team says you are ready. If you need more watching or
+              treatment, the plan can change. Ask your surgeon and anesthesia team where you will
+              likely go.
             </p>
             <a
               href="https://www.asahq.org/standards-and-practice-parameters/standards-for-postanesthesia-care"
               target="_blank"
               rel="noopener noreferrer"
             >
-              American Society of Anesthesiologists: Standards for Postanesthesia Care (opens in new tab)
+              American Society of Anesthesiologists: rules for recovery room care (opens in new tab)
             </a>
           </article>
         </section>
 
         <section className="icu-model-section" aria-labelledby="anesthesia-education-heading">
           <div className="section-heading">
-            <p className="eyebrow">ANESTHESIA EDUCATION</p>
+            <p className="eyebrow">ANESTHESIA BASICS</p>
             <h2 id="anesthesia-education-heading">What anesthesia may feel like</h2>
             <p className="planner-disclaimer">
-              This section is separate from the procedure-route examples: a procedure name does not
-              tell you which anesthesia you will receive. Types can be combined, and your
-              anesthesiology team can explain your actual plan.
+              Anesthesia is medicine that keeps you from feeling pain during surgery. The name of
+              your surgery does not tell you which kind you will get. More than one kind can be
+              used, and your anesthesia team can explain your plan.
             </p>
           </div>
 
           <div className="anesthesia-card">
             <label className="anesthesia-select" htmlFor="anesthesia-type">
-              Anesthesia type
+              Type of anesthesia
               <select
                 id="anesthesia-type"
                 value={selectedAnesthesiaType}
@@ -1264,27 +1308,27 @@ function App() {
                 <h3>{anesthesiaInfo.label}</h3>
                 <p>{anesthesiaInfo.description}</p>
               </div>
-              <h4>Possible effects and recovery</h4>
+              <h4>How you may feel afterward</h4>
               <p>{anesthesiaInfo.effects}</p>
               <p>
-                After anesthesia, people are monitored in PACU or an appropriate equivalent area.
-                Staff may check alertness, breathing, oxygen level, circulation, and temperature;
-                the exact monitoring and next destination depend on the care plan.
+                After anesthesia, staff watch you in the recovery room or a similar area. They may
+                check how awake you are, your breathing, oxygen level, heart, and temperature. What
+                they check and where you go next depends on your care plan.
               </p>
             </article>
 
             <div className="anesthesia-questions">
-              <h3>Questions for your anesthesiology team</h3>
+              <h3>Questions for your anesthesia team</h3>
               <ul>
-                <li>Which type or combination is planned, and why?</li>
-                <li>What might I notice as it wears off, and which symptoms should I report?</li>
-                <li>What instructions apply to medicines, eating or drinking, transportation, and activities afterward?</li>
+                <li>Which kind of anesthesia will I get, and why?</li>
+                <li>What might I feel as it wears off, and which symptoms should I tell you about?</li>
+                <li>What should I know about my medicines, eating and drinking, getting home, and activities afterward?</li>
               </ul>
             </div>
 
             <p className="planner-local-note">
-              General education only; do not use this to change medicines, fasting, or activity.
-              Follow the instructions from your own care team.
+              This is general information only. Do not use it to change your medicines, when you
+              stop eating, or your activity. Follow the instructions from your own care team.
             </p>
             <div className="anesthesia-sources">
               <a
@@ -1327,19 +1371,19 @@ function App() {
         <section className="tools-page" hidden={activePage !== 'health-history'}>
           <div className="section-heading">
             <p className="eyebrow">MY PROFILE</p>
-            <h2 id="health-history-heading">Health history to discuss</h2>
+            <h2 id="health-history-heading">Health history to talk about</h2>
             <p className="planner-disclaimer">
-              Optional organizer for conditions you report having been diagnosed with or told about
-              by your care team. This list is not complete and does not assess risk or change your
-              care. Confirm details with a health professional.
+              If you want, note health problems a doctor or nurse has told you that you have. This
+              list does not include every condition, and it does not judge your risk or change your
+              care. Check the details with your care team.
             </p>
           </div>
 
           <fieldset className="comorbidity-selector">
             <legend>Health conditions (optional)</legend>
             <p className="comorbidity-guidance">
-              Select only what you know and want to note. If you are unsure, leave it unchecked or
-              use the unsure option below.
+              Only check what you know and want to note. If you are not sure, leave it blank or
+              check the "Not sure" box below.
             </p>
             {healthHistoryGroups.map((group) => (
               <fieldset className="comorbidity-group" key={group.category}>
@@ -1364,23 +1408,23 @@ function App() {
                 checked={activeProfile.healthHistoryUnknown}
                 onChange={(event) => updateActiveProfile('healthHistoryUnknown', event.target.checked)}
               />
-              <span>Not sure / history not available</span>
+              <span>Not sure / I don't know my history</span>
             </label>
             <label className="field-row comorbidity-other" htmlFor="profile-other-health-history">
-              Other condition(s) to discuss (optional)
+              Other health problems to talk about (optional)
               <input
                 id="profile-other-health-history"
                 type="text"
                 maxLength={200}
                 value={activeProfile.otherHealthHistory}
                 onChange={(event) => updateActiveProfile('otherHealthHistory', event.target.value)}
-                placeholder="Avoid names or identifying details"
+                placeholder="Do not include names or personal details"
               />
             </label>
           </fieldset>
           <p className="planner-local-note">
-            This note is kept only in this demo profile's current browser session. Do not enter
-            identifying or sensitive details.
+            This is only kept in this demo profile while this page is open. Do not enter anything
+            that could identify you or that you want to keep private.
           </p>
         </section>
 
@@ -1394,8 +1438,8 @@ function App() {
               <span>{completedCount}/{tasks.length} done</span>
             </div>
             <p className="planner-disclaimer">
-              These sample reminders are not a personal care plan. Follow your care team's
-              instructions and do not change medicines or activity based on this checklist.
+              These are sample reminders, not a care plan made for you. Follow your care team's
+              instructions. Do not change your medicines or activity because of this list.
             </p>
 
             <p className="visually-hidden" role="status" aria-live="polite">{taskAnnouncement}</p>
@@ -1450,26 +1494,26 @@ function App() {
               <button className="task-add-button" type="submit">Add reminder</button>
             </form>
             <p className="planner-local-note">
-              Your reminders stay in this demo profile in this page’s memory and are cleared when
-              the page is reloaded or closed. Avoid names or other identifying details.
+              Your reminders are only kept on this page and are erased when you refresh or close
+              it. Do not include names or other personal details.
             </p>
           </article>
 
           <aside className="care-panel">
             <p className="eyebrow">YOUR FOCUS</p>
             <h2>Daily planning</h2>
-            <p>Choose what feels helpful. Ask your care team what guidance applies to your activity, fluids, and medicines.</p>
+            <p>Pick what helps you. Ask your care team what is right for you about activity, drinking fluids, and medicines.</p>
           </aside>
         </section>
 
         <div hidden={activePage !== 'journey'}>
         <section className="timeline-section">
           <div className="section-heading">
-            <p className="eyebrow">CONTINUUM OF CARE</p>
+            <p className="eyebrow">STEPS OF RECOVERY</p>
             <h2>From ICU care to at-home recovery</h2>
             <p className="planner-disclaimer">
-              This is general education, not a schedule or care plan. Your experience and
-              instructions may differ; ask your care team what applies to you.
+              This is general information, not a schedule or a plan made for you. Your recovery may
+              be different. Ask your care team what applies to you.
             </p>
           </div>
 
@@ -1493,37 +1537,38 @@ function App() {
             <p className="eyebrow">WHAT TO EXPECT</p>
             <h2 id="icu-day-one-heading">Day one after surgery: ICU care</h2>
             <p className="planner-disclaimer">
-              Every recovery is different. Your ICU team will tailor care to your operation and
-              explain what applies to you; follow their instructions.
+              The ICU (intensive care unit) is where staff watch you very closely. Every recovery is
+              different. Your ICU team will tailor care to your surgery and explain what applies to
+              you. Follow their instructions.
             </p>
           </div>
 
           <div className="timeline-grid">
             <article className="timeline-card">
               <span className="stage-badge">After surgery</span>
-              <h3>Arrival and close monitoring</h3>
+              <h3>Arriving and being watched closely</h3>
               <ul>
-                <li>Your team checks breathing, circulation, alertness, and comfort.</li>
-                <li>Monitors and any tubes or drains are reviewed as part of your care.</li>
-                <li>The team shares a handoff and updates your recovery plan.</li>
+                <li>Your team checks your breathing, heart, how awake you are, and how comfortable you are.</li>
+                <li>Staff check the machines and any tubes or drains attached to you.</li>
+                <li>The surgery team tells the ICU team about your surgery and updates your recovery plan.</li>
               </ul>
             </article>
             <article className="timeline-card">
               <span className="stage-badge">Throughout day one</span>
-              <h3>Support and reassessment</h3>
+              <h3>Care and regular checks</h3>
               <ul>
-                <li>Nurses reassess you regularly and respond to changes.</li>
-                <li>Pain, nausea, wound, and fluid needs are managed by your care team.</li>
-                <li>Breathing exercises, drinks, food, or movement happen only when your team says they are appropriate.</li>
+                <li>Nurses check on you often and act if anything changes.</li>
+                <li>Your care team handles your pain, nausea, wound, and fluids.</li>
+                <li>You start breathing exercises, drinking, eating, or moving only when your team says it is okay.</li>
               </ul>
             </article>
             <article className="timeline-card">
               <span className="stage-badge">As recovery progresses</span>
               <h3>Small steps, guided by your team</h3>
               <ul>
-                <li>Ask what the goals are for your next few hours and who to call with concerns.</li>
-                <li>Your team decides when you are ready for less intensive monitoring or a different unit.</li>
-                <li>Share new or worsening symptoms with your nurse right away.</li>
+                <li>Ask what the goals are for the next few hours and who to ask if you are worried.</li>
+                <li>Your team decides when you are ready for less watching or to move to another unit.</li>
+                <li>Tell your nurse right away about any new symptoms or ones getting worse.</li>
               </ul>
             </article>
           </div>
@@ -1531,8 +1576,8 @@ function App() {
 
         <section className="procedures-section">
           <div className="section-heading">
-            <p className="eyebrow">COMMON SURGICAL TYPES</p>
-            <h2>Procedure-specific recovery priorities</h2>
+            <p className="eyebrow">COMMON TYPES OF SURGERY</p>
+            <h2>What to focus on after each type of surgery</h2>
           </div>
 
           <div className="procedure-grid">

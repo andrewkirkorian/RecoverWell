@@ -7,268 +7,268 @@ const rules = [
     a: 'apixaban',
     b: 'ibuprofen',
     level: 'High',
-    title: 'Bleeding risk',
+    title: 'Higher risk of bleeding',
     description:
-      'Ibuprofen may increase bleeding risk when taken with apixaban. Confirm this combination with the prescribing clinician or pharmacist.',
+      'Ibuprofen may raise the risk of bleeding when taken with apixaban. Check with the doctor who prescribed it or a pharmacist before taking them together.',
   },
   {
     a: 'apixaban',
     b: 'aspirin',
     level: 'High',
-    title: 'Bleeding risk',
+    title: 'Higher risk of bleeding',
     description:
-      'Aspirin may add to apixaban’s blood-thinning effect and increase bleeding risk. Confirm the combination with the care team.',
+      'Aspirin may add to apixaban’s blood-thinning effect and raise the risk of bleeding. Check with your care team before taking them together.',
   },
   {
     a: 'warfarin',
     b: 'ibuprofen',
     level: 'High',
-    title: 'Bleeding risk',
+    title: 'Higher risk of bleeding',
     description:
-      'Ibuprofen can increase bleeding risk with warfarin. Ask the prescriber or pharmacist before using them together.',
+      'Ibuprofen can raise the risk of bleeding when taken with warfarin. Ask your doctor or pharmacist before taking them together.',
   },
   {
     a: 'warfarin',
     b: 'warfarin-potentiator',
     level: 'High',
-    title: 'Warfarin effect may increase',
+    title: 'Warfarin may get too strong',
     description: (a, b) =>
-      `${b} may raise warfarin effect and bleeding risk. Prompt prescriber review and INR monitoring may be needed.`,
+      `${b} may make warfarin stronger and raise the risk of bleeding. Talk to your doctor soon. You may need extra blood clotting tests (INR).`,
   },
   {
     a: 'warfarin',
     b: 'acetaminophen',
     level: 'Moderate',
-    title: 'Warfarin effect may increase',
+    title: 'Warfarin may get too strong',
     description:
-      'Regular, repeated acetaminophen use may raise INR in people taking warfarin. Tell the prescriber how much is taken.',
+      'Taking acetaminophen often, day after day, may make warfarin stronger and change your blood clotting test (INR). Tell your doctor how much you take.',
   },
   {
     a: 'warfarin',
     b: 'inducer',
     level: 'High',
-    title: 'Blood thinner may work less well',
+    title: 'Blood thinner may not work as well',
     description: (a, b) =>
-      `${b} can lower the effect of anticoagulants. Do not start or stop it without prescriber or pharmacist advice.`,
+      `${b} can make blood thinners work less well. Do not start or stop it without asking your doctor or pharmacist.`,
   },
   {
     a: 'anticoagulant',
     b: 'inducer',
     level: 'High',
-    title: 'Blood thinner may work less well',
+    title: 'Blood thinner may not work as well',
     description: (a, b) =>
-      `${b} can lower the effect of ${a}. Ask the prescriber or pharmacist before combining them.`,
+      `${b} can make ${a} work less well. Ask your doctor or pharmacist before taking them together.`,
   },
   {
     a: 'anticoagulant',
     b: 'anticoagulant',
     level: 'High',
-    title: 'Multiple blood thinners',
+    title: 'More than one blood thinner',
     description: (a, b) =>
-      `${a} and ${b} are both anticoagulants. Using two together greatly raises bleeding risk and is usually only done under close clinical direction.`,
+      `${a} and ${b} are both blood thinners. Taking two together greatly raises the risk of bleeding. This is usually only done when a doctor is watching closely.`,
   },
   {
     a: 'anticoagulant',
     b: 'antiplatelet',
     level: 'High',
-    title: 'Bleeding risk',
+    title: 'Higher risk of bleeding',
     description: (a, b) =>
-      `${b} may add to the blood-thinning effect of ${a} and increase bleeding risk. Confirm the combination with the care team.`,
+      `${b} may add to the blood-thinning effect of ${a} and raise the risk of bleeding. Check with your care team before taking them together.`,
   },
   {
     a: 'antiplatelet',
     b: 'antiplatelet',
     level: 'High',
-    title: 'Multiple blood thinners',
+    title: 'More than one blood thinner',
     description: (a, b) =>
-      `${a} and ${b} both reduce clotting. Some combinations are intentional, but bleeding risk rises; confirm with the prescriber.`,
+      `${a} and ${b} both make it harder for blood to clot. Doctors sometimes use them together on purpose, but the risk of bleeding goes up. Check with your doctor.`,
   },
   {
     a: 'anticoagulant',
     b: 'nsaid',
     level: 'High',
-    title: 'Bleeding risk',
+    title: 'Higher risk of bleeding',
     description: (a, b) =>
-      `${b} may increase bleeding risk when taken with ${a}. Confirm this combination with the prescribing clinician or pharmacist.`,
+      `${b} may raise the risk of bleeding when taken with ${a}. Check with the doctor who prescribed it or a pharmacist before taking them together.`,
   },
   {
     a: 'anticoagulant',
     b: 'bleeding-supplement',
     level: 'Moderate',
-    title: 'Bleeding risk',
+    title: 'Higher risk of bleeding',
     description: (a, b) =>
-      `${b} may affect clotting and add to the bleeding risk of ${a}. Ask a pharmacist before using it.`,
+      `${b} may affect blood clotting and add to the bleeding risk of ${a}. Ask a pharmacist before taking it.`,
   },
   {
     a: 'anticoagulant',
     b: 'ssri',
     level: 'Moderate',
-    title: 'Bleeding risk',
+    title: 'Higher risk of bleeding',
     description: (a, b) =>
-      `${b} can modestly increase bleeding risk when combined with ${a}. Mention it to the prescriber.`,
+      `${b} can slightly raise the risk of bleeding when taken with ${a}. Tell your doctor you take both.`,
   },
   {
     a: 'antiplatelet',
     b: 'nsaid',
     level: 'Moderate',
-    title: 'Bleeding and stomach risk',
+    title: 'Risk of bleeding and stomach problems',
     description: (a, b) =>
-      `${b} with ${a} may increase bleeding, especially in the stomach. Some NSAIDs can also interfere with aspirin’s heart-protective effect; ask a pharmacist.`,
+      `${b} with ${a} may raise the risk of bleeding, especially in the stomach. Some pain relievers like ibuprofen can also make aspirin less able to protect your heart. Ask a pharmacist.`,
   },
   {
     a: 'salicylate',
     b: 'nsaid',
     level: 'Moderate',
-    title: 'Bleeding and stomach risk',
-    description: (a, b) => `${a} with ${b} may increase stomach bleeding risk. Ask a pharmacist about timing and need.`,
+    title: 'Risk of bleeding and stomach problems',
+    description: (a, b) => `${a} with ${b} may raise the risk of bleeding in the stomach. Ask a pharmacist when to take each one, and if you need both.`,
   },
   {
     a: 'antiplatelet',
     b: 'bleeding-supplement',
     level: 'Moderate',
-    title: 'Bleeding risk',
-    description: (a, b) => `${b} may add to the bleeding risk of ${a}. Ask a pharmacist before using it.`,
+    title: 'Higher risk of bleeding',
+    description: (a, b) => `${b} may add to the bleeding risk of ${a}. Ask a pharmacist before taking it.`,
   },
   {
     a: 'ssri',
     b: 'nsaid',
     level: 'Moderate',
-    title: 'Bleeding risk',
+    title: 'Higher risk of bleeding',
     description: (a, b) =>
-      `Combining an SSRI or SNRI such as ${a} with an NSAID such as ${b} may increase bleeding risk.`,
+      `Taking an antidepressant like ${a} with a pain reliever like ${b} may raise the risk of bleeding.`,
   },
   {
     a: 'ssri',
     b: 'antiplatelet',
     level: 'Moderate',
-    title: 'Bleeding risk',
-    description: (a, b) => `${a} with ${b} may increase bleeding risk.`,
+    title: 'Higher risk of bleeding',
+    description: (a, b) => `${a} with ${b} may raise the risk of bleeding.`,
   },
   {
     a: 'ssri',
     b: 'tramadol',
     level: 'High',
-    title: 'Serotonin and seizure risks',
+    title: 'Risk of a serious reaction and seizures',
     description: (a) =>
-      `Taking tramadol with ${a} may increase the risk of serotonin syndrome and seizures. Contact the prescriber or pharmacist for review.`,
+      `Taking tramadol with ${a} may raise the risk of seizures and of serotonin syndrome (a serious reaction that can cause shaking, fever, and a racing heart). Contact your doctor or pharmacist.`,
   },
   {
     a: 'serotonergic',
     b: 'serotonergic',
     level: 'Moderate',
-    title: 'Serotonin syndrome risk',
+    title: 'Risk of a serious reaction (serotonin syndrome)',
     description: (a, b) =>
-      `${a} and ${b} can each raise serotonin. Together they may increase the risk of serotonin syndrome; ask the prescriber or pharmacist.`,
+      `${a} and ${b} both raise serotonin, a chemical in the brain. Together they may cause serotonin syndrome (a serious reaction that can cause shaking, fever, and a racing heart). Ask your doctor or pharmacist.`,
   },
   {
     a: 'opioid',
     b: 'benzodiazepine',
     level: 'High',
-    title: 'Excess sedation and breathing risk',
+    title: 'Too sleepy and slowed breathing',
     description: (a, b) =>
-      `Combining an opioid such as ${a} with ${b} can cause dangerous sedation and slowed breathing. Use together only under explicit prescriber direction.`,
+      `Taking a strong pain medicine (opioid) like ${a} with ${b} can make you dangerously sleepy and slow your breathing. Only take them together if your doctor has clearly told you to.`,
   },
   {
     a: 'opioid',
     b: 'sedative',
     level: 'Moderate',
-    title: 'Extra drowsiness and slowed breathing',
+    title: 'Extra sleepiness and slowed breathing',
     description: (a, b) =>
-      `${b} may add to the sedation of ${a}. Avoid alcohol and ask the prescriber or pharmacist about the combination.`,
+      `${b} may make ${a} cause more sleepiness. Do not drink alcohol, and ask your doctor or pharmacist about taking them together.`,
   },
   {
     a: 'opioid',
     b: 'opioid',
     level: 'High',
-    title: 'Multiple opioids',
+    title: 'More than one strong pain medicine (opioid)',
     description: (a, b) =>
-      `${a} and ${b} are both opioids. Taking more than one raises overdose and breathing risk; confirm with the prescriber.`,
+      `${a} and ${b} are both opioids. Taking more than one raises the risk of overdose and slowed breathing. Check with your doctor.`,
   },
   {
     a: 'lisinopril',
     b: 'ibuprofen',
     level: 'Moderate',
-    title: 'Kidney function and blood pressure',
+    title: 'Kidneys and blood pressure',
     description:
-      'Ibuprofen can affect kidney function and blood pressure when combined with lisinopril. The risk may be higher with dehydration or kidney disease.',
+      'Ibuprofen with lisinopril can affect your kidneys and blood pressure. The risk may be higher if you are dehydrated (low on fluids) or have kidney disease.',
   },
   {
     a: 'raas',
     b: 'nsaid',
     level: 'Moderate',
-    title: 'Kidney function and blood pressure',
+    title: 'Kidneys and blood pressure',
     description: (a, b) =>
-      `${b} can affect kidney function and blood pressure when combined with ${a}. The risk may be higher with dehydration or kidney disease.`,
+      `${b} with ${a} can affect your kidneys and blood pressure. The risk may be higher if you are dehydrated (low on fluids) or have kidney disease.`,
   },
   {
     a: 'diuretic',
     b: 'nsaid',
     level: 'Moderate',
-    title: 'Kidney strain and reduced diuretic effect',
+    title: 'Strain on kidneys, and water pill may work less well',
     description: (a, b) =>
-      `${b} may blunt the effect of ${a} and strain the kidneys, especially with dehydration.`,
+      `${b} may make ${a} (a water pill) work less well and strain the kidneys, especially if you are dehydrated.`,
   },
   {
     a: 'raas',
     b: 'potassium-supplement',
     level: 'Moderate',
-    title: 'High potassium',
+    title: 'Potassium may get too high',
     description: (a, b) =>
-      `${a} and ${b} together may raise blood potassium. Confirm the combination and any monitoring plan with the care team.`,
+      `${a} and ${b} together may raise the potassium in your blood. Check with your care team about taking both and about any blood tests you need.`,
   },
   {
     a: 'raas',
     b: 'k-sparing',
     level: 'High',
-    title: 'High potassium',
+    title: 'Potassium may get too high',
     description: (a, b) =>
-      `${a} and ${b} can both raise blood potassium. The combination may be prescribed, but requires clinician review and appropriate monitoring.`,
+      `${a} and ${b} can both raise the potassium in your blood. Doctors sometimes prescribe them together, but you need a doctor to check and regular blood tests.`,
   },
   {
     a: 'k-sparing',
     b: 'potassium-supplement',
     level: 'High',
-    title: 'High potassium',
-    description: (a, b) => `${a} with ${b} may raise blood potassium too far. Clinician review is needed.`,
+    title: 'Potassium may get too high',
+    description: (a, b) => `${a} with ${b} may raise the potassium in your blood too much. Have a doctor check this.`,
   },
   {
     a: 'statin-3a4',
     b: 'cyp3a4-inhibitor',
     level: 'High',
-    title: 'Muscle injury risk',
+    title: 'Risk of muscle damage',
     description: (a, b) =>
-      `${b} can raise ${a} levels and the risk of muscle injury. The prescriber may need to adjust treatment.`,
+      `${b} can raise the amount of ${a} in your body and the risk of muscle damage. Your doctor may need to change your medicines.`,
   },
   {
     a: 'nitrate',
     b: 'pde5',
     level: 'High',
-    title: 'Dangerously low blood pressure',
+    title: 'Blood pressure can drop dangerously low',
     description: (a, b) =>
-      `Nitrates such as ${a} must not be combined with ${b} because blood pressure can drop dangerously. Seek urgent clinical guidance.`,
+      `Chest pain medicines like ${a} must never be taken with ${b}, because blood pressure can drop dangerously low. Get medical advice right away.`,
   },
   {
     a: 'levothyroxine',
     b: 'binding-mineral',
     level: 'Moderate',
-    title: 'Reduced thyroid medicine absorption',
+    title: 'Thyroid medicine may not absorb well',
     description: (a, b) =>
-      `${b} can reduce levothyroxine absorption. Ask a pharmacist about dose timing and separation.`,
+      `${b} can stop your body from absorbing levothyroxine well. Ask a pharmacist how far apart to take them.`,
   },
   {
     a: 'corticosteroid',
     b: 'nsaid',
     level: 'Moderate',
-    title: 'Stomach bleeding risk',
-    description: (a, b) => `${a} with ${b} may increase the risk of stomach irritation and bleeding.`,
+    title: 'Risk of stomach bleeding',
+    description: (a, b) => `${a} with ${b} may raise the risk of an upset stomach and stomach bleeding.`,
   },
   {
     a: 'nsaid',
     b: 'nsaid',
     level: 'Moderate',
-    title: 'Duplicate pain relievers (NSAIDs)',
+    title: 'Two of the same kind of pain reliever (NSAIDs)',
     description: (a, b) =>
-      `${a} and ${b} are both NSAIDs. Taking two adds side-effect risk without extra benefit; ask a pharmacist.`,
+      `${a} and ${b} are the same kind of pain reliever (NSAIDs). Taking two adds side effects without helping more. Ask a pharmacist.`,
   },
 ];
 
@@ -328,7 +328,7 @@ export function screenMedications(medications, comorbidities = '') {
       key: 'bleeding-stack',
       level: 'High',
       title: 'Several medicines that affect bleeding',
-      description: `${bleeders.map((entry) => entry.name).join(', ')} can each raise bleeding risk. Together the risk is higher; ask a pharmacist or prescriber to review the full list promptly.`,
+      description: `${bleeders.map((entry) => entry.name).join(', ')} can each raise the risk of bleeding. Together the risk is higher. Ask a pharmacist or your doctor to look over your full list soon.`,
       sourceDrug: bleeders[0].id,
     });
   }
@@ -338,9 +338,9 @@ export function screenMedications(medications, comorbidities = '') {
     ? list
         .filter((entry) => entry.classes.includes('nsaid'))
         .map((entry) => ({
-          title: 'Kidney disease noted in patient profile',
+          title: 'You noted kidney disease in your health history',
           medication: entry.name,
-          description: `NSAIDs such as ${entry.name.toLowerCase()} may worsen kidney function. Avoid use unless the patient’s clinician specifically approves it.`,
+          description: `Pain relievers called NSAIDs, like ${entry.name.toLowerCase()}, may make kidney disease worse. Do not take it unless your doctor says it is okay.`,
         }))
     : [];
 
