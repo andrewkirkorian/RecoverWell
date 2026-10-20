@@ -8,12 +8,12 @@ import './App.css';
 
 const pageTitles = {
   home: 'Home',
-  plan: 'Procedure planning',
+  plan: 'Daily plan',
   medications: 'Pharmacy',
   'health-history': 'Health history',
   care: 'Prepare for your visit',
   selfcare: 'Self-care toolkit',
-  guide: 'Anesthesia and ICU guide',
+  guide: 'Procedure planning',
   journey: 'Recovery journey',
   reference: 'Health reference',
 };

@@ -381,3 +381,15 @@ test('passes reported kidney disease from health history to the Pharmacy screeni
   openSection('My recovery', 'Medicines');
   expect(screen.getByText(/kidney disease noted in patient profile/i)).toBeDefined();
 });
+
+test('sets the browser tab title to match the page chosen in navigation', () => {
+  render(<App />);
+  createDemoProfile();
+  expect(document.title).toBe('Home – Recover Well');
+
+  openSection('My recovery', 'Daily plan');
+  expect(document.title).toBe('Daily plan – Recover Well');
+
+  openSection('Recovery information', 'Procedure planning');
+  expect(document.title).toBe('Procedure planning – Recover Well');
+});
