@@ -1660,6 +1660,20 @@ function App() {
         </section>
         </div>
       </main>
+
+      <footer className="app-footer">
+        <p>
+          Found something confusing or broken?{' '}
+          <a
+            href="https://github.com/andrewkirkorian/RecoverWell/issues/new?template=tester-feedback.yml"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Send feedback (opens in new tab)
+          </a>
+          . You need a free GitHub account. Do not include real names or health details.
+        </p>
+      </footer>
     </div>
   );
 }
