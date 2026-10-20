@@ -14,6 +14,7 @@ Recover Well is a React web-app prototype for organizing general post-surgery re
 ### Current features
 
 - **Demo profiles:** create a display-name profile and sign in or switch between profiles during one open session. This is not real sign-up or authentication; there are no passwords, accounts, or server-side identity checks.
+- **Optional saving on this device:** a "Save my demo profiles on this device" checkbox (off by default) keeps profiles in this browser's `localStorage` so they survive a reload. Turning it off erases the saved copy, and "Erase all demo profiles" clears the page and the device. Saved data is unencrypted and visible to anyone using the same browser.
 - **Home and recovery checklist:** show a sample recovery overview and let users check off example daily tasks.
 - **Personal reminders:** add or remove optional daily-plan and self-care reminders for each demo profile. These are user-created organizers, not care instructions.
 - **Procedure planning:** select from sample service lines and procedures, enter a date and arrival details, and check off general discussion prompts.
@@ -32,7 +33,7 @@ Recover Well is a React web-app prototype for organizing general post-surgery re
 
 ### Data handling and limitations
 
-- Each demo profile has separate in-memory daily and procedure checklist state, procedure-planning fields including the anesthesia education selection, health-history notes, self-care check-in and notes, saved dated check-ins shown on a calendar and optional general wellness suggestions derived from the entered values (not medical advice, not exported, hideable) (user-entered values only, no interpretation), personal reminders, and medication list. Visit-preparation drafts are also held in page memory and are cleared when switching profiles. Profile data is not saved to an account, database, or browser storage. Reloading or leaving the page clears all profiles and their data. Profiles are not private or protected from other people using the same open browser tab.
+- Each demo profile has separate in-memory daily and procedure checklist state, procedure-planning fields including the anesthesia education selection, health-history notes, self-care check-in and notes, saved dated check-ins shown on a calendar and optional general wellness suggestions derived from the entered values (not medical advice, not exported, hideable) (user-entered values only, no interpretation), personal reminders, and medication list. Visit-preparation drafts are also held in page memory and are cleared when switching profiles. Profile data is never saved to an account or database. By default it is not saved to browser storage either, and reloading or leaving the page clears all profiles and their data. If the person turns on saving, profiles are written unencrypted to this browser's `localStorage` (key `recover-well:saved-profiles`) until saving is turned off or the profiles are erased. Profiles are not private or protected from other people using the same open browser tab.
 - The visit-preparation tool can copy a generated draft, download it as a text file, or open the browser print dialog only when the user selects the corresponding action. Review exported content before sharing; the app does not send or save the draft.
 - The app has no backend, authorization, verified authentication, encryption-at-rest, audit logging, role management, or secure messaging integration.
 - Use a non-identifying display name only. Do not enter real names, contact details, dates of birth, patient identifiers, or protected health information anywhere in the prototype.
@@ -86,6 +87,7 @@ src/
   CareSupport.jsx                Emergency reminders and care-visit preparation
   SelfCare.jsx                   Optional patient-reported check-in and planning prompts
   HealthReference.jsx            Plain-language health topic reference
+  profileStorage.js              Opt-in localStorage saving for demo profiles
   rxnormSearch.js                NLM RxNorm and openFDA lookups (with built-in fallback)
   medicationFormulary.js         Built-in medication list
   medicationStrengths.js         Strength options per medication

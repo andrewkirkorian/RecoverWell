@@ -47,7 +47,7 @@ test('shows optional whole-person health tips with reputable sources and care-te
   expect(screen.getByText(/stay connected and ask for practical support/i)).toBeDefined();
   expect(screen.getByText(/ask your care team before changing your activity, diet, or medicines/i)).toBeDefined();
 
-  const whoDietLink = screen.getByRole('link', { name: 'WHO: Healthy diet' });
+  const whoDietLink = screen.getByRole('link', { name: 'WHO: Healthy diet (opens in new tab)' });
   expect(whoDietLink.href).toBe('https://www.who.int/news-room/fact-sheets/detail/healthy-diet');
   expect(whoDietLink.target).toBe('_blank');
   expect(whoDietLink.rel).toContain('noreferrer');
