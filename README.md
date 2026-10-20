@@ -97,7 +97,7 @@ src/
   App.css, index.css             Styles
   setupTests.js, reportWebVitals.js
   *.test.jsx                     Component and interaction tests
-public/                          Static assets (icons are placeholders, not final branding)
+public/                          Static assets (app icons and web manifest)
 .github/workflows/ci-deploy.yml  Test, lint, build, and GitHub Pages deploy
 RecoverWell.code-workspace       VS Code workspace file
 ```
