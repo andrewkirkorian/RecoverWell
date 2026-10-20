@@ -392,3 +392,16 @@ test('sets the browser tab title to match the page chosen in navigation', () => 
   openSection('Recovery information', 'Procedure planning');
   expect(document.title).toBe('Procedure planning – Recover Well');
 });
+
+test('shows a feedback link that opens the tester feedback form in a new tab', () => {
+  render(<App />);
+  createDemoProfile();
+
+  const link = screen.getByRole('link', { name: 'Send feedback (opens in new tab)' });
+  expect(link.getAttribute('href')).toBe(
+    'https://github.com/andrewkirkorian/RecoverWell/issues/new?template=tester-feedback.yml',
+  );
+  expect(link.getAttribute('target')).toBe('_blank');
+  expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+  expect(screen.getByText(/do not include real names or health details/i)).toBeDefined();
+});
