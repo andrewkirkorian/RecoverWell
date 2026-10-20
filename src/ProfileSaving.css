@@ -1,0 +1,43 @@
+/* Opt-in profile saving controls on the sign-up page. */
+
+.signup-storage {
+  margin-top: 18px;
+}
+
+.signup-storage .signup-privacy {
+  margin-top: 8px;
+}
+
+.signup-storage-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #29453a;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signup-storage-toggle input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #2f6b55;
+}
+
+.signup-erase-button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  border: 1px solid #a33a2b;
+  border-radius: 8px;
+  background: transparent;
+  color: #a33a2b;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signup-erase-button:hover {
+  background: #fbeeec;
+}
