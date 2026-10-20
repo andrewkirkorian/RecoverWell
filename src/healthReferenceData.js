@@ -76,9 +76,9 @@ export const referenceEntries = [
     title: 'Infections and handwashing',
     summary: 'Infections are caused by germs like bacteria and viruses. Washing your hands is one of the best ways to stop germs from spreading.',
     points: [
-      'Wash your hands with soap and water. If your hands do not look dirty, you can use hand sanitizer with alcohol instead.',
+      'Wash your hands with soap and water. If you can’t, use a hand sanitizer with at least 60% alcohol.',
       'Antibiotics do not work on viruses, like colds and flu. Taking them when you do not need them helps germs become harder to treat.',
-      'Tell your care team about fever, redness that spreads, or fluid leaking from a wound, as they told you to.',
+      'Tell your care team about fever, redness that spreads, red streaks leading away from a wound, or more fluid, pus, or a bad smell coming from a wound, as they told you to.',
     ],
     sources: ['cdc', 'who', 'openstax'],
   },
