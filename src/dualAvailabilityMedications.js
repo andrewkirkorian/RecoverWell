@@ -51,7 +51,7 @@ export const dualAvailabilityMedications = [
       strengths: 'Naproxen 250, 375 and 500 mg tablets; naproxen sodium 275 and 550 mg tablets',
       directions:
         'Arthritis: 250 to 500 mg twice a day. Sudden, short-term pain: 500 mg to start, then 500 mg every 12 hours or 250 mg every 6 to 8 hours.',
-      maxDaily: 'Short-term pain: up to 1,250 mg on the first day, then usually no more than 1,000 mg a day unless your doctor says otherwise.',
+      maxDaily: 'Short-term pain: up to 1,250 mg naproxen (1,375 mg naproxen sodium) on the first day, then usually no more than 1,000 mg naproxen (1,100 mg naproxen sodium) a day unless your doctor says otherwise.',
       limits: 'Your doctor adjusts the dose based on your age and how well your kidneys and liver work.',
     },
     sources: [{ label: 'FDA labeling on DailyMed: naproxen', url: dailyMed('naproxen') }],
@@ -73,7 +73,7 @@ export const dualAvailabilityMedications = [
     rx: {
       strengths: '10 mg, 20 mg and 40 mg delayed-release capsules',
       directions:
-        'Acid reflux (GERD): often 20 mg once a day. Damage to the food pipe from acid (erosive esophagitis): often 20 to 40 mg once a day for 4 to 8 weeks. Higher or twice-a-day doses depend on the condition.',
+        'Acid reflux (GERD): 20 mg once a day for up to 4 weeks. Damage to the food pipe from acid (erosive esophagitis): 20 mg once a day for 4 to 8 weeks. Other conditions may use different doses.',
       maxDaily: 'Your doctor sets this based on what is being treated.',
       limits: 'Your doctor decides how long you take it and checks how it is going.',
     },
@@ -89,13 +89,13 @@ export const dualAvailabilityMedications = [
     aliases: ['nexium'],
     otc: {
       strengths: '20 mg delayed-release capsules or tablets',
-      directions: '1 capsule a day with water before eating, for 14 days.',
-      maxDaily: '1 capsule in 24 hours.',
+      directions: '1 capsule or tablet a day with water before eating, for 14 days.',
+      maxDaily: '1 capsule or tablet in 24 hours.',
       limits: 'Do not use for more than 14 days in a row. You can repeat the 14 days no more than once every 4 months.',
     },
     rx: {
       strengths: '20 mg and 40 mg delayed-release capsules',
-      directions: 'Acid reflux (GERD): often 20 mg once a day for 4 to 8 weeks. Damage to the food pipe from acid (erosive esophagitis) may need 20 or 40 mg.',
+      directions: 'Acid reflux (GERD): 20 mg once a day for 4 weeks; some people need 4 more weeks. Damage to the food pipe from acid (erosive esophagitis): 20 or 40 mg once a day for 4 to 8 weeks.',
       maxDaily: 'Your doctor sets this based on what is being treated.',
       limits: 'Your doctor decides how long you take it and checks how it is going.',
     },
@@ -134,8 +134,8 @@ export const dualAvailabilityMedications = [
     otc: {
       strengths: '10 mg and 20 mg tablets',
       directions:
-        '1 tablet with water for heartburn symptoms, or 15 to 60 minutes before foods that cause heartburn.',
-      maxDaily: 'No more than 2 tablets of the 10 mg strength, or 1 tablet of the 20 mg strength, in 24 hours.',
+        '1 tablet with water for heartburn symptoms, or up to 60 minutes before foods that cause heartburn (check your product label for the exact time).',
+      maxDaily: 'No more than 2 tablets in 24 hours.',
       limits: 'Do not use for more than 14 days in a row without asking a doctor.',
     },
     rx: {
