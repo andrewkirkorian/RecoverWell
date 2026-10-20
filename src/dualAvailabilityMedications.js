@@ -62,7 +62,7 @@ export const dualAvailabilityMedications = [
       'Do not take more of it, or take it for longer, without asking your doctor. Ask a doctor first if you are pregnant or breastfeeding, under 18, have liver disease, or take blood thinners or other medicines that may not mix with it.',
     name: 'Omeprazole',
     purpose: 'Lowers stomach acid (proton pump inhibitor)',
-    classes: [],
+    classes: ['clopidogrel-reducing-ppi'],
     aliases: ['prilosec'],
     otc: {
       strengths: '20 mg delayed-release tablets',
@@ -85,7 +85,7 @@ export const dualAvailabilityMedications = [
       'Do not take more of it, or take it for longer, without asking your doctor. Ask a doctor first if you are pregnant or breastfeeding, under 18, have liver disease, or take medicines that may not mix with it.',
     name: 'Esomeprazole',
     purpose: 'Lowers stomach acid (proton pump inhibitor)',
-    classes: [],
+    classes: ['clopidogrel-reducing-ppi'],
     aliases: ['nexium'],
     otc: {
       strengths: '20 mg delayed-release capsules or tablets',

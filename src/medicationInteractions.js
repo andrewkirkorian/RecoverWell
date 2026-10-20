@@ -3,6 +3,16 @@ import { resolveIngredients } from './medicationFormulary';
 // Rules match an ingredient id or class tag. The first matching rule per pair wins,
 // so specific rules come before general ones. Wording is independently written.
 const rules = [
+  // From the clopidogrel (Plavix) label, section 5.1: "Avoid concomitant use of Plavix with
+  // omeprazole or esomeprazole." Severity pending pharmacist review (see issue #7).
+  {
+    a: 'clopidogrel',
+    b: 'clopidogrel-reducing-ppi',
+    level: 'High',
+    title: 'Blood thinner may not work as well',
+    description: (a, b) =>
+      `${b} can make ${a} work less well at preventing blood clots. The ${a} label says not to take them together. Ask your doctor or pharmacist about a different stomach acid medicine.`,
+  },
   {
     a: 'apixaban',
     b: 'ibuprofen',
