@@ -1,0 +1,56 @@
+name: Tester feedback
+description: Tell us about something confusing, broken, or missing in Recover Well.
+title: "Feedback: "
+labels: [feedback]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing Recover Well. **Please do not include real names or personal health details.**
+        Describe what happened using made-up examples only.
+  - type: dropdown
+    id: page
+    attributes:
+      label: Which page were you on?
+      options:
+        - Sign up / sign in
+        - Home
+        - Daily plan
+        - Medicines
+        - Health history
+        - Prepare for your visit
+        - Self-care
+        - Health reference
+        - Procedure planning
+        - Recovery journey
+        - Somewhere else
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of feedback is it?
+      options:
+        - Something was confusing or hard to understand
+        - Something did not work
+        - Something is missing
+        - The health information looks wrong
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, and what did you see?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect or want instead?
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser (optional)
+      placeholder: For example, iPhone with Safari
