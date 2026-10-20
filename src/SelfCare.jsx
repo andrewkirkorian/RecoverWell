@@ -427,8 +427,9 @@ function SelfCare({
             </div>
             <p className="planner-disclaimer">
               {savedCount} saved {savedCount === 1 ? 'check-in' : 'check-ins'}. Dates with a dot have
-              a saved check-in. Saved check-ins are only kept on this page and are erased when you
-              refresh it. This is your own log, not a medical checkup.
+              a saved check-in. Saved check-ins are erased when you refresh the page, unless you
+              chose to save your demo profiles on this device. This is your own log, not a medical
+              checkup.
             </p>
           </div>
 
@@ -524,8 +525,8 @@ function SelfCare({
         </div>
         <p>{summary}</p>
         <p>
-          This only shows what you typed, and it is only kept while this page is open. Do not add
-          names or other personal details.
+          This only shows what you typed. It is erased when you close the page, unless you chose
+          to save your demo profiles on this device. Do not add names or other personal details.
         </p>
       </article>
 
@@ -583,36 +584,36 @@ function SelfCare({
             <a
               href="https://www.who.int/news-room/fact-sheets/detail/healthy-diet"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
-              WHO: Healthy diet
+              WHO: Healthy diet (opens in new tab)
             </a>
           </li>
           <li>
             <a
               href="https://www.who.int/news-room/fact-sheets/detail/physical-activity"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
-              WHO: Physical activity
+              WHO: Physical activity (opens in new tab)
             </a>
           </li>
           <li>
             <a
               href="https://www.nccih.nih.gov/health/whole-person-health-what-it-is-and-why-its-important"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
-              NCCIH: Whole person health
+              NCCIH: Whole person health (opens in new tab)
             </a>
           </li>
           <li>
             <a
               href="https://www.nccih.nih.gov/health/safety"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
-              NCCIH: Safe use of complementary health products and practices
+              NCCIH: Safe use of complementary health products and practices (opens in new tab)
             </a>
           </li>
         </ul>
