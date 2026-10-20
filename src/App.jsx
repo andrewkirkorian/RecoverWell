@@ -1519,7 +1519,7 @@ function App() {
                       checked={task.done}
                       onChange={() => toggleTask(task.id)}
                     />
-                    <span className="task-time">{task.time}</span>
+                    <span className="task-time">{task.time}</span>{' '}
                     <span className="task-name">{task.label}</span>
                   </label>
                   <button
