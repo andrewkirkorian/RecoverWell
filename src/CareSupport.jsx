@@ -1,13 +1,13 @@
 import { useState } from 'react';
 
 const emergencyWarningSigns = [
-  { id: 'breathing', label: 'Severe difficulty breathing, choking, or blue/gray lips' },
-  { id: 'chest-pain', label: 'New severe chest pain or pressure' },
-  { id: 'stroke', label: 'Sudden face drooping, one-sided weakness, or trouble speaking' },
-  { id: 'unresponsive', label: 'Unresponsive, a first seizure, a seizure lasting about 5 minutes or longer, or repeated seizures without recovery' },
-  { id: 'allergy', label: 'Severe allergic reaction with tongue/throat swelling or breathing difficulty' },
-  { id: 'bleeding', label: 'Uncontrolled bleeding or a severe injury' },
-  { id: 'safety', label: 'Immediate risk of suicide or harm to someone' },
+  { id: 'breathing', label: 'Severe difficulty breathing, choking, or blue or gray lips' },
+  { id: 'chest-pain', label: 'New, bad chest pain or pressure' },
+  { id: 'stroke', label: 'Sudden face drooping, weakness on one side, or trouble speaking' },
+  { id: 'unresponsive', label: 'Will not wake up or respond, a first seizure, a seizure lasting about 5 minutes or more, or seizures one after another without waking up in between' },
+  { id: 'allergy', label: 'Bad allergic reaction with a swollen tongue or throat, or trouble breathing' },
+  { id: 'bleeding', label: 'Bleeding that will not stop, or a serious injury' },
+  { id: 'safety', label: 'Someone may hurt or kill themselves or someone else right now' },
 ];
 
 const initialForm = {
@@ -50,12 +50,12 @@ function CareSupport() {
       .filter((warningSign) => selectedWarningSigns.includes(warningSign.id))
       .map((warningSign) => warningSign.label);
     const lines = [
-      'Visit preparation notes (personal use only)',
+      'Notes for my visit (for my own use)',
       `Symptoms: ${form.symptoms.trim() || 'Not provided'}`,
       `Started: ${form.onset.trim() || 'Not provided'}`,
-      `Severity: ${form.severity || 'Not provided'}`,
-      `Course: ${form.course || 'Not provided'}`,
-      `Emergency warning signs selected: ${selectedWarningLabels.join('; ') || 'None selected'}`,
+      `How bad: ${form.severity || 'Not provided'}`,
+      `Changes since then: ${form.course || 'Not provided'}`,
+      `Emergency warning signs checked: ${selectedWarningLabels.join('; ') || 'None checked'}`,
       `Questions to bring up: ${form.questions.trim() || 'Not provided'}`,
     ];
 
@@ -67,13 +67,13 @@ function CareSupport() {
     setCopyFailed(false);
     try {
       if (!navigator.clipboard?.writeText) {
-        throw new Error('Clipboard access is unavailable in this browser.');
+        throw new Error('Copying is not available in this browser.');
       }
       await navigator.clipboard.writeText(summary);
       setCopyMessage('Draft copied. Review it before sharing.');
     } catch {
       setCopyFailed(true);
-      setCopyMessage('Could not copy the draft. You can select and copy the text above manually.');
+      setCopyMessage('Could not copy the draft. You can highlight the text above and copy it yourself.');
     }
   };
 
@@ -90,7 +90,7 @@ function CareSupport() {
       setExportMessage('Draft downloaded. Review it before sharing.');
     } catch {
       setExportFailed(true);
-      setExportMessage('Could not download the draft. You can select and copy the text above manually.');
+      setExportMessage('Could not download the draft. You can highlight the text above and copy it yourself.');
     } finally {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     }
@@ -103,7 +103,7 @@ function CareSupport() {
       window.print();
     } catch {
       setExportFailed(true);
-      setExportMessage('Could not open the print dialog. Try your browser’s print command instead.');
+      setExportMessage('Could not open the print window. Try printing from your browser’s menu instead.');
     }
   };
 
@@ -120,12 +120,12 @@ function CareSupport() {
   return (
     <section className="care-support-section" aria-labelledby="care-support-heading">
       <div className="section-heading">
-        <p className="eyebrow">PATIENT TOOL</p>
+        <p className="eyebrow">VISIT NOTES</p>
         <h2 id="care-support-heading">Prepare for your next visit</h2>
         <p className="care-support-intro">
-          Organize what you have noticed, what matters most to you, and the questions or reminders
-          you want to keep with you. This tool does not diagnose symptoms, send information, or
-          replace a clinical assessment.
+          Write down what you have noticed, what matters most to you, and the questions you want to
+          ask. This tool cannot tell you what is wrong, does not send your notes to anyone, and does
+          not take the place of seeing a doctor or nurse.
         </p>
       </div>
 
@@ -134,10 +134,10 @@ function CareSupport() {
         <div className="care-support-emergency-note" role="note">
           <strong>Think someone may be having an emergency?</strong>
           <span>
-            Contact your local emergency number or go to the nearest emergency department now.
-            For possible poisoning or overdose, contact emergency services or poison control
-            promptly; do not induce vomiting or wait for symptoms. Do not wait to fill out this
-            form. This warning-sign list is not complete.
+            Call your local emergency number (such as 911) or go to the nearest emergency room now.
+            If someone may have been poisoned or taken too much of a drug, call emergency services or
+            poison control right away. Do not make them throw up, and do not wait for symptoms. Do not
+            stop to fill out this form. This list does not include every warning sign.
           </span>
         </div>
 
@@ -169,13 +169,13 @@ function CareSupport() {
             </label>
 
             <label className="care-support-field" htmlFor="care-severity">
-              How severe do they feel?
+              How bad are they?
               <select id="care-severity" name="severity" value={form.severity} onChange={updateField}>
                 <option value="">Choose if you know</option>
                 <option value="Mild">Mild</option>
                 <option value="Moderate">Moderate</option>
                 <option value="Severe">Severe</option>
-                <option value="Unsure">Unsure</option>
+                <option value="Unsure">Not sure</option>
               </select>
             </label>
 
@@ -186,14 +186,14 @@ function CareSupport() {
                 <option value="Getting better">Getting better</option>
                 <option value="About the same">About the same</option>
                 <option value="Getting worse">Getting worse</option>
-                <option value="Changing or unsure">Changing or unsure</option>
+                <option value="Changing or unsure">Up and down, or not sure</option>
               </select>
             </label>
           </div>
 
           <fieldset className="care-warning-signs">
             <legend>Is any of this happening right now?</legend>
-            <p>If yes, contact your local emergency number now rather than waiting for a reply.</p>
+            <p>If yes, call your local emergency number now. Do not wait.</p>
             <div className="care-warning-sign-list">
               {emergencyWarningSigns.map((warningSign) => (
                 <label key={warningSign.id}>
@@ -210,8 +210,8 @@ function CareSupport() {
 
           {selectedWarningSigns.length > 0 && (
             <div className="care-support-urgent-alert" role="alert" aria-live="assertive">
-              One or more emergency warning signs were selected. Contact your local emergency
-              number now or go to the nearest emergency department. Do not wait for this tool.
+              You checked an emergency warning sign. Call your local emergency number now or go to
+              the nearest emergency room. Do not wait for this tool.
             </div>
           )}
 
@@ -224,7 +224,7 @@ function CareSupport() {
               onChange={updateField}
               maxLength={1000}
               rows={2}
-              placeholder="Add questions, concerns, or reminders you want to keep with you"
+              placeholder="Add questions, worries, or reminders you want to bring"
             />
           </label>
 
@@ -247,7 +247,7 @@ function CareSupport() {
           >
             <h3 id="care-support-summary-heading">Draft to review</h3>
             <pre>{summary}</pre>
-            <p>Review and correct this summary before sharing it. Nothing is sent or saved by this page.</p>
+            <p>Read it over and fix anything before you share it. This page does not send or save anything.</p>
             <div className="care-support-actions">
               <button className="care-support-submit" type="button" onClick={copySummary}>
                 Copy draft
@@ -273,9 +273,8 @@ function CareSupport() {
         )}
 
         <p className="care-support-privacy">
-          Only enter information you are comfortable sharing on this device. Entries stay in this
-          page while it is open and are not sent to a clinician. Healthcare professionals should
-          verify information and use their organization's approved documentation system.
+          Only enter what you are comfortable having on this device. What you type stays on this
+          page while it is open and is not sent to a doctor or nurse.
         </p>
       </div>
     </section>

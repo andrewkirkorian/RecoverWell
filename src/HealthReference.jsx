@@ -3,8 +3,8 @@ import { referenceEntries, referenceSources } from './healthReferenceData';
 
 const areas = [
   { id: 'all', label: 'All topics' },
-  { id: 'medical', label: 'Medical issues' },
-  { id: 'nursing', label: 'Nursing assistant' },
+  { id: 'medical', label: 'Your body and health' },
+  { id: 'nursing', label: 'Nursing basics' },
   { id: 'saved', label: 'Saved topics' },
 ];
 
@@ -17,7 +17,7 @@ const normalize = (text) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const areaLabel = (area) => (area === 'medical' ? 'Medical issues' : 'Nursing assistant');
+const areaLabel = (area) => (area === 'medical' ? 'Your body and health' : 'Nursing basics');
 
 function entryToText(entry, sourceMap) {
   const sources = entry.sources.map((id) => sourceMap[id]?.label).filter(Boolean);
@@ -28,7 +28,7 @@ function entryToText(entry, sourceMap) {
     'Questions to ask my care team:',
     ...entry.questions.map((question) => `- ${question}`),
     `Sources: ${sources.join('; ')}`,
-    'General education only; not medical advice.',
+    'General information only, not medical advice.',
   ].join('\n');
 }
 
@@ -58,15 +58,15 @@ function HealthReference() {
   const toggleSaved = (entry) => {
     const isSaved = savedIds.includes(entry.id);
     setSavedIds((current) => (isSaved ? current.filter((id) => id !== entry.id) : [...current, entry.id]));
-    setMessage(`${isSaved ? 'Removed' : 'Saved'} “${entry.title}” ${isSaved ? 'from' : 'to'} saved topics for this page session.`);
+    setMessage(`${isSaved ? 'Removed' : 'Saved'} “${entry.title}” ${isSaved ? 'from' : 'to'} your saved topics while this page is open.`);
   };
 
   const copyEntry = async (entry) => {
     try {
       await navigator.clipboard.writeText(entryToText(entry, sourceMap));
-      setMessage(`Copied “${entry.title}”. Review before sharing.`);
+      setMessage(`Copied “${entry.title}”. Read it over before you share it.`);
     } catch {
-      setMessage('Copy was not available in this browser.');
+      setMessage('Copying does not work in this browser.');
     }
   };
 
@@ -80,21 +80,22 @@ function HealthReference() {
     <section className="selfcare-section reference-page" aria-labelledby="health-reference-heading">
       <div className="section-heading">
         <p className="eyebrow">HEALTH REFERENCE</p>
-        <h2 id="health-reference-heading">Medical issues and nursing assistant</h2>
+        <h2 id="health-reference-heading">Learn about your body and your care</h2>
         <p>
-          General education drawn from open science and health references. It does not diagnose,
-          assess urgency, or replace your care team.
+          Basic health facts from trusted, free sources. This page cannot tell you what is wrong
+          or how urgent it is, and it does not take the place of your care team.
         </p>
         <p className="reference-emergency" role="note">
-          <strong>In an emergency, call your local emergency number now.</strong> Examples include
-          trouble breathing, chest pain, confusion, heavy bleeding, a severe allergic reaction, or
-          immediate danger. If you may harm yourself, contact emergency services or a local crisis
-          line right away. Do not use this page to decide whether symptoms are urgent.
+          <strong>In an emergency, call your local emergency number now.</strong> For example:
+          trouble breathing, chest pain, confusion, heavy bleeding, a bad allergic reaction, or
+          danger right now. If you might hurt yourself, call emergency services or a crisis line
+          (such as 988 in the U.S.) right away. Do not use this page to decide if symptoms are
+          urgent.
         </p>
       </div>
 
       <form className="reference-controls" role="search" onSubmit={(event) => event.preventDefault()}>
-        <div role="group" aria-label="Reference area" className="reference-filters">
+        <div role="group" aria-label="Topic area" className="reference-filters">
           {areas.map((item) => (
             <button
               key={item.id}
@@ -114,7 +115,7 @@ function HealthReference() {
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="For example, hand hygiene"
+            placeholder="For example, handwashing"
             aria-controls="reference-results"
           />
         </label>
@@ -128,8 +129,8 @@ function HealthReference() {
         </button>
       </form>
       <p className="planner-disclaimer">
-        Do not type names, diagnoses, or other identifying details into search. Search text and saved
-        topics stay in this page only and are cleared when you reload.
+        Do not type names, health conditions, or other personal details into the search. Your
+        searches and saved topics are only kept on this page and are erased when you refresh it.
       </p>
 
       <p role="status">
@@ -146,7 +147,7 @@ function HealthReference() {
             <p>
               {area === 'saved' && !query
                 ? 'You have not saved any topics yet.'
-                : 'Try a different word or switch the area filter.'}
+                : 'Try a different word or pick a different topic area.'}
             </p>
             <button type="button" className="task-add-button" onClick={clearFilters}>
               Clear search and filters
@@ -191,7 +192,7 @@ function HealthReference() {
                   ))}
                 </p>
                 <p className="planner-disclaimer">
-                  Last reviewed: {entry.lastReviewed ?? 'date not provided; not clinically reviewed'}.
+                  Last checked: {entry.lastReviewed ?? 'no date yet; not checked by a doctor or nurse'}.
                 </p>
               </details>
               <div className="reference-card-actions no-print">
@@ -220,10 +221,10 @@ function HealthReference() {
 
       <article className="selfcare-card">
         <p className="planner-disclaimer">
-          This compiled set is a paraphrased starting point and has not been clinically reviewed.
-          Source links go to each site’s main page, not to the exact page supporting a statement.
-          Reference ranges, doses, and guidelines vary by place and date; confirm with your
-          clinician or the current source.
+          These topics are a starting point, written in our own words. A doctor or nurse has not
+          checked them yet. Source links go to each website’s home page, not to the exact page for
+          each fact. Normal ranges, doses, and advice can be different from place to place and
+          change over time, so check with your care team or the latest source.
         </p>
       </article>
     </section>

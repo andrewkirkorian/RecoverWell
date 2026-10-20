@@ -14,47 +14,47 @@ test('shows a searchable medication list and potential interaction flags', () =>
   render(<Pharmacy comorbidities="Hypertension" />);
 
   expect(screen.getByRole('heading', { name: 'Pharmacy' })).toBeDefined();
-  expect(screen.getByText(/Ibuprofen may increase bleeding risk/i)).toBeDefined();
+  expect(screen.getByText(/Ibuprofen may raise the risk of bleeding/i)).toBeDefined();
   expect(
-    screen.getByRole('link', { name: 'DailyMed labeling: apixaban (opens in new tab)' }).getAttribute('href'),
+    screen.getByRole('link', { name: 'Official drug label for apixaban on DailyMed (opens in new tab)' }).getAttribute('href'),
   ).toContain('dailymed.nlm.nih.gov');
   expect(
-    screen.getByRole('heading', { name: 'Kidney function and blood pressure' }),
+    screen.getByRole('heading', { name: 'Kidneys and blood pressure' }),
   ).toBeDefined();
-  expect(screen.getByText(/independently written prompts link to public DailyMed drug labeling/i)).toBeDefined();
+  expect(screen.getByText(/written in our own words and link to the official drug labels/i)).toBeDefined();
 
   fireEvent.click(screen.getByRole('button', { name: 'Prescription' }));
-  const medicationList = screen.getByRole('list', { name: 'Patient medication list' });
+  const medicationList = screen.getByRole('list', { name: 'Your medicine list' });
   expect(within(medicationList).getByText('Apixaban')).toBeDefined();
   expect(within(medicationList).getByText('Lisinopril')).toBeDefined();
   expect(within(medicationList).queryByText('Ibuprofen')).toBeNull();
 
-  fireEvent.change(screen.getByRole('combobox', { name: 'Search patient medicines' }), {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search your medicines' }), {
     target: { value: 'lisinopril' },
   });
   expect(within(medicationList).getByText('Lisinopril')).toBeDefined();
   expect(within(medicationList).queryByText('Apixaban')).toBeNull();
 });
 
-test('flags an NSAID when kidney disease is in the patient profile', () => {
+test('flags an NSAID when kidney disease is in the health history', () => {
   render(<Pharmacy comorbidities="Hypertension, CKD" />);
 
-  expect(screen.getByText(/kidney disease noted in patient profile/i)).toBeDefined();
-  expect(screen.getByText(/NSAIDs such as ibuprofen may worsen kidney function/i)).toBeDefined();
+  expect(screen.getByText(/You noted kidney disease in your health history/i)).toBeDefined();
+  expect(screen.getByText(/NSAIDs, like ibuprofen, may make kidney disease worse/i)).toBeDefined();
 });
 
 test('adds a single-availability medicine from the local reference without inventing a dose', () => {
   render(<Pharmacy comorbidities="" />);
 
-  fireEvent.change(screen.getByRole('combobox', { name: 'Search medication reference' }), {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search all medicines' }), {
     target: { value: 'aspirin' },
   });
   const results = screen.getByRole('list', { name: 'Medication search results' });
   fireEvent.click(within(results).getByRole('button', { name: /Add Aspirin/ }));
 
-  const medicationList = screen.getByRole('list', { name: 'Patient medication list' });
+  const medicationList = screen.getByRole('list', { name: 'Your medicine list' });
   expect(within(medicationList).getByText('Aspirin')).toBeDefined();
-  expect(within(medicationList).getByText(/Dose or schedule not entered/i)).toBeDefined();
+  expect(within(medicationList).getByText(/Dose or how often is not filled in yet/i)).toBeDefined();
   const aspirinDose = within(medicationList).getByLabelText('Dose for Aspirin');
   expect(within(aspirinDose).getAllByRole('option').map((o) => o.textContent)).toEqual(
     expect.arrayContaining(['81 mg', '325 mg', 'Other (type it in)']),
@@ -75,23 +75,23 @@ test('adds the over-the-counter or prescription form of a dual-availability medi
   fireEvent.click(screen.getByRole('button', { name: /Add Naproxen Prescription version/ }));
   fireEvent.click(screen.getByRole('button', { name: /Add Naproxen Over the counter version/ }));
 
-  const list = screen.getByRole('list', { name: 'Patient medication list' });
+  const list = screen.getByRole('list', { name: 'Your medicine list' });
   expect(within(list).getAllByText('Naproxen')).toHaveLength(2);
   expect(within(list).getByText(/^Prescription · 3$/)).toBeDefined();
   expect(within(list).getByText(/^Over the counter · 3$/)).toBeDefined();
-  expect(screen.getByRole('button', { name: /Naproxen Prescription is on the patient list|Naproxen Prescription is on/ })).toBeDefined();
+  expect(screen.getByRole('button', { name: /Naproxen Prescription is on your list/ })).toBeDefined();
 });
 
-test('offers patient-list names as local autocomplete suggestions', () => {
+test('offers names from your list as local autocomplete suggestions', () => {
   render(<Pharmacy comorbidities="" />);
 
-  const patientSearch = screen.getByRole('combobox', { name: 'Search patient medicines' });
+  const patientSearch = screen.getByRole('combobox', { name: 'Search your medicines' });
   expect(patientSearch.getAttribute('list')).toBe('patient-medication-suggestions');
   expect(document.querySelector('#patient-medication-suggestions option[value="Apixaban"]')).not.toBeNull();
 
   fireEvent.change(patientSearch, { target: { value: 'apixaban' } });
   expect(
-    within(screen.getByRole('list', { name: 'Patient medication list' })).getByText('Apixaban'),
+    within(screen.getByRole('list', { name: 'Your medicine list' })).getByText('Apixaban'),
   ).toBeDefined();
 });
 
@@ -107,15 +107,15 @@ test('catches interactions among four blood thinners including an over-the-count
   render(<Pharmacy comorbidities="" medications={medications} onMedicationsChange={() => {}} />);
 
   expect(screen.getByRole('heading', { name: 'Several medicines that affect bleeding' })).toBeDefined();
-  expect(screen.getAllByRole('heading', { name: 'Multiple blood thinners' }).length).toBe(2);
-  expect(screen.getAllByRole('heading', { name: 'Bleeding risk' }).length).toBe(4);
-  expect(screen.queryByText(/Not screened \(/)).toBeNull();
+  expect(screen.getAllByRole('heading', { name: 'More than one blood thinner' }).length).toBe(2);
+  expect(screen.getAllByRole('heading', { name: 'Higher risk of bleeding' }).length).toBe(4);
+  expect(screen.queryByText(/Not checked \(/)).toBeNull();
 });
 
-test('groups the patient list by prescription and over-the-counter availability', () => {
+test('groups your list by prescription and over-the-counter availability', () => {
   render(<Pharmacy comorbidities="" />);
 
-  const list = screen.getByRole('list', { name: 'Patient medication list' });
+  const list = screen.getByRole('list', { name: 'Your medicine list' });
   expect(within(list).getByText(/^Prescription · 2$/)).toBeDefined();
   expect(within(list).getByText(/^Over the counter · 2$/)).toBeDefined();
   expect(screen.queryByRole('button', { name: /varies/i })).toBeNull();
@@ -124,13 +124,13 @@ test('groups the patient list by prescription and over-the-counter availability'
 test('adds from the built-in reference list and screens it immediately', () => {
   render(<Pharmacy comorbidities="" />);
 
-  fireEvent.change(screen.getByRole('combobox', { name: 'Search medication reference' }), {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search all medicines' }), {
     target: { value: 'warfarin' },
   });
   const reference = screen.getByRole('list', { name: 'Medication search results' });
   fireEvent.click(within(reference).getByRole('button', { name: /Add Warfarin/ }));
 
-  expect(screen.getAllByRole('heading', { name: 'Multiple blood thinners' }).length).toBe(1);
+  expect(screen.getAllByRole('heading', { name: 'More than one blood thinner' }).length).toBe(1);
   expect(screen.getAllByText(/Warfarin/).length).toBeGreaterThan(0);
 });
 
@@ -159,19 +159,19 @@ test('RxNorm search results are each marked Prescription or Over the counter fro
   });
   render(<Pharmacy comorbidities="" />);
 
-  fireEvent.change(screen.getByRole('combobox', { name: 'Search medication reference' }), {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search all medicines' }), {
     target: { value: 'zolpidem' },
   });
   const results = screen.getByRole('list', { name: 'Medication search results' });
   await waitFor(() => expect(within(results).getByText('Zolpidem 10 MG Oral Tablet')).toBeDefined());
   expect(within(results).getAllByText('Prescription').length).toBeGreaterThan(0);
   expect(within(results).getAllByText('Over the counter').length).toBeGreaterThan(0);
-  expect(within(results).getByText(/Prescription status not confirmed/)).toBeDefined();
+  expect(within(results).getByText(/Not sure if it needs a prescription/)).toBeDefined();
   expect(within(results).getAllByText('Mystery 5 MG Oral Tablet')).toHaveLength(1);
   expect(within(results).queryByRole('button', { name: /Mystery/ })).toBeNull();
 
   fireEvent.click(within(results).getByRole('button', { name: /Add Zolpidem 10 MG Oral Tablet/ }));
-  const list = screen.getByRole('list', { name: 'Patient medication list' });
+  const list = screen.getByRole('list', { name: 'Your medicine list' });
   expect(within(list).getByText('Zolpidem 10 MG Oral Tablet')).toBeDefined();
   expect(within(list).getByText(/^Prescription · 3$/)).toBeDefined();
 });
@@ -182,22 +182,22 @@ test('an RxNorm result sold both ways offers an Rx and an OTC add button', async
     fda: { 777: ['HUMAN OTC DRUG', 'HUMAN PRESCRIPTION DRUG'] },
   });
   render(<Pharmacy comorbidities="" />);
-  fireEvent.change(screen.getByRole('combobox', { name: 'Search medication reference' }), {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search all medicines' }), {
     target: { value: 'examplamine' },
   });
   const results = await screen.findByRole('list', { name: 'Medication search results' });
   await waitFor(() => expect(within(results).getByRole('button', { name: /Add Examplamine Prescription version/ })).toBeDefined());
   fireEvent.click(within(results).getByRole('button', { name: /Add Examplamine Over the counter version/ }));
-  const list = screen.getByRole('list', { name: 'Patient medication list' });
+  const list = screen.getByRole('list', { name: 'Your medicine list' });
   expect(within(list).getByText(/^Over the counter · 3$/)).toBeDefined();
 });
 
 test('falls back to the built-in list with a notice when RxNorm is unavailable', async () => {
   render(<Pharmacy comorbidities="" />);
-  fireEvent.change(screen.getByRole('combobox', { name: 'Search medication reference' }), {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search all medicines' }), {
     target: { value: 'warfarin' },
   });
-  expect((await screen.findByRole('alert')).textContent).toMatch(/Showing the built-in list only/i);
+  expect((await screen.findByRole('alert')).textContent).toMatch(/Showing our built-in list only/i);
   expect(within(screen.getByRole('list', { name: 'Medication search results' })).getByText('Warfarin')).toBeDefined();
 });
 
@@ -205,14 +205,14 @@ test('explains the public APIs used for medication searches', () => {
   render(<Pharmacy comorbidities="" />);
 
   expect(
-    screen.getByText(/Search text is sent to the U\.S\. National Library of Medicine RxNorm API/i),
+    screen.getByText(/What you type here is sent to the National Library of Medicine and the FDA/i),
   ).toBeDefined();
-  expect(screen.getByText(/Do not enter names, diagnoses, or other identifying information/i)).toBeDefined();
+  expect(screen.getByText(/Do not type\s+names, health conditions, or anything that could identify you/i)).toBeDefined();
 });
 
 test('dose menus list strengths by form and allow a custom dose', () => {
   render(<Pharmacy comorbidities="" />);
-  const list = screen.getByRole('list', { name: 'Patient medication list' });
+  const list = screen.getByRole('list', { name: 'Your medicine list' });
 
   const ibuprofen = within(list).getByLabelText('Dose for Ibuprofen');
   const labels = within(ibuprofen).getAllByRole('option').map((o) => o.textContent);

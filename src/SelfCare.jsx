@@ -1,48 +1,48 @@
 import { useMemo, useState } from 'react';
 
 const selfCareGoals = [
-  { id: 'water', label: 'Drinks', hint: 'Follow any fluid guidance your care team gave you.' },
-  { id: 'movement', label: 'Move a little each day', hint: 'Follow your clinician-approved movement plan, even in short sessions.' },
-  { id: 'rest', label: 'Protect your energy', hint: 'Build rest into your routine and pace activities realistically.' },
-  { id: 'meds', label: 'Medicine questions', hint: 'Take medicines only as directed; ask your care team or pharmacist if unsure.' },
+  { id: 'water', label: 'Drinks', hint: 'Follow what your care team told you about how much to drink.' },
+  { id: 'movement', label: 'Move a little each day', hint: 'Move the way your doctor or nurse said is okay, even for a few minutes at a time.' },
+  { id: 'rest', label: 'Save your energy', hint: 'Plan rest into your day and do not try to do too much at once.' },
+  { id: 'meds', label: 'Medicine questions', hint: 'Take medicines only the way you were told. Ask your care team or pharmacist if you are not sure.' },
 ];
 
 const selfCareReminders = [
-  'If it helps, note when symptoms change or what makes you more comfortable.',
-  'Keep a note of which habits feel easiest and which ones feel tiring.',
-  'Call your care team if a symptom worsens, new symptoms appear, or you feel unsure.',
+  'If it helps, write down when symptoms change or what makes you feel better.',
+  'Note which habits feel easy and which ones wear you out.',
+  'Call your care team if a symptom gets worse, a new one starts, or you are not sure what to do.',
 ];
 
 const generalHealthTips = [
   {
     title: 'Nourish yourself in ways that work for you',
     detail:
-      'When you can, choose a variety of nourishing foods that fit your culture, preferences, budget, and access. There is no single eating pattern that works for everyone.',
+      'When you can, eat a mix of healthy foods that fit your culture, taste, and budget. There is no one way of eating that works for everyone.',
   },
   {
     title: 'Find movement that fits your circumstances',
     detail:
-      'Everyday movement can support physical and mental well-being. Choose an activity that suits your abilities, and follow your care team’s instructions about activity, especially during recovery.',
+      'Moving your body each day is good for body and mind. Pick something you are able to do, and follow your care team’s advice about activity, especially while you recover.',
   },
   {
     title: 'Make room for rest',
     detail:
-      'A regular wind-down routine and a comfortable sleep environment may support rest. If sleep problems persist or affect daily life, consider raising them with a health professional.',
+      'Winding down the same way each night and having a comfortable place to sleep can help you rest. If sleep problems keep happening or get in the way of your day, tell your doctor or nurse.',
   },
   {
     title: 'Care for emotional well-being',
     detail:
-      'If it feels comfortable, try a brief pause, slow breathing, or a relaxation practice. These are optional ways to support well-being, not a substitute for mental health care.',
+      'If you like, try taking a short break, breathing slowly, or doing something that relaxes you. These can help you feel better, but they do not replace mental health care.',
   },
   {
     title: 'Stay connected and ask for practical support',
     detail:
-      'If you wish, share what would help with someone you trust—such as company, help with everyday tasks, or support preparing questions for a care visit.',
+      'If you want, tell someone you trust what would help, like company, help with chores, or help writing down questions for a doctor visit.',
   },
   {
-    title: 'Be thoughtful about complementary products and practices',
+    title: 'Be careful with herbs and supplements',
     detail:
-      '“Natural” does not always mean safe. Herbs and supplements can have risks or interact with medicines; discuss them with a pharmacist or care professional before use.',
+      '“Natural” does not always mean safe. Herbs and supplements can cause problems or not mix well with your medicines. Ask a pharmacist or your care team before you take them.',
   },
 ];
 
@@ -114,32 +114,32 @@ function getSuggestedTips(checkIn) {
 
   if (pain !== null && pain >= 0 && pain <= 10) {
     if (pain >= 7) {
-      add('Pace yourself, take comfortable pauses, and use comfort measures your care team has approved.');
+      add('Go slowly, take breaks, and use the pain relief your care team said is okay.');
       add('Write down what changed, what helped, and any questions for your care team.');
     } else if (pain >= 4) {
-      add('Break activities into shorter steps and build in comfortable rest.');
+      add('Break activities into shorter steps and rest in between.');
     }
   }
   if (energy !== null && energy >= 0 && energy <= 10) {
     if (energy <= 3) {
-      add('Try one small task, then pause. Consider telling someone you trust what practical help would support you.');
+      add('Try one small task, then take a break. Think about telling someone you trust what help you need.');
     } else if (energy <= 6) {
-      add('Alternate activity with rest. Choose gentle movement only when it fits your care team’s guidance.');
+      add('Switch between doing something and resting. Only do gentle movement if your care team said it is okay.');
     }
   }
   if (sleep !== null && sleep >= 0 && sleep <= 24) {
     if (sleep < 6) {
-      add('Try a calm wind-down routine and keep your sleep space comfortable. Mention ongoing sleep changes to your care team.');
+      add('Try a calm routine before bed and keep your bedroom comfortable. Tell your care team if sleep problems keep happening.');
     } else if (sleep >= 9) {
-      add('Notice whether this sleep pattern continues, and note it for your next care visit if useful.');
+      add('Notice if you keep sleeping this much, and mention it at your next visit if it helps.');
     }
   }
   if (checkIn.mood === 'Low' || checkIn.mood === 'Anxious') {
-    add('A brief pause, slow breathing, or a grounding exercise may help. Consider reaching out to someone you trust.');
+    add('A short break, slow breathing, or focusing on what you can see and hear around you may help. Think about reaching out to someone you trust.');
   } else if (checkIn.mood === 'Tired') {
-    add('Reduce demands where you can, and keep easy food and fluid options nearby that fit your needs.');
+    add('Do less where you can, and keep easy snacks and drinks nearby that are okay for you.');
   } else if (checkIn.mood === 'Hopeful' || checkIn.mood === 'Steady') {
-    add('Pick one enjoyable or connecting activity that feels manageable today.');
+    add('Pick one thing you enjoy, or a way to connect with someone, that feels doable today.');
   }
   return tips.slice(0, 4);
 }
@@ -270,10 +270,10 @@ function SelfCare({
     <section className="selfcare-section" aria-labelledby="selfcare-heading">
       <div className="section-heading">
         <p className="eyebrow">SELF-CARE TOOLKIT</p>
-        <h2 id="selfcare-heading">Patient-first care that supports independence</h2>
+        <h2 id="selfcare-heading">Simple ways to take care of yourself</h2>
         <p className="planner-disclaimer">
-          Use only the parts that feel helpful. This is a personal note, not a medical assessment
-          or a measure of recovery. Follow the instructions from your own care team.
+          Use only the parts that help you. These are your own notes, not a medical checkup or a
+          measure of how well you are recovering. Follow the instructions from your care team.
         </p>
       </div>
 
@@ -281,7 +281,7 @@ function SelfCare({
         <article className="selfcare-card selfcare-highlight">
           <p className="eyebrow">MY CHECKLIST</p>
           <h3>{completedHabits} of {totalHabits} choices checked off</h3>
-          <p>This only tracks boxes you choose to check; it does not measure your health or recovery.</p>
+          <p>This only counts the boxes you check. It does not measure your health or recovery.</p>
         </article>
 
         <article className="selfcare-card">
@@ -367,7 +367,7 @@ function SelfCare({
                 rows="3"
                 value={checkIn.notes}
                 onChange={(event) => updateCheckIn((current) => ({ ...current, notes: event.target.value }))}
-                placeholder="Write what feels different today, any symptom changes, or what helped most."
+                placeholder="Write what feels different today, any changes in symptoms, or what helped most."
               />
             </label>
           </div>
@@ -427,8 +427,8 @@ function SelfCare({
             </div>
             <p className="planner-disclaimer">
               {savedCount} saved {savedCount === 1 ? 'check-in' : 'check-ins'}. Dates with a dot have
-              a saved check-in. Saved check-ins stay in this page only and are cleared when you
-              reload. This is a personal log, not a medical assessment.
+              a saved check-in. Saved check-ins are only kept on this page and are erased when you
+              refresh it. This is your own log, not a medical checkup.
             </p>
           </div>
 
@@ -511,13 +511,8 @@ function SelfCare({
             <button className="task-add-button" type="submit">Add choice</button>
           </form>
           <p className="planner-disclaimer">
-            Personal choices are optional reminders, not care instructions. Follow your care
-            team’s guidance.
-          </p>
-
-          <p className="planner-disclaimer">
-            Checklist items are optional examples. Follow your clinician's advice about activity,
-            fluids, and medicines.
+            These are only examples and reminders, not care instructions. Follow your care team's
+            advice about activity, drinking fluids, and medicines.
           </p>
         </article>
       </div>
@@ -529,8 +524,8 @@ function SelfCare({
         </div>
         <p>{summary}</p>
         <p>
-          This draft contains only the details you entered and stays in this page while it is open.
-          Avoid adding names or other identifying details.
+          This only shows what you typed, and it is only kept while this page is open. Do not add
+          names or other personal details.
         </p>
       </article>
 
@@ -554,21 +549,21 @@ function SelfCare({
           {tipsHidden ? 'Show suggestions' : 'Hide suggestions'}
         </button>
         <p className="planner-disclaimer">
-          These suggestions are general wellness ideas based only on what you entered. They are not
-          medical advice, diagnosis, or an assessment of urgency, and they are not included in
-          exported drafts. Follow your care team’s instructions. For severe or worsening symptoms,
-          trouble breathing, chest pain, confusion, heavy bleeding, or immediate danger, contact
-          your care team or local emergency services.
+          These are general ideas based only on what you typed. They are not medical advice, and
+          they cannot tell you what is wrong or how urgent it is. Follow your care team’s
+          instructions. If symptoms are bad or getting worse, or you have trouble breathing, chest
+          pain, confusion, heavy bleeding, or are in danger, call your care team or your local
+          emergency number.
         </p>
       </section>
 
       <section className="selfcare-health-tips" aria-labelledby="general-health-tips-heading">
         <div className="section-heading">
-          <p className="eyebrow">WHOLE-PERSON WELL-BEING</p>
+          <p className="eyebrow">FEELING YOUR BEST</p>
           <h3 id="general-health-tips-heading">General health tips</h3>
           <p>
-            Small, realistic choices can support well-being across different parts of life. Pick
-            what feels useful; these general ideas are not personal medical advice.
+            Small, doable choices can help you feel better in many parts of life. Pick what is
+            useful to you. These are general ideas, not medical advice for you.
           </p>
         </div>
         <div className="selfcare-overview-grid">
@@ -580,8 +575,8 @@ function SelfCare({
           ))}
         </div>
         <p className="planner-disclaimer">
-          If you have a health condition, are recovering from a procedure, or are unsure what is
-          appropriate, ask your care team before changing your activity, diet, or medicines.
+          If you have a health problem, are recovering from surgery, or are not sure what is right
+          for you, ask your care team before changing your activity, diet, or medicines.
         </p>
         <ul className="health-tip-sources" aria-label="Health tip sources">
           <li>
@@ -626,7 +621,7 @@ function SelfCare({
 
       <article className="selfcare-card">
         <div className="selfcare-card-header">
-          <p className="eyebrow">SELF CARE REMINDERS</p>
+          <p className="eyebrow">REMINDERS</p>
           <h3>Helpful reminders</h3>
         </div>
         <ul className="reminder-list">
