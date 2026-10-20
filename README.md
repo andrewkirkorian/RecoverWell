@@ -40,7 +40,7 @@ Recover Well is a React web-app prototype for organizing general post-surgery re
 - The medication rules cover only selected combinations and factors. A lack of displayed warnings does not mean a medication combination is safe. Verify the complete medication list with a pharmacist or prescriber.
 - The recovery, ICU, procedure-route, and anesthesia content is general and incomplete. The destination examples do not determine or predict discharge readiness, and anesthesia selection is only an education filter—not a record of the planned anesthetic. Self-care entries are user-reported and are not interpreted as a health assessment. Nothing in the app determines risk, discharge readiness, or treatment. Follow instructions from the care team.
 - Postanesthesia care and anesthesia education links: [ASA Standards for Postanesthesia Care](https://www.asahq.org/standards-and-practice-parameters/standards-for-postanesthesia-care), [ASA Types of Anesthesia](https://madeforthismoment.asahq.org/anesthesia-101/types-of-anesthesia/), and [ASA Anesthesia Recovery](https://madeforthismoment.asahq.org/preparing-for-surgery/recovery/). Local pathways and individual instructions may differ.
-- General health tips are educational, not personalized advice; the linked source pages were last checked on 10 October 2026 (the CDC site blocks automated checks, so verify that link manually). Follow professional guidance for individual needs.
+- General health tips are educational, not personalized advice; the linked source pages were last checked on 20 October 2026. Follow professional guidance for individual needs.
 
 ## Technology
 
